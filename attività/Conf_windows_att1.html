@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configurazione Windows – Attività 1 – Utenti e file</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  :root {
+    --ink: #1c2530;
+    --muted: #55606e;
+    --line: #c9d1da;
+    --accent: #1f5f8b;
+    --note-bg: #eef4f9;
+  }
+  * { box-sizing: border-box; }
+  html { font-size: 16px; }
+  body {
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    line-height: 1.55;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 3rem;
+    background: #fff;
+  }
+  h1 {
+    font-size: 1.7rem;
+    line-height: 1.2;
+    margin: 0 0 .25rem;
+    color: var(--accent);
+  }
+  .sub { color: var(--muted); margin: 0 0 1.75rem; }
+  h2 {
+    font-size: 1.2rem;
+    margin: 2rem 0 .6rem;
+    padding-bottom: .3rem;
+    border-bottom: 2px solid var(--accent);
+    break-after: avoid;
+  }
+  ol { padding-left: 1.6rem; margin: .4rem 0 1rem; }
+  ol.alpha { list-style-type: lower-alpha; }
+  li { margin: .3rem 0; break-inside: avoid; }
+  li::marker { color: var(--accent); font-weight: 600; }
+  code, kbd {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: .9em;
+    background: #f1f3f5;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 0 .3em;
+  }
+  .note {
+    background: var(--note-bg);
+    border-left: 4px solid var(--accent);
+    padding: .55rem .9rem;
+    margin: .6rem 0 1rem;
+    font-size: .95rem;
+    break-inside: avoid;
+  }
+  .note strong { color: var(--accent); }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: .6rem 0 1rem;
+    font-size: .95rem;
+    break-inside: avoid;
+  }
+  th, td { border: 1px solid var(--line); padding: .4rem .6rem; text-align: left; }
+  th { background: #f4f6f8; }
+  footer { margin-top: 2.5rem; color: var(--muted); font-size: .85rem; }
+  @media print {
+    body { padding: 0; max-width: none; font-size: 11pt; }
+    a { color: inherit; text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Configurazione Windows – Attività 1</h1>
+<p class="sub">Utenti e file &middot; Oracle VirtualBox 7.x &middot; Windows 11</p>
+
+<h2>1. Attività preliminari</h2>
+<ol class="alpha">
+  <li>Creare una macchina con nome “Windows” e accertarsi di salvare la macchina nella directory corretta.
+    <div class="note"><strong>Nota.</strong> Nella procedura guidata di VirtualBox la cartella si sceglie nel campo “Cartella macchina”. Per Windows 11 lasciare attivi EFI, TPM 2.0 e Secure Boot (impostati automaticamente se il tipo è Windows 11). Assegnare almeno 4 GB di RAM, 2 CPU e 64 GB di disco.</div>
+  </li>
+  <li>Associare al DVD virtuale il file ISO di Windows, avviare la macchina e installare Windows. In fase di installazione verrà richiesto il nome di un utente che sarà l’amministratore della macchina: chiamatelo <code>admin</code> con password <code>admin</code>.
+    <div class="note"><strong>Nota.</strong> VirtualBox 7 offre l’“Installazione automatica”, dove si possono inserire direttamente utente e password. In alternativa, nell’installazione manuale di Windows 11 l’account Microsoft è richiesto: premere <kbd>Maiusc</kbd>+<kbd>F10</kbd> e digitare <code>start ms-cxh:localonly</code> per creare un account locale. Scegliere l’edizione <em>Pro</em> e “Non ho un codice Product Key”.</div>
+  </li>
+  <li>Effettuare due cloni della macchina appena installata, chiamandole “Windows 1” e “Windows 2”.
+    <div class="note"><strong>Nota.</strong> Scegliere “Clone completo” e “Reinizializza l’indirizzo MAC di tutte le schede di rete”.</div>
+  </li>
+  <li>Avviare la macchina “Windows 1”.</li>
+  <li>Selezionare le proprietà di “Questo PC” (tasto destro su “Questo PC” in “Esplora file”).</li>
+  <li>Scegliere “Cambia impostazioni” e modificare il nome e la descrizione della macchina, chiamandola <code>WINDOWS-1</code>.
+    <div class="note"><strong>Nota.</strong> In Windows 11 il tasto destro apre Impostazioni &rarr; Informazioni su. Aprire “Impostazioni di sistema avanzate”, scheda “Nome computer”, pulsante “Cambia…”. La descrizione si imposta nella stessa scheda.</div>
+  </li>
+  <li>Riavviare.</li>
+  <li>Ripetere le operazioni d–g anche per la seconda macchina clonata, assegnando il nome <code>WINDOWS-2</code>.</li>
+</ol>
+
+<h2>2. Creazione di un utente</h2>
+<ol class="alpha">
+  <li>Avviare la macchina “Windows 1”.</li>
+  <li>Aprire il “Pannello di controllo”.</li>
+  <li>Selezionare “Account utente”.</li>
+  <li>Selezionare “Gestisci altro account”.</li>
+  <li>Scegliere “Aggiungi un nuovo utente nelle impostazioni del PC” e poi “Aggiungi un altro utente a questo PC”.</li>
+  <li>Scegliere “Non ho le informazioni di accesso di questa persona”.</li>
+  <li>Scegliere “Aggiungi un utente senza account Microsoft”.</li>
+  <li>Inserire l’utente <code>utente1</code>, la password (uguale al nome utente) e le domande per il recupero.</li>
+  <li>Verificare la presenza di due utenti: quello creato in fase di installazione, che ha i diritti di amministratore, e l’ultimo creato, senza particolari diritti.</li>
+  <li>Creare un secondo utente <code>utente2</code>.</li>
+</ol>
+<div class="note"><strong>Nota.</strong> In Windows 11 i passaggi e–g portano a Impostazioni &rarr; Account &rarr; Altri utenti, e l’opzione “senza account Microsoft” può non comparire. Alternative (da Prompt dei comandi come amministratore): <code>net user utente1 utente1 /add</code>, oppure <code>lusrmgr.msc</code> (solo edizione Pro). In questi casi non vengono chieste le domande di recupero.</div>
+
+<h2>3. Permessi per l’accesso a file e cartelle</h2>
+<ol class="alpha">
+  <li>Disconnettersi da admin e connettersi come <code>utente1</code>.</li>
+  <li>Creare nella cartella “Utenti\Pubblica\Documenti pubblici” la cartella <code>cartella1</code>.</li>
+  <li>Rimuovere l’ereditarietà trasferendo i diritti a “cartella1”.
+    <div class="note"><strong>Nota.</strong> Tasto destro (o <kbd>Alt</kbd>+<kbd>Invio</kbd>) &rarr; Proprietà &rarr; Sicurezza &rarr; Avanzate &rarr; “Disabilita ereditarietà” &rarr; “Converti le autorizzazioni ereditate in autorizzazioni esplicite”. In Windows 11 il menu contestuale è ridotto: usare “Mostra altre opzioni”.</div>
+  </li>
+  <li>Eliminare i diritti per il gruppo “Interactive” (in Windows in italiano compare come “INTERATTIVO”). Vedere la pagina Microsoft sulle identità speciali: <a href="https://learn.microsoft.com/it-it/windows/security/identity-protection/access-control/special-identities">learn.microsoft.com &ndash; Identità speciali</a>.</li>
+  <li>Abilitare <code>utente2</code> ad accedere a “cartella1” in sola lettura.</li>
+  <li>Creare un file in “cartella1”.</li>
+  <li>Verificare che <code>utente2</code> possa leggere il file ma non modificarlo.</li>
+  <li>Aggiungere a <code>utente2</code> i diritti di modifica.</li>
+  <li>Verificare che <code>utente2</code> possa creare e modificare.</li>
+</ol>
+<div class="note"><strong>Suggerimento.</strong> Per provare i permessi, cambiare utente dal menu Start (icona utente) senza disconnettere gli altri. Prima di iniziare, creare uno snapshot della VM “Windows” pulita per poter ripetere l’esercizio.</div>
+
+<h2>Riepilogo dei nomi da usare</h2>
+<table>
+  <thead><tr><th>Elemento</th><th>Nome</th><th>Password</th></tr></thead>
+  <tbody>
+    <tr><td>Macchina originale</td><td>Windows</td><td>&ndash;</td></tr>
+    <tr><td>Cloni (VirtualBox)</td><td>Windows 1, Windows 2</td><td>&ndash;</td></tr>
+    <tr><td>Nome computer</td><td>WINDOWS-1, WINDOWS-2</td><td>&ndash;</td></tr>
+    <tr><td>Amministratore</td><td>admin</td><td>admin</td></tr>
+    <tr><td>Utenti standard</td><td>utente1, utente2</td><td>uguale al nome utente</td></tr>
+    <tr><td>Cartella condivisa</td><td>cartella1</td><td>&ndash;</td></tr>
+  </tbody>
+</table>
+</body>
+</html>

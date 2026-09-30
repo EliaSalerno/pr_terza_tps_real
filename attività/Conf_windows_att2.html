@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configurazione Windows – Attività 2 – Gruppi</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  :root {
+    --ink: #1c2530;
+    --muted: #55606e;
+    --line: #c9d1da;
+    --accent: #1f5f8b;
+    --note-bg: #eef4f9;
+    --warn: #b45309;
+    --warn-bg: #fdf3e7;
+  }
+  * { box-sizing: border-box; }
+  html { font-size: 16px; }
+  body {
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    line-height: 1.55;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 3rem;
+    background: #fff;
+  }
+  h1 { font-size: 1.7rem; line-height: 1.2; margin: 0 0 .25rem; color: var(--accent); }
+  .sub { color: var(--muted); margin: 0 0 1.75rem; }
+  h2 {
+    font-size: 1.2rem;
+    margin: 2rem 0 .6rem;
+    padding-bottom: .3rem;
+    border-bottom: 2px solid var(--accent);
+    break-after: avoid;
+  }
+  ol { padding-left: 1.6rem; margin: .4rem 0 1rem; }
+  ol.alpha { list-style-type: lower-alpha; }
+  li { margin: .3rem 0; break-inside: avoid; }
+  li::marker { color: var(--accent); font-weight: 600; }
+  code, kbd {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: .9em;
+    background: #f1f3f5;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 0 .3em;
+  }
+  pre {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: .88rem;
+    background: #f1f3f5;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: .7rem .9rem;
+    overflow-x: auto;
+    break-inside: avoid;
+  }
+  .note, .warn {
+    padding: .55rem .9rem;
+    margin: .6rem 0 1rem;
+    font-size: .95rem;
+    break-inside: avoid;
+  }
+  .note { background: var(--note-bg); border-left: 4px solid var(--accent); }
+  .note strong { color: var(--accent); }
+  .warn { background: var(--warn-bg); border-left: 4px solid var(--warn); }
+  .warn strong { color: var(--warn); }
+  table { border-collapse: collapse; width: 100%; margin: .6rem 0 1rem; font-size: .95rem; break-inside: avoid; }
+  th, td { border: 1px solid var(--line); padding: .4rem .6rem; text-align: left; }
+  th { background: #f4f6f8; }
+  footer { margin-top: 2.5rem; color: var(--muted); font-size: .85rem; }
+  @media print {
+    body { padding: 0; max-width: none; font-size: 11pt; }
+    a { color: inherit; text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Configurazione Windows – Attività 2</h1>
+<p class="sub">Gruppi &middot; Oracle VirtualBox 7.x &middot; Windows 11</p>
+
+<h2>1. Attività preliminari</h2>
+<ol class="alpha">
+  <li>Disporre di due macchine virtuali Windows a cui è stato cambiato il nome computer (vedi punti 1 e 2 dell’attività precedente).
+    <div class="warn"><strong>Attenzione.</strong> Se si riutilizza la macchina “Windows 1” dell’attività 1, gli utenti <code>utente1</code> e <code>utente2</code> esistono già e il punto 2e darebbe errore. Usare la macchina “Windows 2” (dove non sono mai stati creati) oppure ripristinare lo snapshot della macchina pulita.</div>
+  </li>
+</ol>
+
+<h2>2. Creazione di un gruppo</h2>
+<ol class="alpha">
+  <li>Avviare una delle due macchine create.</li>
+  <li>Accedere come amministratore (<code>admin</code>).</li>
+  <li>Lanciare PowerShell (tasto <kbd>Win</kbd>+<kbd>X</kbd> e scegliere PowerShell o Terminale come amministratore).
+    <div class="note"><strong>Nota.</strong> In Windows 11 la voce si chiama “Terminale (amministratore)” e apre PowerShell di default.</div>
+  </li>
+  <li>Lanciare <code>lusrmgr.msc</code> (Local Users and Groups, “Utenti e gruppi locali”).
+    <div class="note"><strong>Nota.</strong> Lo strumento è disponibile solo nelle edizioni Pro, Enterprise ed Education, non in Home.</div>
+  </li>
+  <li>Creare tre utenti: <code>utente1</code>, <code>utente2</code> e <code>utente3</code>.
+    <div class="note"><strong>Nota.</strong> Nella finestra di creazione togliere la spunta da “L’utente deve cambiare la password all’accesso successivo”, altrimenti al primo accesso verrà chiesta una nuova password. Usare come password lo stesso nome utente.</div>
+  </li>
+  <li>Creare un gruppo <code>gruppo1</code> e aggiungere gli utenti <code>utente1</code> e <code>utente2</code> (non <code>utente3</code>).</li>
+</ol>
+<div class="note">
+  <strong>Alternativa da riga di comando</strong> (se <code>lusrmgr.msc</code> non è disponibile), da PowerShell come amministratore:
+  <pre>net user utente1 utente1 /add
+net user utente2 utente2 /add
+net user utente3 utente3 /add
+net localgroup gruppo1 /add
+net localgroup gruppo1 utente1 utente2 /add</pre>
+</div>
+
+<h2>3. Permessi al gruppo per l’accesso a file e cartelle</h2>
+<p>Si ipotizzi che l’utente creato in fase di installazione si chiami <code>admin</code>.</p>
+<ol class="alpha">
+  <li>Creare nella cartella “Utenti\Pubblica\Documenti pubblici” la cartella <code>cartella2</code>.</li>
+  <li>Rimuovere l’ereditarietà trasferendo i diritti a “cartella2”.
+    <div class="note"><strong>Nota.</strong> Tasto destro (o <kbd>Alt</kbd>+<kbd>Invio</kbd>) &rarr; Proprietà &rarr; Sicurezza &rarr; Avanzate &rarr; “Disabilita ereditarietà” &rarr; “Converti le autorizzazioni ereditate in autorizzazioni esplicite”. In Windows 11 il menu contestuale è ridotto: usare “Mostra altre opzioni”.</div>
+  </li>
+  <li>Eliminare i diritti per il gruppo “Interactive” (in Windows in italiano compare come “INTERATTIVO”), <strong>e anche per “Users/Utenti” ed eventualmente “Everyone/Tutti”</strong>. Lasciare solo SYSTEM, Administrators e il proprietario. Identità speciali: <a href="https://learn.microsoft.com/it-it/windows/security/identity-protection/access-control/special-identities">learn.microsoft.com &ndash; Identità speciali</a>.
+    <div class="warn"><strong>Attenzione.</strong> Dopo la conversione, la cartella conserva le voci ereditate da “Documenti pubblici”, tra cui il gruppo Users (lettura ed esecuzione). Se non viene rimosso, <code>utente3</code> riesce ad accedere a <code>cartella2</code> e la verifica del punto g fallisce.</div>
+  </li>
+  <li>Abilitare <code>gruppo1</code> ad accedere a “cartella2” in sola lettura.</li>
+  <li>Creare un file in “cartella2”.</li>
+  <li>Verificare che <code>utente1</code> e <code>utente2</code> possano leggere il file ma non modificarlo.</li>
+  <li>Verificare che <code>utente3</code> non possa accedere a “cartella2”.</li>
+  <li>Aggiungere a <code>gruppo1</code> i diritti di modifica.</li>
+  <li>Verificare che <code>utente1</code> e <code>utente2</code> possano creare e modificare.</li>
+  <li>Accedere come <code>admin</code> e aggiungere <code>utente3</code> a <code>gruppo1</code>.</li>
+  <li>Verificare che <code>utente3</code> abbia acquisito i diritti.
+    <div class="warn"><strong>Attenzione.</strong> I diritti di gruppo vengono assegnati al momento dell’accesso. Se <code>utente3</code> è già connesso, deve scegliere <strong>Disconnetti</strong> e riaccedere, altrimenti sembrerà che l’aggiunta non abbia effetto.</div>
+  </li>
+</ol>
+<div class="note"><strong>Suggerimento.</strong> Per le verifiche usare il cambio utente dal menu Start (icona utente) senza disconnettere gli altri, tranne nel punto k dove serve una nuova sessione per <code>utente3</code>.</div>
+
+<h2>Riepilogo dei diritti attesi su cartella2</h2>
+<table>
+  <thead><tr><th>Fase</th><th>utente1 / utente2</th><th>utente3</th></tr></thead>
+  <tbody>
+    <tr><td>gruppo1 in sola lettura</td><td>Leggono, non modificano</td><td>Nessun accesso</td></tr>
+    <tr><td>gruppo1 con modifica</td><td>Creano e modificano</td><td>Nessun accesso</td></tr>
+    <tr><td>utente3 aggiunto a gruppo1 (dopo nuovo accesso)</td><td>Creano e modificano</td><td>Crea e modifica</td></tr>
+  </tbody>
+</table>
+
+</body>
+</html>

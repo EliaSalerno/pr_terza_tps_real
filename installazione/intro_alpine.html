@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guida Completa: Configurazione Alpine Linux su VM</title>
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #212529;
+            --primary: #0d6efd;
+            --secondary: #0d9488;
+            --accent: #d97706;
+            --code-bg: #1e293b;
+            --code-text: #f8fafc;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        h1 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        section {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        h2 {
+            color: var(--secondary);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-top: 0;
+        }
+
+        h3 {
+            color: var(--accent);
+            margin-top: 1.5rem;
+        }
+
+        code {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #f1f5f9;
+            color: #334155;
+        }
+
+        .alert {
+            background-color: #fffbeeb;
+            border-left: 4px solid var(--accent);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .alert-title {
+            font-weight: bold;
+            color: #92400e;
+        }
+
+        ol, ul {
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>Alpine Linux in Macchina Virtuale</h1>
+        <div class="subtitle">Guida passo-passo a configurazione, Bash, rete, NTP e personalizzazione</div>
+    </header>
+
+    <!-- SEZIONE 1 -->
+    <section>
+        <h2>1. Rete e Installazione Base</h2>
+        <p>Per condividere la connessione Internet del PC reale (Host) con Alpine Linux (Guest):</p>
+        <ul>
+            <li><strong>Impostazione VM (VirtualBox / VMware):</strong> Imposta la scheda di rete in modalità <strong>NAT</strong>.</li>
+            <li><strong>Installazione:</strong> Avvia il sistema live ed esegui lo script guidato:</li>
+        </ul>
+        <pre><code>setup-alpine</code></pre>
+        <ul>
+            <li>Seleziona l'interfaccia <code>eth0</code> e scegli il metodo <code>dhcp</code>.</li>
+            <li>Completa l'installazione su disco con <code>setup-disk</code> e riavvia.</li>
+        </ul>
+    </section>
+
+    <!-- SEZIONE 2 -->
+    <section>
+        <h2>2. Gestione Repository e Soluzione Errori</h2>
+        <p>Se riscontri l'errore <code>WARNING! No mirror found</code> o <code>ERROR: unable to select package</code>, occorre ripristinare o verificare i repository.</p>
+
+        <h3>Verificare la Versione di Alpine</h3>
+        <pre><code>cat /etc/alpine-release</code></pre>
+
+        <h3>Ripristinare /etc/apk/repositories (Esempio per v3.24)</h3>
+        <p>Puoi sovrascrivere direttamente il file dei repository eseguendo:</p>
+        <pre><code>cat &lt;&lt;EOF &gt; /etc/apk/repositories
+http://dl-cdn.alpinelinux.org/alpine/v3.24/main
+http://dl-cdn.alpinelinux.org/alpine/v3.24/community
+EOF</code></pre>
+
+        <p>Aggiorna sempre l'indice dopo la modifica:</p>
+        <pre><code>apk update</code></pre>
+    </section>
+
+    <!-- SEZIONE 3 -->
+    <section>
+        <h2>3. Configurazione Bash come Shell Predefinita</h2>
+        <p>Di default Alpine utilizza la shell <code>ash</code>. Per installare e attivare la <strong>Bash</strong>:</p>
+
+        <pre><code># 1. Installa Bash e il completamento automatico
+apk add bash bash-completion
+
+# 2. Imposta Bash come shell di default per root
+sed -i -e 's/root:\/bin\/sh/root:\/bin\/bash/g' /etc/passwd
+
+# 3. (Opzionale) Per un utente non-root
+apk add shadow
+chsh -s /bin/bash nome_utente</code></pre>
+
+        <p>Riavvialo con <code>exit</code> e fai di nuovo il login per applicare le modifiche, oppure esegui subito <code>exec bash</code>.</p>
+        <pre><code># Verifica la shell attiva
+echo $SHELL</code></pre>
+
+        <div class="alert">
+            <div class="alert-title">Nota: Differenze con Ubuntu</div>
+            Alpine usa <code>apk</code> invece di <code>apt</code>, <code>OpenRC</code> (<code>rc-service</code>) invece di <code>systemd</code> (<code>systemctl</code>) e la libreria <code>musl libc</code> invece di <code>glibc</code>.
+        </div>
+    </section>
+
+    <!-- SEZIONE 4 -->
+    <section>
+        <h2>4. Sincronizzazione Ora (NTP Client)</h2>
+        <p>Per le macchine virtuali (che possono perdere il sincrono dell'ora quando vengono messe in pausa), il client NTP consigliato è <strong>Chrony</strong>.</p>
+
+        <pre><code># Installazione e avvio di Chrony
+apk add chrony
+rc-update add chronyd default
+rc-service chronyd start
+
+# Verifica dello stato di sincronizzazione
+chronyc tracking</code></pre>
+    </section>
+
+    <!-- SEZIONE 5 -->
+    <section>
+        <h2>5. Editor di Testo Micro</h2>
+        <p><strong>Micro</strong> è un editor da terminale moderno e intuitivo che supporta le scorciatoie classiche (<code>Ctrl+C</code>, <code>Ctrl+V</code>, <code>Ctrl+S</code>, <code>Ctrl+Q</code>).</p>
+
+        <pre><code># Installazione
+apk add micro
+
+# Utilizzo
+micro nome_file.txt</code></pre>
+    </section>
+
+    <!-- SEZIONE 6 -->
+    <section>
+        <h2>6. Ingrandire i Font del Terminale</h2>
+        <p>Se i caratteri della console di VirtualBox sono troppo piccoli, puoi installare ed estendere i font di sistema:</p>
+
+        <pre><code># 1. Installa kbd e il pacchetto font terminus
+apk add kbd font-terminus
+
+# 2. Prova subito il font grande (32px)
+setfont /usr/share/consolefonts/ter-v32n.psf.gz
+
+# 3. Impostalo in modo permanente all'avvio
+echo 'consolefont="ter-v32n.psf.gz"' &gt; /etc/conf.d/consolefont
+rc-update add consolefont boot</code></pre>
+
+        <h3>Alternativa tramite VirtualBox</h3>
+        <p>Vai nel menu in alto della finestra di VirtualBox: <strong>Visualizza (View)</strong> &rarr; <strong>Fattore di scala (Scale Factor)</strong> &rarr; Seleziona <strong>150%</strong> o <strong>200%</strong>.</p>
+    </section>
+
+    <!-- SEZIONE 7 -->
+    <section>
+        <h2>7. Tabella di Riferimento Rapido Comandi</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Azione</th>
+                    <th>Comando Alpine Linux</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Installare un pacchetto</td>
+                    <td><code>apk add nome_pacchetto</code></td>
+                </tr>
+                <tr>
+                    <td>Aggiornare indice repository</td>
+                    <td><code>apk update</code></td>
+                </tr>
+                <tr>
+                    <td>Avviare un servizio</td>
+                    <td><code>rc-service nome_servizio start</code></td>
+                </tr>
+                <tr>
+                    <td>Abilitare servizio al boot</td>
+                    <td><code>rc-update add nome_servizio default</code></td>
+                </tr>
+                <tr>
+                    <td>Testare la connessione</td>
+                    <td><code>ping -c 3 google.com</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+</div>
+
+</body>
+</html>

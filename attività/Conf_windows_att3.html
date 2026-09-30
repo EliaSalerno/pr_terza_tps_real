@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configurazione Windows – Attività 3 – Condivisione in rete</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  :root {
+    --ink: #1c2530;
+    --muted: #55606e;
+    --line: #c9d1da;
+    --accent: #1f5f8b;
+    --note-bg: #eef4f9;
+    --warn: #b45309;
+    --warn-bg: #fdf3e7;
+  }
+  * { box-sizing: border-box; }
+  html { font-size: 16px; }
+  body {
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    line-height: 1.55;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 3rem;
+    background: #fff;
+  }
+  h1 { font-size: 1.7rem; line-height: 1.2; margin: 0 0 .25rem; color: var(--accent); }
+  .sub { color: var(--muted); margin: 0 0 1.75rem; }
+  h2 {
+    font-size: 1.2rem;
+    margin: 2rem 0 .6rem;
+    padding-bottom: .3rem;
+    border-bottom: 2px solid var(--accent);
+    break-after: avoid;
+  }
+  ol { padding-left: 1.6rem; margin: .4rem 0 1rem; }
+  ol.alpha { list-style-type: lower-alpha; }
+  li { margin: .3rem 0; break-inside: avoid; }
+  li::marker { color: var(--accent); font-weight: 600; }
+  code, kbd {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: .9em;
+    background: #f1f3f5;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 0 .3em;
+  }
+  .note, .warn {
+    padding: .55rem .9rem;
+    margin: .6rem 0 1rem;
+    font-size: .95rem;
+    break-inside: avoid;
+  }
+  .note { background: var(--note-bg); border-left: 4px solid var(--accent); }
+  .note strong { color: var(--accent); }
+  .warn { background: var(--warn-bg); border-left: 4px solid var(--warn); }
+  .warn strong { color: var(--warn); }
+  table { border-collapse: collapse; width: 100%; margin: .6rem 0 1rem; font-size: .95rem; break-inside: avoid; }
+  th, td { border: 1px solid var(--line); padding: .4rem .6rem; text-align: left; }
+  th { background: #f4f6f8; }
+  footer { margin-top: 2.5rem; color: var(--muted); font-size: .85rem; }
+  @media print {
+    body { padding: 0; max-width: none; font-size: 11pt; }
+    a { color: inherit; text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Configurazione Windows – Attività 3</h1>
+<p class="sub">Condivisione in rete &middot; Oracle VirtualBox 7.x &middot; Windows 11 Pro</p>
+
+<h2>1. Attività preliminari</h2>
+<ol class="alpha">
+  <li>Disporre di due macchine virtuali Windows a cui è stato cambiato il nome computer (vedi punti 1 e 2 dell’attività 1).</li>
+  <li>Le due macchine si chiamino <code>WINDOWS-1</code> e <code>WINDOWS-2</code>.</li>
+  <li>A macchine spente, andare nelle impostazioni di VirtualBox (Rete &rarr; Scheda 1) e impostare su <strong>entrambe</strong> le macchine il tipo “Rete interna”. Verificare che i due indirizzi MAC siano diversi, cambiandolo su una delle due se necessario.
+    <div class="warn"><strong>Attenzione.</strong> Le due macchine devono usare lo <strong>stesso nome di rete interna</strong> (ad esempio <code>intnet</code>, il valore predefinito), altrimenti non si vedono. Se i cloni sono stati creati con l’opzione “Reinizializza l’indirizzo MAC”, i MAC sono già diversi; altrimenti usare il pulsante di rigenerazione accanto al campo “Indirizzo MAC” (Impostazioni avanzate).</div>
+  </li>
+  <li>Avviare le due macchine, accedere come amministratore e disabilitare, da Pannello di controllo, il firewall di Windows Defender.
+    <div class="note"><strong>Nota.</strong> Pannello di controllo &rarr; Sistema e sicurezza &rarr; Windows Defender Firewall &rarr; “Attiva/Disattiva Windows Defender Firewall”. Disattivarlo sia per le reti private sia per quelle pubbliche: senza un DHCP la rete interna viene di solito classificata come pubblica. Il firewall blocca di default i pacchetti <code>ping</code>, quindi questo passaggio è indispensabile. Essendo la rete interna isolata dal resto, per l’esercizio è accettabile; al termine conviene riattivarlo.</div>
+  </li>
+  <li>Con il comando <code>ipconfig /all</code> recuperare l’indirizzo IPv4 di ciascuna delle due macchine.
+    <div class="warn"><strong>Attenzione.</strong> Nella rete interna di VirtualBox non esiste un server DHCP: senza configurazione le macchine ottengono un indirizzo automatico del tipo <code>169.254.x.x</code> (assegnazione impiegata circa un minuto). Il ping funziona comunque, ma per un esercizio più affidabile è consigliato impostare indirizzi statici:
+      <ul>
+        <li>Premere <kbd>Win</kbd>+<kbd>R</kbd>, digitare <code>ncpa.cpl</code>, aprire le proprietà della scheda Ethernet e quindi “Protocollo Internet versione 4 (TCP/IPv4)”.</li>
+        <li>WINDOWS-1: <code>192.168.10.1</code>; WINDOWS-2: <code>192.168.10.2</code>; subnet mask <code>255.255.255.0</code>; gateway e DNS vuoti.</li>
+      </ul>
+    </div>
+  </li>
+  <li>Con il comando <code>ping</code>, specificando l’indirizzo IP dell’altra macchina, verificare che le due macchine si vedano reciprocamente.</li>
+</ol>
+
+<h2>2. Accesso al computer di rete</h2>
+<ol class="alpha">
+  <li>Avviare <code>WINDOWS-1</code> e accedere come amministratore.</li>
+  <li>Lanciare PowerShell (tasto <kbd>Win</kbd>+<kbd>X</kbd> e scegliere PowerShell o Terminale come amministratore).</li>
+  <li>Lanciare <code>lusrmgr.msc</code> (Local Users and Groups, “Utenti e gruppi locali”).
+    <div class="note"><strong>Nota.</strong> Disponibile solo nelle edizioni Pro, Enterprise ed Education.</div>
+  </li>
+  <li>Creare un utente <code>rete1</code>, con password <code>rete1</code>, e togliere la spunta da “L’utente deve cambiare la password all’accesso successivo”.
+    <div class="warn"><strong>Attenzione.</strong> La password va impostata obbligatoriamente. Di default Windows rifiuta gli accessi di rete degli account locali con password vuota, e il punto j fallirebbe.</div>
+  </li>
+  <li>Avviare <code>WINDOWS-2</code> e accedere come amministratore.</li>
+  <li>Creare un utente <code>rete2</code>, con password <code>rete2</code>, senza cambio password obbligatorio.</li>
+  <li>Accedere come <code>rete2</code>.</li>
+  <li>Aprire “Esplora file” e selezionare “Rete”.</li>
+  <li>Verificare che compaia “WINDOWS-1”. Se non compare, verificare se viene richiesta l’attivazione della ricerca (individuazione della rete) ed eventualmente digitare <code>\\WINDOWS-1</code> nella barra degli indirizzi.
+    <div class="note"><strong>Nota.</strong> Se il nome non viene risolto, usare direttamente l’indirizzo IP, ad esempio <code>\\192.168.10.1</code>.</div>
+  </li>
+  <li>Quando vengono richieste le credenziali, fornire quelle di <code>rete1</code>. Conviene scrivere l’utente come <code>WINDOWS-1\rete1</code> e spuntare “Memorizza credenziali”.</li>
+  <li>Verificare di poter accedere a <code>WINDOWS-1</code>, dove però non verrà visualizzato nulla (non ci sono ancora cartelle condivise; le condivisioni amministrative come <code>C$</code> sono nascoste).</li>
+</ol>
+
+<h2>3. Accesso a una cartella condivisa</h2>
+<ol class="alpha">
+  <li>Su <code>WINDOWS-1</code> accedere come <code>rete1</code>.</li>
+  <li>Creare una cartella con nome <code>Cartella1</code> sul Desktop.</li>
+  <li>Cliccare col tasto destro e selezionare “Proprietà”.
+    <div class="note"><strong>Nota.</strong> In Windows 11 il menu contestuale è ridotto: usare <kbd>Alt</kbd>+<kbd>Invio</kbd> oppure “Mostra altre opzioni”.</div>
+  </li>
+  <li>Selezionare “Condivisione” e poi “Condivisione avanzata”.</li>
+  <li>Fornire le credenziali di amministratore (<code>admin</code> / <code>admin</code>) nella finestra di controllo account, se richieste.</li>
+  <li>Abilitare “Condividi la cartella” e assegnare come nome <code>Condivisione1</code>.</li>
+  <li>Scegliere “Autorizzazioni”.</li>
+  <li>Rimuovere “Everyone” (“Tutti”) e aggiungere <code>rete1</code> con diritti di sola lettura.</li>
+  <li>Confermare e chiudere la finestra delle proprietà.</li>
+  <li>Andare sulla macchina <code>WINDOWS-2</code> e riaccedere a <code>\\WINDOWS-1</code>: dovrebbe comparire “Condivisione1”.
+    <div class="note"><strong>Nota.</strong> Se la cartella non compare, premere <kbd>F5</kbd> per aggiornare. Se Windows continua a usare credenziali vecchie, chiudere la connessione con <code>net use * /delete</code> e riaprire il percorso.</div>
+  </li>
+  <li>Verificare che abbia i diritti di sola lettura: aprire la cartella e provare a creare o modificare un file; l’operazione deve essere negata.</li>
+</ol>
+
+<h2>Riepilogo dei dati da usare</h2>
+<table>
+  <thead><tr><th>Elemento</th><th>Valore</th></tr></thead>
+  <tbody>
+    <tr><td>Nome computer</td><td>WINDOWS-1, WINDOWS-2</td></tr>
+    <tr><td>Rete VirtualBox</td><td>Rete interna, stesso nome (<code>intnet</code>) su entrambe</td></tr>
+    <tr><td>Indirizzi IP (consigliati)</td><td>192.168.10.1 (WINDOWS-1), 192.168.10.2 (WINDOWS-2), maschera 255.255.255.0</td></tr>
+    <tr><td>Amministratore</td><td>admin / admin</td></tr>
+    <tr><td>Utente su WINDOWS-1</td><td>rete1 / rete1</td></tr>
+    <tr><td>Utente su WINDOWS-2</td><td>rete2 / rete2</td></tr>
+    <tr><td>Cartella condivisa</td><td>Cartella1, condivisa come Condivisione1 (sola lettura per rete1)</td></tr>
+  </tbody>
+</table>
+</body>
+</html>

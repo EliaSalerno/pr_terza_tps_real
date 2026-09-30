@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guida: creare la macchina virtuale Windows 11 con VirtualBox</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  :root {
+    --ink: #1c2530;
+    --muted: #55606e;
+    --line: #c9d1da;
+    --accent: #1f5f8b;
+    --note-bg: #eef4f9;
+    --warn: #b45309;
+    --warn-bg: #fdf3e7;
+  }
+  * { box-sizing: border-box; }
+  html { font-size: 16px; }
+  body {
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    line-height: 1.55;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 3rem;
+    background: #fff;
+  }
+  h1 { font-size: 1.7rem; line-height: 1.2; margin: 0 0 .25rem; color: var(--accent); }
+  .sub { color: var(--muted); margin: 0 0 1.75rem; }
+  h2 {
+    font-size: 1.2rem;
+    margin: 2rem 0 .6rem;
+    padding-bottom: .3rem;
+    border-bottom: 2px solid var(--accent);
+    break-after: avoid;
+  }
+  ol, ul { padding-left: 1.6rem; margin: .4rem 0 1rem; }
+  ol.alpha { list-style-type: lower-alpha; }
+  li { margin: .3rem 0; break-inside: avoid; }
+  li::marker { color: var(--accent); font-weight: 600; }
+  code, kbd {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: .9em;
+    background: #f1f3f5;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 0 .3em;
+  }
+  pre {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: .85rem;
+    background: #f1f3f5;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: .6rem .9rem;
+    overflow-x: auto;
+    break-inside: avoid;
+  }
+  .note, .warn { padding: .55rem .9rem; margin: .6rem 0 1rem; font-size: .95rem; break-inside: avoid; }
+  .note { background: var(--note-bg); border-left: 4px solid var(--accent); }
+  .note strong { color: var(--accent); }
+  .warn { background: var(--warn-bg); border-left: 4px solid var(--warn); }
+  .warn strong { color: var(--warn); }
+  table { border-collapse: collapse; width: 100%; margin: .6rem 0 1rem; font-size: .93rem; }
+  tr { break-inside: avoid; }
+  th, td { border: 1px solid var(--line); padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f4f6f8; }
+  .check li { list-style: none; }
+  .check li::before { content: "\2610\00a0"; color: var(--accent); }
+  footer { margin-top: 2.5rem; color: var(--muted); font-size: .85rem; }
+  @media print {
+    body { padding: 0; max-width: none; font-size: 11pt; }
+    a { color: inherit; text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Creare la macchina virtuale Windows 11</h1>
+<p class="sub">Oracle VirtualBox 7.x &middot; configurazione per le lezioni di TPS &middot; senza codice di attivazione</p>
+
+<h2>1. Prima di iniziare</h2>
+<ul>
+  <li><strong>Computer ospitante:</strong> almeno 8 GB di RAM (meglio 16 GB), 64 GB liberi su disco (meglio SSD) e virtualizzazione attiva nel BIOS/UEFI (Intel VT-x oppure AMD-V/SVM).</li>
+  <li><strong>VirtualBox 7.x</strong> installato dal sito ufficiale <code>virtualbox.org</code>. La versione 7 gestisce TPM 2.0 e Secure Boot, richiesti da Windows 11.</li>
+  <li><strong>ISO di Windows 11:</strong> dal sito Microsoft, pagina “Scarica Windows 11”, sezione “Scarica l’immagine del disco (ISO)”, scegliere <em>Windows 11 (ISO multi-edizione)</em> e la lingua italiana. Non serve alcun account.</li>
+</ul>
+
+<h2>2. Creare la macchina</h2>
+<ol class="alpha">
+  <li>Aprire VirtualBox e premere <strong>Nuova</strong>.</li>
+  <li><strong>Nome:</strong> <code>Windows</code>. In <strong>Cartella</strong> scegliere la directory corretta per le macchine virtuali (quella indicata dal docente o una cartella dedicata, ad esempio <code>D:\VM</code>).</li>
+  <li><strong>Immagine ISO:</strong> selezionare il file scaricato. Tipo e versione vengono riconosciuti: <em>Microsoft Windows / Windows 11 (64-bit)</em>. Se compare il campo “Edizione”, scegliere <strong>Windows 11 Pro</strong>.
+    <div class="note"><strong>Perché Pro.</strong> La Home non ha <code>lusrmgr.msc</code>, <code>gpedit.msc</code> né l’ingresso in dominio, strumenti necessari per le attività su utenti, gruppi e permessi.</div>
+  </li>
+  <li>Lasciare <strong>deselezionata</strong> la voce “Skip Unattended Installation”: VirtualBox installerà Windows da solo.</li>
+  <li>Pagina <strong>Installazione automatica</strong>: utente <code>admin</code>, password <code>admin</code>; il nome host può restare quello proposto (verrà cambiato nelle attività); lasciare vuoto il codice prodotto; spuntare <strong>Install Guest Additions</strong>.</li>
+  <li>Pagina <strong>Hardware</strong>: RAM <code>4096 MB</code> (8192 MB se il PC ha 16 GB), CPU <code>2</code>, <strong>Enable EFI</strong> attivo.</li>
+  <li>Pagina <strong>Disco rigido</strong>: creare un nuovo disco virtuale da <code>64 GB</code>, lasciando <strong>deselezionata</strong> l’opzione “Pre-allocate Full Size” (il disco occupa spazio solo man mano che serve).</li>
+  <li>Premere <strong>Fine</strong>, ma non avviare ancora la macchina: prima verificare le impostazioni del punto 3.</li>
+</ol>
+
+<h2>3. Impostazioni da controllare</h2>
+<p>Selezionare la macchina, premere <strong>Impostazioni</strong> e controllare:</p>
+<table>
+  <thead><tr><th>Sezione</th><th>Valore consigliato</th></tr></thead>
+  <tbody>
+    <tr><td>Sistema &rarr; Scheda madre</td><td>Memoria 4096 MB; <strong>EFI</strong> attivo; <strong>TPM versione 2.0</strong>; <strong>Secure Boot</strong> attivo</td></tr>
+    <tr><td>Sistema &rarr; Processore</td><td>2 CPU</td></tr>
+    <tr><td>Schermo</td><td>Memoria video 128 MB; controller grafico VBoxSVGA; accelerazione 3D disattivata</td></tr>
+    <tr><td>Archiviazione</td><td>ISO nel lettore ottico; disco VDI da 64 GB su controller SATA</td></tr>
+    <tr><td>Rete &rarr; Scheda 1</td><td><strong>NAT</strong> per ora (accesso a internet). Nell’attività 3, sui cloni, si passa a “Rete interna”</td></tr>
+    <tr><td>Generale &rarr; Avanzate</td><td>Appunti condivisi: <em>Bidirezionale</em>; Trascina e rilascia: <em>Bidirezionale</em> (facoltativo)</td></tr>
+    <tr><td>Audio</td><td>Si può disattivare per evitare suoni in aula</td></tr>
+  </tbody>
+</table>
+
+<h2>4. Installare Windows</h2>
+<h3 style="font-size:1.05rem;margin:1rem 0 .3rem">Metodo consigliato: installazione automatica</h3>
+<p>Avviare la macchina e attendere. Windows si installa da solo e si riavvia più volte (10-20 minuti): non premere tasti e non spegnere. Alla fine si arriva al desktop già connessi come <code>admin</code>.</p>
+
+<h3 style="font-size:1.05rem;margin:1rem 0 .3rem">Metodo manuale (se si è scelto di saltare l’installazione automatica)</h3>
+<ol class="alpha">
+  <li>All’avvio premere un tasto quando compare “Press any key to boot from CD or DVD”.</li>
+  <li>Scegliere lingua e tastiera italiana, poi “Installa ora”.</li>
+  <li>Selezionare <strong>“Non ho un codice Product Key”</strong> e poi l’edizione <strong>Windows 11 Pro</strong>.</li>
+  <li>Scegliere “Personalizzata”, selezionare il disco non allocato e proseguire.</li>
+  <li>Al momento della creazione dell’account, se viene richiesto l’account Microsoft, premere <kbd>Maiusc</kbd>+<kbd>F10</kbd> e digitare <code>start ms-cxh:localonly</code> per creare un utente locale <code>admin</code> con password <code>admin</code>.</li>
+</ol>
+<div class="warn"><strong>Attenzione.</strong> Questo trucco per l’account locale dipende dalla build di Windows e potrebbe non funzionare nelle versioni più recenti. In tal caso usare l’installazione automatica di VirtualBox.</div>
+
+<h2>5. Configurare Windows dopo l’installazione</h2>
+<ol>
+  <li><strong>Guest Additions.</strong> Se non sono state installate in automatico: menu <em>Dispositivi &rarr; Inserisci immagine CD delle Guest Additions</em>, aprire l’unità CD in Esplora file, eseguire <code>VBoxWindowsAdditions.exe</code> e riavviare. Si ottengono schermo ridimensionabile, mouse integrato e appunti condivisi.</li>
+  <li><strong>Verifica edizione.</strong> Premere <kbd>Win</kbd>+<kbd>R</kbd>, digitare <code>winver</code>: deve risultare Windows 11 Pro. Provare anche <code>lusrmgr.msc</code>: deve aprirsi.</li>
+  <li><strong>Lingua, tastiera e fuso orario.</strong> Impostazioni &rarr; Ora e lingua: italiano, tastiera italiana, fuso orario corretto.</li>
+  <li><strong>Sospendere gli aggiornamenti.</strong> Impostazioni &rarr; Windows Update &rarr; “Sospendi aggiornamenti”, così Windows non si aggiorna durante la lezione.</li>
+  <li><strong>Alimentazione.</strong> Impostazioni &rarr; Sistema &rarr; Alimentazione: schermo e sospensione su “Mai”.</li>
+  <li><strong>Esplora file.</strong> Visualizza &rarr; Mostra: attivare “Estensioni nomi file” ed “Elementi nascosti”, utili per lavorare sui permessi.</li>
+</ol>
+
+<h2>6. Uso senza codice di attivazione</h2>
+<p>Windows 11 installato senza chiave funziona con queste differenze:</p>
+<table>
+  <thead><tr><th>Funziona</th><th>Non disponibile o limitato</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Creazione e gestione di utenti e gruppi, permessi NTFS, condivisioni di rete, PowerShell e prompt dei comandi, criteri di sicurezza locali, Utilità di pianificazione, <code>ipconfig</code>, <code>ping</code></td>
+      <td>Personalizzazione (sfondo, colori, temi, schermata di blocco) e filigrana “Attiva Windows” in basso a destra</td>
+    </tr>
+  </tbody>
+</table>
+<div class="note"><strong>Licenza.</strong> Per una demo in classe questa modalità è sufficiente, ma per un uso prolungato Windows richiede formalmente una licenza. Alternative legittime: l’<em>Evaluation Center</em> di Microsoft (<code>microsoft.com/evalcenter</code>), con ISO di Windows 11 Enterprise valida 90 giorni e senza filigrana, oppure le licenze della scuola (Microsoft 365 Education, Azure Dev Tools for Teaching), da chiedere all’amministratore IT.</div>
+
+<h2>7. Snapshot, cloni ed esportazione</h2>
+<ol class="alpha">
+  <li><strong>Snapshot.</strong> Con la macchina spenta: <em>Strumenti &rarr; Istantanee &rarr; Crea</em>, nome “Installazione pulita”. Se qualcosa va storto, si ripristina in pochi secondi.</li>
+  <li><strong>Cloni per le attività.</strong> Tasto destro sulla macchina &rarr; <em>Clona</em> &rarr; nome <code>Windows 1</code> (poi <code>Windows 2</code>) &rarr; tipo <strong>Clone completo</strong> &rarr; spuntare <strong>“Reinizializza l’indirizzo MAC di tutte le schede di rete”</strong>.</li>
+  <li><strong>Esportare per altri PC dell’aula.</strong> <em>File &rarr; Esporta servizio virtualizzato</em>, formato OVF 2.0, file <code>.ova</code>. Sugli altri PC: <em>File &rarr; Importa servizio virtualizzato</em>, con la stessa opzione di reinizializzazione del MAC. Verificare che la macchina si avvii correttamente su un PC prima di distribuirla a tutti.</li>
+</ol>
+
+<h2>8. Problemi frequenti</h2>
+<table>
+  <thead><tr><th>Problema</th><th>Soluzione</th></tr></thead>
+  <tbody>
+    <tr><td>Errore di virtualizzazione non disponibile</td><td>Attivare VT-x/AMD-V (o “SVM Mode”) nel BIOS/UEFI del PC ospitante.</td></tr>
+    <tr><td>VM molto lenta su PC Windows</td><td>Hyper-V, WSL2 o “Integrità della memoria” possono rallentare VirtualBox. Disattivarli da “Attiva o disattiva funzionalità di Windows” oppure, da prompt come amministratore, <code>bcdedit /set hypervisorlaunchtype off</code> e riavviare.</td></tr>
+    <tr><td>Non parte dal DVD / shell UEFI</td><td>Spegnere, riavviare e premere subito un tasto. Dalla shell UEFI digitare <code>exit</code> e scegliere il DVD dal Boot Manager.</td></tr>
+    <tr><td>“Questo PC non può eseguire Windows 11”</td><td>Controllare TPM 2.0, Secure Boot e RAM (almeno 4 GB). In alternativa, nel programma di installazione premere <kbd>Maiusc</kbd>+<kbd>F10</kbd> ed eseguire:
+<pre>reg add HKLM\SYSTEM\Setup\LabConfig /v BypassTPMCheck /t REG_DWORD /d 1 /f
+reg add HKLM\SYSTEM\Setup\LabConfig /v BypassSecureBootCheck /t REG_DWORD /d 1 /f
+reg add HKLM\SYSTEM\Setup\LabConfig /v BypassRAMCheck /t REG_DWORD /d 1 /f</pre></td></tr>
+    <tr><td>Il mouse resta “bloccato” nella finestra</td><td>Premere il tasto Host (di default <kbd>Ctrl</kbd> destro) e installare le Guest Additions.</td></tr>
+    <tr><td>Risoluzione fissa e piccola</td><td>Installare le Guest Additions e riavviare.</td></tr>
+  </tbody>
+</table>
+
+<h2>9. Controllo finale</h2>
+<ul class="check">
+  <li>La macchina si chiama “Windows” ed è nella cartella corretta.</li>
+  <li>Edizione Windows 11 Pro (<code>winver</code>), utente <code>admin</code> / <code>admin</code>.</li>
+  <li><code>lusrmgr.msc</code> si apre.</li>
+  <li>Guest Additions installate: schermo ridimensionabile e appunti condivisi.</li>
+  <li>Aggiornamenti sospesi e sospensione disattivata.</li>
+  <li>Snapshot “Installazione pulita” creato.</li>
+  <li>Cloni “Windows 1” e “Windows 2” creati con MAC reinizializzato (quando servono).</li>
+</ul>
+</body>
+</html>
