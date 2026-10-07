@@ -14,49 +14,51 @@
     <p class="occhiello">Teoria · Installazione · Laboratorio</p>
     <h1>Macchine virtuali</h1>
     <p class="sottotitolo">
-      Una parte teorica che spiega il funzionamento tecnico delle macchine virtuali — vantaggi,
-      limiti e ambiti di utilizzo — e una parte pratica con le guide di preparazione
-      dell'ambiente e le attività di laboratorio.
+      Teoria, guide di preparazione e attività di laboratorio. Scegli una sezione:
+      si apre una scheda con un breve approfondimento e i documenti che contiene.
     </p>
     <div class="azioni">
-      <label class="cerca">
-        <input id="ricerca" type="search" placeholder="Cerca un argomento (es. snapshot, gruppi, NAT)…"
-               aria-label="Cerca un argomento" autocomplete="off">
-      </label>
       <button id="tema" class="pulsante" type="button" aria-pressed="false">Tema chiaro</button>
       <a class="pulsante" href="README.md">README del progetto</a>
     </div>
   </div>
 </header>
 
-<nav id="parti" class="parti contenitore" aria-label="Parti del sito"></nav>
-
 <main>
   <div id="contenuti" class="contenitore"></div>
-  <p id="nessun-risultato" class="nessun-risultato contenitore" hidden>
-    Nessun documento corrisponde alla ricerca.
-  </p>
   <noscript>
     <div class="contenitore">
-      <p class="vuota">
-        I contenuti dell'indice sono generati da JavaScript: attivalo per vedere l'elenco
-        completo. Nel frattempo è disponibile il <a href="README.md">README del progetto</a>,
-        che elenca tutti i documenti del repository.
+      <p class="noscript-nota">
+        I contenuti dell'indice sono generati da JavaScript: attivalo per vedere le
+        sezioni. Nel frattempo è disponibile il <a href="README.md">README del
+        progetto</a>, che elenca tutti i documenti del repository.
       </p>
     </div>
   </noscript>
 </main>
 
+<div id="scheda-overlay" class="overlay" hidden>
+  <div class="scheda" role="dialog" aria-modal="true" aria-labelledby="scheda-titolo">
+    <div class="scheda-testa">
+      <div>
+        <span id="scheda-parte" class="etichetta"></span>
+        <h2 id="scheda-titolo"></h2>
+      </div>
+      <button id="scheda-chiudi" class="icona" type="button" aria-label="Chiudi la scheda">&#10005;</button>
+    </div>
+    <div id="scheda-corpo" class="scheda-corpo"></div>
+  </div>
+</div>
+
 <footer class="sito-piede">
   <div class="contenitore">
     <p>
-      Il sito è generato dai dati di <code>assets/indice.js</code>: per aggiungere un nuovo
-      argomento basta inserire il file HTML nella cartella giusta e aggiungere la
-      corrispondente voce in quell'elenco, senza modificare gli altri file.
+      Ogni documento resta un file HTML autonomo e stampabile in A4; al suo interno
+      trovi il link di ritorno a questa pagina.
     </p>
     <p>
-      I documenti restano HTML autonomi e stampabili in A4; ognuno di essi propone in alto
-      il link di ritorno a questa pagina.
+      Nuovi argomenti: inserisci il file HTML nella cartella giusta e aggiungi la voce
+      corrispondente in <code>assets/indice.js</code>.
     </p>
   </div>
 </footer>

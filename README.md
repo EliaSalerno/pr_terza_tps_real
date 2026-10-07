@@ -17,7 +17,7 @@ scorciatoia comoda ma pericolosa.
 ├── index.html                             ← sito: indice navigabile dei documenti
 ├── assets/                                ← componenti del sito (stile e script)
 │   ├── sito.css                           ← stile della pagina indice
-│   ├── sito.js                            ← rendering dell'indice, ricerca e tema
+│   ├── sito.js                            ← rendering delle card e delle schede, tema
 │   ├── indice.js                          ← struttura del sito: qui si aggiungono i nuovi argomenti
 │   └── barra.js                           ← barra "← Indice" inserita in ogni documento
 ├── teoria/
@@ -42,12 +42,14 @@ Il repository è suddiviso in tre cartelle distinte:
   perché tutte le esercitazioni partono da una macchina già pronta e clonabile.
 - **`attività/`** — le **esercitazioni** vere e proprie, ordinate per argomento.
 
-La pagina **`index.html`** è la versione navigabile di questo indice: apre ogni
-documento direttamente dal browser (funziona anche da file locale), con ricerca per
-argomento e tema chiaro/scuro, e ogni documento propone in alto il link di ritorno
-all'indice. La struttura del sito è definita interamente in `assets/indice.js`: per
-aggiungere un nuovo argomento basta inserire il file HTML nella cartella giusta e la
-corrispondente voce in quell'elenco, senza toccare gli altri file.
+La pagina **`index.html`** è la versione navigabile di questo indice: una card per
+sezione, con spiegazione in poche parole; cliccandola si apre una **scheda** con un
+breve approfondimento e i documenti che contiene, che si aprono direttamente nel
+browser (funziona anche da file locale), con tema chiaro/scuro. Ogni documento
+propone in alto il link di ritorno all'indice. La struttura del sito è definita
+interamente in `assets/indice.js`: per aggiungere un nuovo argomento basta inserire
+il file HTML nella cartella giusta e la corrispondente voce in quell'elenco, senza
+toccare gli altri file.
 
 Ogni documento è un HTML autonomo, ottimizzato per la stampa in A4, che contiene la
 traccia passo-passo, le note sulle differenze tra versioni del sistema, gli avvisi

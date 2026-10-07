@@ -3,10 +3,13 @@
 
   var dati = window.INDICE || [];
   var contenuti = document.getElementById("contenuti");
-  var barraParti = document.getElementById("parti");
-  var nessunRisultato = document.getElementById("nessun-risultato");
-  var campo = document.getElementById("ricerca");
+  var overlay = document.getElementById("scheda-overlay");
+  var corpoScheda = document.getElementById("scheda-corpo");
+  var titoloScheda = document.getElementById("scheda-titolo");
+  var parteScheda = document.getElementById("scheda-parte");
+  var pulsanteChiudi = document.getElementById("scheda-chiudi");
   var pulsanteTema = document.getElementById("tema");
+  var chiaveSezione = null;
 
   function esc(testo) {
     return String(testo === null || testo === undefined ? "" : testo).replace(
@@ -21,137 +24,122 @@
     return encodeURI(p);
   }
 
-  function testoRicerca(testo, argomenti) {
-    return (testo + " " + (argomenti || []).join(" ")).toLowerCase();
-  }
-
-  function renderDocumento(doc) {
-    var html =
-      '<article class="documento" data-testo="' +
-      esc(testoRicerca(doc.titolo + " " + (doc.descrizione || ""), doc.argomenti)) +
-      '">' +
-      "<h3>" + esc(doc.titolo) + "</h3>";
-
-    if (doc.descrizione) {
-      html += "<p>" + esc(doc.descrizione) + "</p>";
-    }
-
-    if (doc.argomenti && doc.argomenti.length) {
-      html += '<ul class="tag">';
-      for (var i = 0; i < doc.argomenti.length; i++) {
-        html += "<li>" + esc(doc.argomenti[i]) + "</li>";
+  function trovaSezione(id) {
+    for (var i = 0; i < dati.length; i++) {
+      if (dati[i].id === id) {
+        return dati[i];
       }
-      html += "</ul>";
     }
-
-    html += '<div class="collegamenti">';
-    if (doc.file) {
-      html += '<a class="apri" href="' + esc(percorso(doc.file)) + '">Apri il documento</a>';
-    }
-    if (doc.pdf) {
-      html +=
-        '<a class="pdf" href="' + esc(percorso(doc.pdf)) +
-        '" target="_blank" rel="noopener">Versione PDF</a>';
-    }
-    html += "</div></article>";
-    return html;
+    return null;
   }
 
-  function renderSezione(sezione) {
+  function renderCard(sezione) {
     var documenti = sezione.documenti || [];
-    var testoSezione = [sezione.titolo, sezione.descrizione, sezione.nota].join(" ");
+    var contatore = documenti.length
+      ? documenti.length + (documenti.length === 1 ? " documento" : " documenti")
+      : "In preparazione";
 
-    var html = '<section class="sezione" id="' + esc(sezione.id) + '" data-testo="' +
-      esc(testoSezione.toLowerCase()) + '">' +
-      '<div class="sezione-testa">' +
+    return (
+      '<button class="card-sezione" type="button" data-sezione="' +
+      esc(sezione.id) +
+      '" aria-haspopup="dialog">' +
       '<span class="etichetta">' + esc(sezione.parte || sezione.titolo) + "</span>" +
-      "<h2>" + esc(sezione.titolo) + "</h2>" +
-      (documenti.length
-        ? '<span class="contatore">' + documenti.length +
-          (documenti.length === 1 ? " documento" : " documenti") + "</span>"
-        : "") +
-      "</div>";
-
-    if (sezione.descrizione) {
-      html += "<p>" + esc(sezione.descrizione) + "</p>";
-    }
-
-    if (documenti.length) {
-      html += '<div class="griglia">';
-      for (var i = 0; i < documenti.length; i++) {
-        html += renderDocumento(documenti[i]);
-      }
-      html += "</div>";
-    }
-
-    if (sezione.nota) {
-      html += '<div class="vuota">' + esc(sezione.nota) + "</div>";
-    }
-
-    html += "</section>";
-    return html;
+      '<span class="card-titolo">' + esc(sezione.titolo) + "</span>" +
+      '<span class="card-breve">' + esc(sezione.breve || "") + "</span>" +
+      '<span class="card-piede">' +
+      '<span class="contatore">' + esc(contatore) + "</span>" +
+      '<span class="apri-scheda">Apri la scheda</span>' +
+      "</span>" +
+      "</button>"
+    );
   }
 
   function render() {
     if (!contenuti) {
       return;
     }
-
-    var htmlSezioni = "";
-    var htmlParti = "";
-
+    var html = '<div class="griglia-sezioni">';
     for (var i = 0; i < dati.length; i++) {
-      var sezione = dati[i];
-      htmlSezioni += renderSezione(sezione);
-      htmlParti +=
-        '<a href="#' + esc(sezione.id) + '" data-sezione="' + esc(sezione.id) + '">' +
-        esc(sezione.titolo) + "</a>";
+      html += renderCard(dati[i]);
+    }
+    html += "</div>";
+    contenuti.innerHTML = html;
+  }
+
+  function corpo(sezione) {
+    var documenti = sezione.documenti || [];
+    var html = "";
+
+    if (sezione.approfondimento) {
+      html += '<p class="scheda-testo">' + esc(sezione.approfondimento) + "</p>";
     }
 
-    contenuti.innerHTML = htmlSezioni;
-    if (barraParti) {
-      barraParti.innerHTML = htmlParti;
+    if (documenti.length) {
+      html += '<ul class="lista-documenti">';
+      for (var i = 0; i < documenti.length; i++) {
+        var doc = documenti[i];
+        html += "<li><h3>" + esc(doc.titolo) + "</h3>";
+        if (doc.descrizione) {
+          html += "<p>" + esc(doc.descrizione) + "</p>";
+        }
+        if (doc.argomenti && doc.argomenti.length) {
+          html += '<ul class="tag">';
+          for (var j = 0; j < doc.argomenti.length; j++) {
+            html += "<li>" + esc(doc.argomenti[j]) + "</li>";
+          }
+          html += "</ul>";
+        }
+        html += '<div class="collegamenti">';
+        if (doc.file) {
+          html += '<a class="apri" href="' + esc(percorso(doc.file)) + '">Apri il documento</a>';
+        }
+        if (doc.pdf) {
+          html +=
+            '<a class="pdf" href="' + esc(percorso(doc.pdf)) +
+            '" target="_blank" rel="noopener">Versione PDF</a>';
+        }
+        html += "</div></li>";
+      }
+      html += "</ul>";
+    }
+
+    if (sezione.nota) {
+      html += '<p class="scheda-nota">' + esc(sezione.nota) + "</p>";
+    } else if (!documenti.length) {
+      html += '<p class="scheda-nota">Nessun documento disponibile per ora.</p>';
+    }
+
+    html +=
+      '<div class="scheda-piede"><button class="pulsante" type="button" data-chiudi>Chiudi</button></div>';
+    return html;
+  }
+
+  function apriScheda(id, apertoDa) {
+    var sezione = trovaSezione(id);
+    if (!sezione || !overlay) {
+      return;
+    }
+    parteScheda.textContent = sezione.parte || "";
+    titoloScheda.textContent = sezione.titolo;
+    corpoScheda.innerHTML = corpo(sezione);
+    chiaveSezione = apertoDa || null;
+    overlay.hidden = false;
+    document.body.style.overflow = "hidden";
+    if (pulsanteChiudi) {
+      pulsanteChiudi.focus();
     }
   }
 
-  function filtra() {
-    var q = (campo && campo.value ? campo.value : "").trim().toLowerCase();
-    var sezioni = contenuti ? contenuti.querySelectorAll(".sezione") : [];
-    var almenoUnaVisibile = false;
-
-    for (var i = 0; i < sezioni.length; i++) {
-      var sezione = sezioni[i];
-      var documenti = sezione.querySelectorAll(".documento");
-      var visibili = 0;
-
-      for (var j = 0; j < documenti.length; j++) {
-        var coincide = !q || documenti[j].getAttribute("data-testo").indexOf(q) !== -1;
-        documenti[j].hidden = !coincide;
-        if (coincide) {
-          visibili++;
-        }
-      }
-
-      var sezioneVisibile =
-        visibili > 0 ||
-        (documenti.length === 0 && (!q || sezione.getAttribute("data-testo").indexOf(q) !== -1));
-
-      sezione.hidden = !sezioneVisibile;
-      if (sezioneVisibile) {
-        almenoUnaVisibile = true;
-      }
-
-      var voce = barraParti
-        ? barraParti.querySelector('[data-sezione="' + sezione.id + '"]')
-        : null;
-      if (voce) {
-        voce.hidden = !sezioneVisibile;
-      }
+  function chiudiScheda() {
+    if (!overlay || overlay.hidden) {
+      return;
     }
-
-    if (nessunRisultato) {
-      nessunRisultato.hidden = almenoUnaVisibile;
+    overlay.hidden = true;
+    document.body.style.overflow = "";
+    if (chiaveSezione && document.contains(chiaveSezione)) {
+      chiaveSezione.focus();
     }
+    chiaveSezione = null;
   }
 
   function temaEffettivo() {
@@ -177,12 +165,42 @@
     );
   }
 
-  function impostaTema(salvato) {
-    if (salvato) {
-      document.documentElement.setAttribute("data-theme", salvato);
-    }
-    aggiornaPulsanteTema();
+  if (contenuti) {
+    contenuti.addEventListener("click", function (evento) {
+      var card =
+        evento.target && evento.target.closest
+          ? evento.target.closest("[data-sezione]")
+          : null;
+      if (card) {
+        apriScheda(card.getAttribute("data-sezione"), card);
+      }
+    });
   }
+
+  if (overlay) {
+    overlay.addEventListener("click", function (evento) {
+      if (evento.target === overlay) {
+        chiudiScheda();
+      }
+      var cheChiude =
+        evento.target && evento.target.closest
+          ? evento.target.closest("[data-chiudi]")
+          : null;
+      if (cheChiude) {
+        chiudiScheda();
+      }
+    });
+  }
+
+  if (pulsanteChiudi) {
+    pulsanteChiudi.addEventListener("click", chiudiScheda);
+  }
+
+  document.addEventListener("keydown", function (evento) {
+    if (evento.key === "Escape") {
+      chiudiScheda();
+    }
+  });
 
   var temaSalvato = null;
   try {
@@ -190,7 +208,10 @@
   } catch (e) {
     temaSalvato = null;
   }
-  impostaTema(temaSalvato);
+  if (temaSalvato) {
+    document.documentElement.setAttribute("data-theme", temaSalvato);
+  }
+  aggiornaPulsanteTema();
 
   if (pulsanteTema) {
     pulsanteTema.addEventListener("click", function () {
@@ -203,14 +224,6 @@
       }
       aggiornaPulsanteTema();
     });
-  }
-
-  render();
-  filtra();
-
-  if (campo) {
-    campo.addEventListener("input", filtra);
-    campo.addEventListener("search", filtra);
   }
 
   if (window.matchMedia) {
@@ -226,4 +239,6 @@
       mq.addListener(cambio);
     }
   }
+
+  render();
 })();

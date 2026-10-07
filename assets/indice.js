@@ -4,6 +4,10 @@
   Per aggiungere un nuovo argomento:
     1. inserire il file HTML (e il PDF, se presente) nella cartella opportuna;
     2. aggiungere un oggetto in "documenti" della sezione giusta (o una nuova sezione).
+  Campi di una sezione:
+    breve          -> testo in poche parole mostrato sulla card dell'indice
+    approfondimento-> testo della scheda che si apre cliccando la card
+    nota           -> avviso per le sezioni senza documenti
   Nessun altro file va modificato: index.html e assets/sito.js si aggiornano da soli.
 */
 window.INDICE = [
@@ -11,13 +15,14 @@ window.INDICE = [
     id: "teoria",
     parte: "Parte I",
     titolo: "Teoria",
-    descrizione:
-      "Il funzionamento delle macchine virtuali: hypervisor, CPU, memoria, disco, rete, pregi e limiti.",
+    breve: "Cos'è una VM e come funziona sotto il cofano",
+    approfondimento:
+      "Il funzionamento tecnico delle macchine virtuali: hypervisor di tipo 1 e 2, CPU e memoria virtuali, dischi, rete, snapshot e cloni, pregi, limiti e ambiti di utilizzo. La dispensa si chiude con la procedura tipica di laboratorio e con le domande di verifica, ed è il presupposto per tutte le attività pratiche.",
     documenti: [
       {
         titolo: "Lezione: le macchine virtuali",
         descrizione:
-          "Dispensa stampabile che ripercorre in sintesi tutta la parte teorica: cos'è una VM, tipi di hypervisor, risorse, rete, snapshot e cloni, VM contro container, procedura tipica di laboratorio e domande di verifica.",
+          "Panoramica stampabile: VM, hypervisor, risorse, rete, snapshot, container e domande di verifica.",
         argomenti: [
           "macchina virtuale",
           "hypervisor",
@@ -35,13 +40,14 @@ window.INDICE = [
     id: "installazione",
     parte: "Parte II",
     titolo: "Installazione",
-    descrizione:
-      "Le guide di preparazione dell'ambiente: si seguono una volta sola, prima delle attività, perché tutte le esercitazioni partono da una macchina già pronta e clonabile.",
+    breve: "Preparare l'ambiente, una volta sola",
+    approfondimento:
+      "Le guide per creare le macchine di partenza: Windows 11 con VirtualBox e Alpine Linux. Si seguono una volta sola, prima delle attività, perché ogni esercizio parte da una macchina già pronta, con snapshot «pulito» e cloni riutilizzabili.",
     documenti: [
       {
         titolo: "Creare la macchina virtuale Windows 11",
         descrizione:
-          "Costruire da zero la macchina Windows 11 che fa da base a tutte le attività: hardware virtuale (EFI, TPM 2.0, Secure Boot), installazione con l'utente admin, Guest Additions, snapshot «Installazione pulita» e cloni Windows 1 / Windows 2 con MAC reinizializzato.",
+          "Da zero a VM pronta: hardware virtuale, installazione di Windows 11, Guest Additions, snapshot e cloni.",
         argomenti: [
           "VirtualBox",
           "Windows 11",
@@ -57,7 +63,7 @@ window.INDICE = [
       {
         titolo: "Alpine Linux in macchina virtuale",
         descrizione:
-          "Guida introduttiva a una seconda VM leggera: rete in NAT, installazione persistente con setup-alpine e setup-disk, repository di apk, Bash come shell predefinita e sincronizzazione dell'orologio con chrony.",
+          "Dal live su disco: rete in NAT, setup-alpine, repository di apk, Bash e sincronizzazione dell'orologio.",
         argomenti: [
           "Alpine Linux",
           "NAT e DHCP",
@@ -76,13 +82,14 @@ window.INDICE = [
     id: "attivita",
     parte: "Parte III",
     titolo: "Attività",
-    descrizione:
-      "Le esercitazioni di laboratorio, ordinate per argomento. Ogni attività indica la macchina e lo snapshot da usare.",
+    breve: "Tre esercitazioni progressive su Windows",
+    approfondimento:
+      "Utenti e file, gruppi, condivisione in rete: tre esercitazioni che partono da una macchina clonata e si complicano passo passo. Ogni documento indica la macchina, lo snapshot e gli utenti da usare, ed è pensato per essere ripetibile.",
     documenti: [
       {
         titolo: "Attività 1: utenti e file",
         descrizione:
-          "Clonazione della macchina madre, rinominamento dei computer in WINDOWS-1 e WINDOWS-2, creazione di utente1 e utente2 e lavoro sui permessi di cartella1: ereditarietà rimossa, diritto Interactive eliminato, sola lettura poi modifica.",
+          "Clonazione, rinominamento dei computer, utenti e permessi su cartella1 (ereditarietà, Interactive, sola lettura → modifica).",
         argomenti: [
           "cloni e MAC",
           "SID",
@@ -97,7 +104,7 @@ window.INDICE = [
       {
         titolo: "Attività 2: gruppi",
         descrizione:
-          "Creazione del gruppo gruppo1 con utente1 e utente2, autorizzazioni assegnate al gruppo su cartella2, verifica con utente3 fuori gruppo e poi inserito: i nuovi permessi valgono solo dopo una nuova sessione.",
+          "Autorizzazioni assegnate a gruppo1 su cartella2, verifica con utente3 fuori gruppo e poi inserito: servono una nuova sessione.",
         argomenti: [
           "gruppi locali",
           "token di accesso",
@@ -111,7 +118,7 @@ window.INDICE = [
       {
         titolo: "Attività 3: condivisione in rete",
         descrizione:
-          "Rete interna tra WINDOWS-1 e WINDOWS-2, firewall disattivato, IP statici, accesso a \\\\WINDOWS-1 con l'utente rete1 e cartella condivisa Condivisione1 in sola lettura.",
+          "Rete interna fra WINDOWS-1 e WINDOWS-2, IP statici, firewall e cartella Condivisione1 in sola lettura.",
         argomenti: [
           "rete interna",
           "modalità di rete",
@@ -129,9 +136,11 @@ window.INDICE = [
     id: "linux",
     parte: "In preparazione",
     titolo: "Attività su Linux (Alpine e Bash)",
-    descrizione: "",
+    breve: "Alpine e Bash: sezione in lavorazione",
+    approfondimento:
+      "La base di partenza è la guida ad Alpine Linux nella Parte II.",
     nota:
-      "Sezione predisposta ma ancora vuota: le attività dedicate a Linux verranno pubblicate qui man mano, con lo stesso formato di quelle Windows (documento HTML stampabile, obiettivo, sintesi e argomenti teorici da conoscere). La base di partenza è la guida introduttiva ad Alpine Linux nella Parte II.",
+      "Le attività dedicate a Linux verranno pubblicate qui man mano, con lo stesso formato di quelle Windows (documento HTML stampabile, obiettivo, sintesi e argomenti teorici da conoscere).",
     documenti: []
   }
 ];
