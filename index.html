@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Macchine virtuali — teoria e attività</title>
+<meta name="description" content="Sito del repository sulle macchine virtuali: teoria, guide di installazione e attività di laboratorio con VirtualBox.">
+<link rel="stylesheet" href="assets/sito.css">
+</head>
+<body>
+
+<header class="testata">
+  <div class="contenitore">
+    <p class="occhiello">Teoria · Installazione · Laboratorio</p>
+    <h1>Macchine virtuali</h1>
+    <p class="sottotitolo">
+      Una parte teorica che spiega il funzionamento tecnico delle macchine virtuali — vantaggi,
+      limiti e ambiti di utilizzo — e una parte pratica con le guide di preparazione
+      dell'ambiente e le attività di laboratorio.
+    </p>
+    <div class="azioni">
+      <label class="cerca">
+        <input id="ricerca" type="search" placeholder="Cerca un argomento (es. snapshot, gruppi, NAT)…"
+               aria-label="Cerca un argomento" autocomplete="off">
+      </label>
+      <button id="tema" class="pulsante" type="button" aria-pressed="false">Tema chiaro</button>
+      <a class="pulsante" href="README.md">README del progetto</a>
+    </div>
+  </div>
+</header>
+
+<nav id="parti" class="parti contenitore" aria-label="Parti del sito"></nav>
+
+<main>
+  <div id="contenuti" class="contenitore"></div>
+  <p id="nessun-risultato" class="nessun-risultato contenitore" hidden>
+    Nessun documento corrisponde alla ricerca.
+  </p>
+  <noscript>
+    <div class="contenitore">
+      <p class="vuota">
+        I contenuti dell'indice sono generati da JavaScript: attivalo per vedere l'elenco
+        completo. Nel frattempo è disponibile il <a href="README.md">README del progetto</a>,
+        che elenca tutti i documenti del repository.
+      </p>
+    </div>
+  </noscript>
+</main>
+
+<footer class="sito-piede">
+  <div class="contenitore">
+    <p>
+      Il sito è generato dai dati di <code>assets/indice.js</code>: per aggiungere un nuovo
+      argomento basta inserire il file HTML nella cartella giusta e aggiungere la
+      corrispondente voce in quell'elenco, senza modificare gli altri file.
+    </p>
+    <p>
+      I documenti restano HTML autonomi e stampabili in A4; ognuno di essi propone in alto
+      il link di ritorno a questa pagina.
+    </p>
+  </div>
+</footer>
+
+<script src="assets/indice.js"></script>
+<script src="assets/sito.js"></script>
+</body>
+</html>

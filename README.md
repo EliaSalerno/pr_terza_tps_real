@@ -14,6 +14,12 @@ scorciatoia comoda ma pericolosa.
 ```
 .
 ├── README.md                              ← questo file (teoria + indice)
+├── index.html                             ← sito: indice navigabile dei documenti
+├── assets/                                ← componenti del sito (stile e script)
+│   ├── sito.css                           ← stile della pagina indice
+│   ├── sito.js                            ← rendering dell'indice, ricerca e tema
+│   ├── indice.js                          ← struttura del sito: qui si aggiungono i nuovi argomenti
+│   └── barra.js                           ← barra "← Indice" inserita in ogni documento
 ├── teoria/
 │   └── Lezione_ le macchine virtuali.html  ← lezione teorica stampabile (panoramica)
 ├── installazione/                         ← guide preliminari: preparare l'ambiente
@@ -35,6 +41,13 @@ Il repository è suddiviso in tre cartelle distinte:
   installa una macchina virtuale. Vanno lette una volta sola, prima delle attività,
   perché tutte le esercitazioni partono da una macchina già pronta e clonabile.
 - **`attività/`** — le **esercitazioni** vere e proprie, ordinate per argomento.
+
+La pagina **`index.html`** è la versione navigabile di questo indice: apre ogni
+documento direttamente dal browser (funziona anche da file locale), con ricerca per
+argomento e tema chiaro/scuro, e ogni documento propone in alto il link di ritorno
+all'indice. La struttura del sito è definita interamente in `assets/indice.js`: per
+aggiungere un nuovo argomento basta inserire il file HTML nella cartella giusta e la
+corrispondente voce in quell'elenco, senza toccare gli altri file.
 
 Ogni documento è un HTML autonomo, ottimizzato per la stampa in A4, che contiene la
 traccia passo-passo, le note sulle differenze tra versioni del sistema, gli avvisi
