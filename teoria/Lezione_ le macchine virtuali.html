@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lezione: le macchine virtuali</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1f2328;--muted:#5b636b;--card:#fff;--line:#e2e2dc;--accent:#2457c5;--soft:#e8eefb;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14161a;--fg:#e6e8eb;--muted:#9aa3ad;--card:#1d2026;--line:#2d3139;--accent:#7aa2f7;--soft:#1f2a44}}
+:root[data-theme="dark"]{--bg:#14161a;--fg:#e6e8eb;--muted:#9aa3ad;--card:#1d2026;--line:#2d3139;--accent:#7aa2f7;--soft:#1f2a44}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.65 Georgia,"Times New Roman",serif}
+main{max-width:780px;margin:0 auto;padding:28px 20px 60px}
+h1{font:700 2rem/1.2 system-ui,-apple-system,Segoe UI,sans-serif;margin:.2em 0}
+h2{font:700 1.35rem/1.3 system-ui,-apple-system,Segoe UI,sans-serif;margin:2.2em 0 .6em;padding-top:.4em;border-top:2px solid var(--line);color:var(--accent)}
+h3{font:600 1.05rem system-ui,sans-serif;margin:1.4em 0 .4em}
+.sub{color:var(--muted);font-family:system-ui,sans-serif;font-size:.95rem}
+.box{background:var(--soft);border-left:4px solid var(--accent);padding:12px 16px;border-radius:6px;margin:1em 0}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:1em 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 16px}
+.card h3{margin-top:.2em}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:.93rem;font-family:system-ui,sans-serif}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--soft)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:12px;overflow-x:auto;font-size:.88rem}
+.stack{font-family:system-ui,sans-serif;display:grid;gap:6px;max-width:520px;margin:1em auto;text-align:center;font-size:.9rem}
+.stack div{border:1px solid var(--line);border-radius:6px;padding:8px;background:var(--card)}
+.stack .vms{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;border:0;padding:0;background:none}
+.stack .vms div{background:var(--soft)}
+.stack .hv{background:var(--accent);color:#fff;border-color:var(--accent)}
+ol.q li{margin:.5em 0}
+</style>
+</head>
+<body>
+<main>
+<p class="sub">Lezione teorica · Preparazione al laboratorio</p>
+<h1>Le macchine virtuali (VM)</h1>
+<p class="sub">Obiettivi: capire cos'è una VM, come funziona l'hypervisor, come si configurano risorse e rete, e come lavorare in sicurezza in laboratorio.</p>
+
+<h2>1. Cos'è una macchina virtuale</h2>
+<p>Una macchina virtuale è un <strong>computer simulato via software</strong> che gira dentro un computer fisico. Ha CPU, RAM, disco e scheda di rete "virtuali", e al suo interno si installa un sistema operativo completo come se fosse hardware reale.</p>
+<div class="cards">
+<div class="card"><h3>Host</h3>La macchina fisica (e il suo sistema operativo) che ospita le VM.</div>
+<div class="card"><h3>Guest</h3>Il sistema operativo che gira dentro la VM.</div>
+<div class="card"><h3>Hypervisor</h3>Il software (VMM, <em>Virtual Machine Monitor</em>) che crea ed esegue le VM e ripartisce le risorse fisiche.</div>
+</div>
+
+<h2>2. Perché si usano le VM</h2>
+<ul>
+<li><strong>Isolamento</strong>: ciò che accade in una VM non intacca l'host né le altre VM.</li>
+<li><strong>Sperimentazione sicura</strong>: si può sbagliare, rompere il sistema e ripartire.</li>
+<li><strong>Consolidamento</strong>: più server logici su un solo hardware, con meno costi ed energia.</li>
+<li><strong>Portabilità</strong>: una VM è un insieme di file, quindi si copia, si sposta, si clona.</li>
+<li><strong>Snapshot</strong>: si salva lo stato e ci si può tornare.</li>
+<li><strong>Ambienti diversi</strong>: Linux su Windows, Windows su macOS, versioni differenti di uno stesso OS.</li>
+</ul>
+
+<h2>3. L'hypervisor: due tipi</h2>
+<div class="stack">
+<div class="vms"><div>VM 1<br>Linux</div><div>VM 2<br>Windows</div><div>VM 3<br>Linux</div></div>
+<div class="hv">Hypervisor</div>
+<div>Hardware fisico (CPU, RAM, disco, rete)</div>
+</div>
+<p class="sub" style="text-align:center">Schema semplificato (tipo 1: l'hypervisor è direttamente sull'hardware)</p>
+<div class="scroll"><table>
+<tr><th></th><th>Tipo 1 (bare metal)</th><th>Tipo 2 (hosted)</th></tr>
+<tr><th>Dove gira</th><td>Direttamente sull'hardware</td><td>Come applicazione su un OS host</td></tr>
+<tr><th>Esempi</th><td>VMware ESXi, Hyper-V (server), Xen, KVM</td><td>VirtualBox, VMware Workstation/Fusion, Parallels</td></tr>
+<tr><th>Prestazioni</th><td>Più alte (meno strati)</td><td>Più basse (passa dall'OS host)</td></tr>
+<tr><th>Uso tipico</th><td>Data center, produzione</td><td>Desktop, laboratorio, sviluppo</td></tr>
+</table></div>
+<div class="box">In laboratorio useremo di norma un hypervisor di <strong>tipo 2</strong>, semplice da installare su un PC normale.</div>
+
+<h2>4. Come funziona la virtualizzazione</h2>
+<p>Le istruzioni del guest vengono eseguite direttamente dalla CPU fisica per la maggior parte del tempo; l'hypervisor interviene solo quando il guest tenta operazioni privilegiate (accesso all'hardware, gestione della memoria), che vengono intercettate e "tradotte" sulle risorse reali.</p>
+<ul>
+<li><strong>Virtualizzazione hardware-assistita</strong>: le CPU moderne offrono estensioni dedicate, <code>Intel VT-x</code> e <code>AMD-V</code>. Vanno <strong>abilitate nel BIOS/UEFI</strong> (spesso sono disattive di default).</li>
+<li><strong>Emulazione</strong>: se l'architettura del guest differisce da quella dell'host (es. ARM su x86), l'hypervisor deve tradurre ogni istruzione: funziona, ma è molto più lento.</li>
+<li><strong>Paravirtualizzazione e driver dedicati</strong>: il guest "sa" di essere virtuale e usa driver ottimizzati (es. Guest Additions, VMware Tools, virtio).</li>
+</ul>
+
+<h2>5. Le risorse di una VM</h2>
+<div class="scroll"><table>
+<tr><th>Risorsa</th><th>Come viene gestita</th><th>Regola pratica</th></tr>
+<tr><th>CPU</th><td>La VM riceve uno o più "core virtuali" (vCPU) che l'hypervisor mappa sui core fisici.</td><td>Non assegnare tutti i core dell'host: lasciane almeno metà.</td></tr>
+<tr><th>RAM</th><td>Quota riservata alla VM mentre è accesa; sottratta alla RAM dell'host.</td><td>Somma delle VM accese + host &lt; RAM totale.</td></tr>
+<tr><th>Disco</th><td>File sull'host che appare come disco al guest (<code>.vdi</code>, <code>.vmdk</code>, <code>.vhdx</code>, <code>.qcow2</code>).</td><td>Scegli la dimensione massima con realismo.</td></tr>
+<tr><th>Rete</th><td>Schede virtuali collegate a reti virtuali (vedi sezione 6).</td><td>Scegli la modalità in base all'obiettivo.</td></tr>
+<tr><th>Video/USB/cartelle</th><td>Dispositivi virtuali o passati dall'host.</td><td>Richiedono i driver guest.</td></tr>
+</table></div>
+<h3>Dischi: allocazione dinamica o fissa</h3>
+<ul>
+<li><strong>Dinamica (thin provisioning)</strong>: il file cresce man mano che si usa lo spazio. Risparmia spazio, un po' più lenta.</li>
+<li><strong>Fissa (thick)</strong>: lo spazio è riservato subito. Più veloce e prevedibile, ma occupa tutto da subito.</li>
+</ul>
+
+<h2>6. La rete virtuale</h2>
+<p>La modalità di rete è l'impostazione che crea più confusione in laboratorio. Ecco le principali (i nomi sono quelli di VirtualBox).</p>
+<div class="scroll"><table>
+<tr><th>Modalità</th><th>Guest → Internet</th><th>Guest ↔ Host</th><th>Guest ↔ Guest</th><th>Uso</th></tr>
+<tr><th>NAT</th><td>Sì</td><td>No (serve il port forwarding)</td><td>No</td><td>Navigare, aggiornare; default</td></tr>
+<tr><th>Rete NAT</th><td>Sì</td><td>No</td><td>Sì</td><td>Più VM che comunicano e escono su Internet</td></tr>
+<tr><th>Bridge</th><td>Sì</td><td>Sì</td><td>Sì</td><td>La VM appare come un PC sulla rete reale</td></tr>
+<tr><th>Host-only</th><td>No</td><td>Sì</td><td>Sì</td><td>Rete isolata, accessibile dall'host</td></tr>
+<tr><th>Interna</th><td>No</td><td>No</td><td>Sì</td><td>Rete completamente isolata tra VM</td></tr>
+</table></div>
+<div class="box"><strong>Attenzione:</strong> in modalità bridge la VM prende un indirizzo sulla rete reale (anche della scuola). Per test di sicurezza o servizi che non devono uscire, usare host-only o interna.</div>
+
+<h2>7. Snapshot, cloni ed esportazione</h2>
+<ul>
+<li><strong>Snapshot</strong>: fotografia dello stato (disco e, se accesa, memoria) a un istante. Si registra solo la <em>differenza</em> dal momento dello snapshot. È il "punto di ripristino" ideale prima di un esperimento.</li>
+<li><strong>Clone</strong>: copia di una VM. <em>Completo</em> (indipendente) oppure <em>collegato</em> (condivide il disco di origine, occupa meno).</li>
+<li><strong>Esportazione/importazione</strong>: formato standard <code>OVA/OVF</code>, per spostare una VM tra computer o hypervisor.</li>
+</ul>
+<div class="box">Gli snapshot <strong>non sono backup</strong>: dipendono dal disco originale e, se numerosi, rallentano la VM.</div>
+
+<h2>8. Strumenti di integrazione col guest</h2>
+<p>Dopo l'installazione del guest conviene installare i componenti forniti dall'hypervisor (<em>Guest Additions</em> in VirtualBox, <em>VMware Tools</em> in VMware). Danno:</p>
+<ul><li>risoluzione schermo dinamica e prestazioni grafiche migliori;</li><li>appunti condivisi e trascinamento file;</li><li>cartelle condivise con l'host;</li><li>integrazione del puntatore del mouse (nessuna "cattura").</li></ul>
+
+<h2>9. VM e container</h2>
+<div class="scroll"><table>
+<tr><th></th><th>Macchina virtuale</th><th>Container (es. Docker)</th></tr>
+<tr><th>Cosa virtualizza</th><td>L'hardware: ogni VM ha il proprio kernel</td><td>Il sistema operativo: condividono il kernel dell'host</td></tr>
+<tr><th>Peso</th><td>Gigabyte, avvio in decine di secondi</td><td>Megabyte, avvio in secondi</td></tr>
+<tr><th>Isolamento</th><td>Forte</td><td>Più debole</td></tr>
+<tr><th>OS diversi</th><td>Sì (Windows, Linux, ecc.)</td><td>Solo compatibili con il kernel host</td></tr>
+</table></div>
+
+<h2>10. Procedura tipo in laboratorio</h2>
+<ol>
+<li>Verificare che la virtualizzazione (VT-x/AMD-V) sia abilitata nel BIOS/UEFI.</li>
+<li>Installare l'hypervisor sull'host.</li>
+<li>Ottenere l'immagine <code>.iso</code> del sistema operativo da installare.</li>
+<li>Creare la VM: nome, tipo/versione di OS, RAM, CPU, disco.</li>
+<li>Collegare l'ISO come lettore ottico virtuale e avviare l'installazione.</li>
+<li>Rimuovere l'ISO, installare le Guest Additions/Tools.</li>
+<li>Impostare la rete adatta all'esercizio.</li>
+<li><strong>Creare uno snapshot "pulito"</strong> prima di iniziare le attività.</li>
+</ol>
+<h3>Esempio da riga di comando (VirtualBox)</h3>
+<pre>VBoxManage createvm --name "Lab-Ubuntu" --ostype Ubuntu_64 --register
+VBoxManage modifyvm "Lab-Ubuntu" --memory 4096 --cpus 2 --nic1 nat
+VBoxManage snapshot "Lab-Ubuntu" take "installazione-pulita"</pre>
+
+<h2>11. Buone pratiche e problemi comuni</h2>
+<ul>
+<li><strong>Spazio disco</strong>: le VM occupano molto; controllare lo spazio libero sull'host.</li>
+<li><strong>Spegnere correttamente</strong> la VM (arresto del guest), non "staccare la spina", per evitare corruzioni.</li>
+<li><strong>Non esagerare con RAM e CPU</strong>: un host senza risorse rallenta tutto.</li>
+<li><strong>Aggiornare</strong> guest e strumenti di integrazione.</li>
+<li><strong>Sicurezza</strong>: l'isolamento è forte ma non assoluto; non eseguire malware su VM connesse alla rete reale o con cartelle condivise attive.</li>
+<li><strong>Dati</strong>: salvare i file importanti fuori dalla VM (cartelle condivise o copie esportate).</li>
+</ul>
+<h3>Se qualcosa non va</h3>
+<ul>
+<li><em>"VT-x non disponibile"</em> → abilitarlo nel BIOS; su Windows verificare conflitti con Hyper-V.</li>
+<li><em>La VM non ha Internet</em> → controllare la modalità di rete (host-only e interna non escono).</li>
+<li><em>Schermo piccolo e mouse "intrappolato"</em> → installare le Guest Additions.</li>
+<li><em>Avvio lentissimo</em> → poca RAM assegnata o disco dell'host quasi pieno.</li>
+</ul>
+
+<h2>12. Domande di verifica</h2>
+<ol class="q">
+<li>Qual è la differenza tra host e guest?</li>
+<li>Perché un hypervisor di tipo 1 offre prestazioni migliori del tipo 2?</li>
+<li>Quale modalità di rete useresti per far comunicare due VM senza accesso a Internet e senza toccare la rete reale?</li>
+<li>Perché uno snapshot non sostituisce un backup?</li>
+<li>In cosa un container differisce da una VM?</li>
+<li>A cosa servono le Guest Additions?</li>
+</ol>
+</main>
+</body>
+</html>
