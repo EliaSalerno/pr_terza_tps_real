@@ -47,9 +47,9 @@ Il contenuto è organizzato in tre parti:
 
 | Parte | Cosa contiene |
 |---|---|
-| [**Parte 1 — Teoria**](#parte-i--teoria) | il funzionamento delle macchine virtuali: hypervisor, CPU, memoria, disco, rete, pregi e limiti |
-| [**Parte 2 — Installazione**](#parte-ii--installazione) | le guide di preparazione: macchina Windows 11 e Alpine Linux |
-| [**Parte 3 — Attività**](#parte-iii--attività) | le esercitazioni di laboratorio con sintesi e prerequisiti teorici |
+| [**Parte 1 - Teoria**](#parte-i--teoria) | il funzionamento delle macchine virtuali: hypervisor, CPU, memoria, disco, rete, pregi e limiti |
+| [**Parte 2 - Installazione**](#parte-ii--installazione) | le guide di preparazione: macchina Windows 11 e Alpine Linux |
+| [**Parte 3 - Attività**](#parte-iii--attività) | le esercitazioni di laboratorio con sintesi e prerequisiti teorici |
 
 ---
 
