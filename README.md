@@ -13,18 +13,24 @@ scorciatoia comoda ma pericolosa.
 
 ```
 .
-├── README.md   ← questo file (teoria + indice delle attività)
-├── installazione/                        ← guide preliminari: preparare l'ambiente
-│   ├── creazione_macchina.html   ← creare e installare la macchina Windows 11
-│   └── intro_alpine.html        ← guida introduttiva ad Alpine Linux in VM
-└── attività/                             ← esercitazioni
-    ├── Conf_windows_att1.html   ← Configurazione Windows – Attività 1 (utenti e file)
-    ├── Conf_windows_att2.html   ← Configurazione Windows – Attività 2 (gruppi)
-    └── Conf_windows_att3.html   ← Configurazione Windows – Attività 3 (rete)
+├── README.md                              ← questo file (teoria + indice)
+├── teoria/
+│   └── Lezione_ le macchine virtuali.html  ← lezione teorica stampabile (panoramica)
+├── installazione/                         ← guide preliminari: preparare l'ambiente
+│   ├── creazione_macchina.html            ← creare e installare la macchina Windows 11
+│   ├── intro_alpine.html                  ← guida introduttiva ad Alpine Linux in VM
+│   └── pdf/                               ← copie stampabili delle guide
+└── attività/                              ← esercitazioni
+    ├── Conf_windows_att1.html             ← Configurazione Windows – Attività 1 (utenti e file)
+    ├── Conf_windows_att2.html             ← Configurazione Windows – Attività 2 (gruppi)
+    ├── Conf_windows_att3.html             ← Configurazione Windows – Attività 3 (rete)
+    └── pdf/                               ← copie stampabili delle attività
 ```
 
-Il repository è suddiviso in due parti distinte:
+Il repository è suddiviso in tre cartelle distinte:
 
+- **`teoria/`** — la **lezione** sulle macchine virtuali in formato stampabile, la
+  dispensa che accompagna la [Parte I](#parte-i--teoria).
 - **`installazione/`** — le guide di **preparazione dell'ambiente**: come si crea e si
   installa una macchina virtuale. Vanno lette una volta sola, prima delle attività,
   perché tutte le esercitazioni partono da una macchina già pronta e clonabile.
@@ -33,11 +39,26 @@ Il repository è suddiviso in due parti distinte:
 Ogni documento è un HTML autonomo, ottimizzato per la stampa in A4, che contiene la
 traccia passo-passo, le note sulle differenze tra versioni del sistema, gli avvisi
 sui passaggi che si sbagliano più spesso e i suggerimenti pratici. Questo README funge
-da **indice**: riassume l'obiettivo di ciascun documento e rimanda al file di dettaglio.
+da **indice**: riassume l'obiettivo di ciascun documento, la sintesi di cosa si fa e
+gli **argomenti teorici da conoscere** prima di affrontarlo, rimandando poi al file di
+dettaglio.
+
+Il contenuto è organizzato in tre parti:
+
+| Parte | Cosa contiene |
+|---|---|
+| [**Parte I — Teoria**](#parte-i--teoria) | il funzionamento delle macchine virtuali: hypervisor, CPU, memoria, disco, rete, pregi e limiti |
+| [**Parte II — Installazione**](#parte-ii--installazione) | le guide di preparazione: macchina Windows 11 e Alpine Linux |
+| [**Parte III — Attività**](#parte-iii--attività) | le esercitazioni di laboratorio con sintesi e prerequisiti teorici |
 
 ---
 
 # Parte I — Teoria
+
+📄 [`teoria/Lezione_ le macchine virtuali.html`](<teoria/Lezione_ le macchine virtuali.html>)
+— *Lezione: le macchine virtuali*: dispensa stampabile che ripercorre in sintesi i
+punti di questa parte (cos'è una VM, tipi di hypervisor, risorse, rete, snapshot e
+cloni, VM contro container, procedura tipica di laboratorio e domande di verifica).
 
 ## 1. Che cos'è una macchina virtuale
 
@@ -119,7 +140,7 @@ didattico.
 | VirtualBox 7.x | 2 | Windows, Linux, macOS | snapshot e cloni molto pratici, ottimo per laboratori |
 | VMware Workstation / Player | 2 | Windows, Linux | prestazioni elevate, Player gratuito solo per uso personale |
 | Hyper-V | 1 | Windows Server, Linux (host), anche Windows client | integrato in Windows Pro/Enterprise; in Home è disponibile solo "Virtual Machine Platform" (per WSL2 e Docker) |
-| QEMU / KVM | 1 (KVM) | Linux | open source,extremely flessibile, base di Proxmox e di molte cloud |
+| QEMU / KVM | 1 (KVM) | Linux | open source, estremamente flessibile, base di Proxmox e di molte cloud |
 | Proxmox VE | 1 | Linux (Debian) | interfaccia web, KVM per VM e LXC per container |
 
 ### Virtualizzazione completa vs para-virtualizzazione
@@ -213,7 +234,7 @@ Il disco di una VM non è un disco: è un **file** (o un insieme di file) sull'h
   copiato altrove. È la base di snapshot e cloni collegati.
 - **Controller virtuale**: l'hypervisor presenta al guest un controller SATA, NVMe o
   **VirtIO**. VirtIO è il più veloce perché il driver del guest è consapevole della
-  virtualizzazione ed evita operazioni costose; richende però driver specifici
+  virtualizzazione ed evita operazioni costose; richiede però driver specifici
   (presenti in Linux e in Windows, installabili con i *Guest Additions* / *integration
   services*).
 
@@ -382,7 +403,7 @@ determina anche le funzioni disponibili — strumenti come *Utenti e gruppi loca
 - **L'hypervisor è un SINGLE POINT OF FAILURE**: con un hypervisor di tipo 2, un
   problema del sistema operativo host ferma tutte le macchine virtuali contemporaneamente.
 - **Non è un confine di sicurezza assoluto**: i bug dell'hypervisor esistono e sono
-  stati sfruttati (ci sono state evasioni pubblicizzate su VirtualBox eVMware). Per
+  stati sfruttati (ci sono state evasioni pubblicizzate su VirtualBox e VMware). Per
   analizzare contenuti davvero ostili servono sandbox dedicate, non la VM del PC di
   lavoro.
 - **Dimensione**: le macchine occupano molto più spazio di quanto dichiarato, soprattutto
@@ -445,30 +466,34 @@ servizi e configurazione di rete.
 
 ---
 
-# Parte II — Attività
+# Parte II — Installazione
 
-## Stato del progetto
-
-Le attività sono **in continua aggiunta**: l'elenco di questa sezione non è da
-considerarsi completo e viene aggiornato man mano che vengono svolte nuove prove.
-
-Per il momento sono documentate **soltanto attività su Windows**; l'elenco relativo
-crescerà sia con nuove attività Windows sia con attività dedicate a
-**Linux / Alpine Linux**, che verranno aggiunte in una sezione separata (già
-predisposta più in basso).
-
-Tutte le attività si svolgono con **Oracle VirtualBox 7.x** su un PC fisico con
-virtualizzazione hardware abilitata nel BIOS/UEFI.
-
-## Preparazione dell'ambiente
+Le guide di questa sezione costituiscono la **preparazione dell'ambiente** e vanno
+seguite **una volta sola**, prima delle attività: tutte le esercitazioni partono da
+una macchina virtuale già pronta, con snapshot della situazione "pulita" e cloni
+riutilizzabili.
 
 Prima di qualsiasi attività occorre avere una macchina virtuale Windows 11
 funzionante, con l'utente `admin`, le Guest Additions installate, uno snapshot
-dell'installazione pulita e i due cloni `Windows 1` e `Windows 2`. Questa parte è
-documentata a parte, perché è uguale per tutte le attività Windows e va eseguita una
-volta sola.
+dell'installazione pulita e i due cloni `Windows 1` e `Windows 2`. La guida ad
+Alpine Linux prepara invece la base per le attività Linux, ancora in fase di
+aggiunta.
 
-### Creare la macchina virtuale Windows 11
+## Requisiti e materiali
+
+| Cosa serve | Dettaglio |
+|---|---|
+| **PC ospitante** | almeno 8 GB di RAM (meglio 16) e 64 GB liberi su disco (meglio SSD) |
+| **Virtualizzazione hardware** | Intel VT-x o AMD-V/SVM **attiva nel BIOS/UEFI**, altrimenti l'hypervisor non parte |
+| **Oracle VirtualBox 7.x** | dal sito ufficiale `virtualbox.org`: la versione 7 gestisce TPM 2.0 e Secure Boot, richiesti da Windows 11. L'*Extension Pack* va installato solo per uso personale/didattico e serve per passthrough USB e webcam (vedi [§7](#7-periferiche-virtuali-e-integrazione-con-lhost)) |
+| **ISO di Windows 11** | dal sito Microsoft, "Scarica l'immagine del disco (ISO)", immagine multi-edizione, lingua italiana; non serve alcun account |
+| **ISO di Alpine Linux** | dal sito `alpinelinux.org`, immagine *standard* (quella installabile anche da CD virtuale) |
+
+Se VirtualBox risulta insolitamente lento su un PC Windows, il sospetto è che
+Hyper-V, WSL2 o l'"Integrità della memoria" stiano rubando l'ipervisore a
+VirtualBox: vedere la tabella dei problemi frequenti nella guida Windows.
+
+## Creare la macchina virtuale Windows 11
 
 📄 [`installazione/creazione_macchina.html`](installazione/creazione_macchina.html)
 
@@ -494,10 +519,89 @@ legittime, snapshot e cloni, esportazione in formato OVA per allineare gli altri
 dell'aula, tabella dei problemi frequenti (virtualizzazione disattivata nel BIOS,
 conflitti con Hyper-V/WSL2, blocco TPM, mouse integrato).
 
-**Nota operativa.** Prima di iniziare, verificare i requisiti del PC ospitante
-(almeno 8 GB di RAM, meglio 16, e 64 GB liberi su disco) e che VT-x/AMD-V sia
-attivo nel BIOS/UEFI. Se VirtualBox risulta molto lento, il sospetto è Hyper-V o WSL2
-attivi sul sistema ospite.
+**Nota operativa.** Non avviare la macchina prima di aver controllato le impostazioni
+del punto 3 della guida (EFI, TPM 2.0, Secure Boot): se Windows 11 si rifiuta di
+installarsi, è quasi sempre lì il problema.
+
+**Argomenti teorici da conoscere.** Dalla [Parte I](#parte-i--teoria): [§1](#1-che-cosè-una-macchina-virtuale)
+cosa significa installare un sistema operativo dentro un'altra macchina; [§2](#2-architettura-lhypervisor)
+VirtualBox è un hypervisor di **tipo 2**, e VT-x/AMD-V va attivata nel BIOS, mentre
+TPM 2.0 e Secure Boot sono forniti **virtualmente** dall'hypervisor (senza di essi
+Windows 11 non si installa); [§5](#5-la-memoria-di-massa) dischi **dinamici**
+(thin provisioning: 64 GB dichiarati che occupano pochi MB), funzionamento di
+**snapshot** e **cloni**, perché va reinizializzato il **MAC** e come si esporta in
+OVA; [§6](#6-la-rete) la modalità **NAT** usata durante l'installazione; [§7](#7-periferiche-virtuali-e-integrazione-con-lhost)
+cosa fanno le **Guest Additions** e perché appunti condivisi e cartelle condivise
+vanno disattivati lavorando con file non fidati; [§8](#8-ciclo-di-vita-e-manutenzione)
+licenze e differenza tra edizione Home e Pro (alla base dell'obbligo di scegliere
+Windows 11 Pro).
+
+## Guida introduttiva: Alpine Linux in macchina virtuale
+
+📄 [`installazione/intro_alpine.html`](installazione/intro_alpine.html)
+
+**Obiettivo.** Allestire una seconda macchina virtuale, leggera e velocissima, basata
+su **Alpine Linux**, che fa da base alle attività Linux: rete in NAT, installazione
+persistente su disco, gestore dei pacchetti, shell Bash, sincronizzazione
+dell'orologio e minimi comfort da console.
+
+**In sintesi.** Dalla ISO live si avvia la macchina con la scheda di rete in **NAT**
+e si esegue `setup-alpine`, scegliendo l'interfaccia `eth0` e il metodo `dhcp`, poi
+`setup-disk` per installare su disco in modo persistente. Se `apk` riporta
+`No mirror found` o `unable to select package`, si verifica la versione con
+`cat /etc/alpine-release` e si riscrive `/etc/apk/repositories`, poi `apk update`.
+Si installa **Bash** e la si rende shell predefinita (`chsh` o modifica di
+`/etc/passwd`), al posto della `ash` di default. Si installa **`chrony`** e si avvia
+il servizio NTP per correggere la *clock drift* delle macchine virtuali, si aggiunge
+l'editor `micro` e infine i font console più leggibili (pacchetto `font-terminus` o
+fattore di scala di VirtualBox).
+
+**Argomenti toccati.** Rete in NAT e indirizzamento DHCP, script guidati
+`setup-alpine`/`setup-disk`, repository e indice di `apk`, differenze rispetto a
+Ubuntu/Debian (`apk` vs `apt`, **OpenRC** vs `systemd`, `musl libc` vs `glibc`),
+cambio della shell predefinita, servizi con `rc-update`/`rc-service`, client NTP con
+`chrony`, editor da terminale, font della console e tabella dei comandi principali.
+
+**Argomenti teorici da conoscere.** Dalla [Parte I](#parte-i--teoria): [§1](#1-che-cosè-una-macchina-virtuale)
+e [§2](#2-architettura-lhypervisor) guest e hypervisor, [§3](#3-la-cpu-vista-dallospite)
+il paragrafo sull'**orologio**: perché la VM perde l'ora dopo sospensioni e snapshot e
+perché serve la sincronizzazione NTP (è esattamente ciò che risolve `chrony`),
+[§6](#6-la-rete) modalità **NAT** e DHCP, [§7](#7-periferiche-virtuali-e-integrazione-con-lhost)
+periferiche virtuali e Guest Additions, [§11](#11-vm-container-o-bare-metal)
+differenza tra macchina virtuale e container (Alpine in VM è una macchina
+completa, non un container). Concetti base del sistema: differenza fra sistema
+operativo *live* e installato su disco, ruolo di `/etc/passwd` e `/etc/shadow`, e
+la logica dei repository nel gestore dei pacchetti.
+
+**Nota operativa.** Lasciare la scheda di rete in NAT: è la modalità che condivide
+Internet dell'host con il guest ed è sufficiente per tutte le prove. La sospensione
+della macchina è la causa più comune di orologio fuori sincro: se `chronyc
+tracking` segnala scostamenti, riavviare il servizio.
+
+---
+
+# Parte III — Attività
+
+## Stato del progetto
+
+Le attività sono **in continua aggiunta**: l'elenco di questa sezione non è da
+considerarsi completo e viene aggiornato man mano che vengono svolte nuove prove.
+
+Per il momento sono documentate **soltanto attività su Windows**; l'elenco relativo
+crescerà sia con nuove attività Windows sia con attività dedicate a
+**Linux / Alpine Linux**, che verranno aggiunte in una sezione separata (già
+predisposta più in basso).
+
+Tutte le attività si svolgono con **Oracle VirtualBox 7.x** su un PC fisico con
+virtualizzazione hardware abilitata nel BIOS/UEFI.
+
+## Sintesi delle attività
+
+| # | Attività | Sintesi | Argomenti teorici da conoscere |
+|---|---|---|---|
+| **1** | [Utenti e file](#configurazione-windows--attività-1-utenti-e-file) | Clonazione della macchina madre in `Windows 1`/`Windows 2`, rinominamento in `WINDOWS-1`/`WINDOWS-2`, creazione di `utente1` e `utente2`, permessi su `cartella1` (ereditarietà rimossa, diritto *Interactive* eliminato, sola lettura → modifica) | [§2](#2-architettura-lhypervisor), [§5](#5-la-memoria-di-massa) (cloni e MAC); ACL ed ereditarietà, identità speciali, admin vs standard |
+| **2** | [Gruppi](#configurazione-windows--attività-2-gruppi) | Creazione di `gruppo1` con `utente1`/`utente2`, autorizzazioni assegnate al gruppo su `cartella2`, verifica con `utente3` fuori gruppo e poi inserito | [§5](#5-la-memoria-di-massa), [§8](#8-ciclo-di-vita-e-manutenzione) (edizione Pro); gruppi locali e token di accesso, nuova sessione |
+| **3** | [Condivisione in rete](#configurazione-windows--attività-3-condivisione-in-rete) | Rete interna tra `WINDOWS-1` e `WINDOWS-2`, firewall disattivato, IP statici, accesso a `\\WINDOWS-1` con `rete1`, cartella condivisa `Condivisione1` in sola lettura | [§5](#5-la-memoria-di-massa), [§6](#6-la-rete) (modalità di rete, DHCP/APIPA); SMB, autorizzazioni di condivisione vs NTFS, cache credenziali |
 
 ## Attività su Windows
 
@@ -531,6 +635,21 @@ computer, creazione di account locali, distinzione fra account amministratori e
 standard, ereditarietà delle autorizzazioni, identità speciali (*Interactive*,
 *Everyone*, *Users*), permessi per utente, rimozione dell'ereditarietà.
 
+**Argomenti teorici da conoscere.** Dalla [Parte I](#parte-i--teoria): [§2](#2-architettura-lhypervisor)
+che cos'è l'hypervisor e come gestisce i guest, [§5](#5-la-memoria-di-massa)
+differenza tra **clone completo** e **clone collegato**, snapshot come punto di
+ripristino, perché ogni clone ha bisogno di un **MAC** (e di un **SID**) propri,
+[§7](#7-periferiche-virtuali-e-integrazione-con-lhost) cosa fanno le Guest
+Additions (schermo ridimensionabile e mouse integrato, utili quando si cambia utente
+più volte).
+Concetti Windows da padroneggiare prima di iniziare: la
+differenza tra account **amministratore** e **standard** (e il token di accesso che
+viene costruito al login), la struttura di una **ACL** e le sue voci (**ACE**), il
+significato dell'**ereditarietà** delle autorizzazioni e della sua conversione in
+autorizzazioni **esplicite**, e le **identità speciali** (*Interactive*,
+*Everyone*, *Users*), che non sono gruppi che si possono modificare ma descrittori
+calcolati dal sistema.
+
 **Nota operativa.** Creare prima uno snapshot della macchina "pulita": le verifiche
 sui permessi richiedono di cambiare utente più volte e l'esercizio deve essere
 ripetibile.
@@ -558,6 +677,17 @@ accesso. A `gruppo1` si aggiungono poi i diritti di modifica, infine si iscrive
 alternativa da riga di comando `net localgroup`), autorizzazioni assegnate a un gruppo,
 effetto della conversione dell'ereditarietà, necessità di una **nuova sessione** perché
 le variazioni di appartenenza ai gruppi vengano applicate.
+
+**Argomenti teorici da conoscere.** Dalla [Parte I](#parte-i--teoria): [§5](#5-la-memoria-di-massa)
+snapshot e cloni come base di partenza dell'esercizio, [§8](#8-ciclo-di-vita-e-manutenzione)
+perché l'edizione scelta in fase di installazione condiziona gli strumenti
+disponibili (`lusrmgr.msc` esiste solo in Pro/Enterprise/Education). Concetti Windows
+da padroneggiare: l'idea stessa di **gestire i permessi per ruolo** anziché per
+singolo utente, la distinzione fra **gruppo locale** e identità speciali, e soprattutto
+il motivo per cui l'aggiunta a un gruppo non ha effetto subito: l'elenco dei gruppi
+finisce nel **token di accesso** costruito al momento del login, quindi servono un
+disconnessione e un nuovo accesso. Riandare anche al concetto di **ACL** e di
+autorizzazioni **esplicite** trattato nell'attività 1.
 
 **Nota operativa.** Se si riutilizza `Windows 1` dell'attività 1, gli utenti
 `utente1`/`utente2` esistono già: usare `Windows 2` o ripristinare lo snapshot.
@@ -589,6 +719,20 @@ di condivisione, autenticazione con account locali e cache delle credenziali
 (`net use * /delete`), condivisioni amministrative nascoste come `C$`, risoluzione dei
 nomi e uso dell'indirizzo IP al posto del nome.
 
+**Argomenti teorici da conoscere.** Dalla [Parte I](#parte-i--teoria): [§6](#6-la-rete)
+la tabella delle **modalità di rete** di VirtualBox (NAT, ponte, solo host, rete
+interna), perché nella rete interna non c'è un server **DHCP** e cosa succede con
+gli indirizzi **APIPA** `169.254.x.x`, ruolo del firewall; [§5](#5-la-memoria-di-massa)
+perché i due cloni devono avere **MAC** distinti; [§7](#7-periferiche-virtuali-e-integrazione-con-lhost)
+attenzione a non confondere le **cartelle condivise host-guest** di VirtualBox (un
+canale dell'hypervisor, non un servizio di rete) con la **condivisione SMB** fra due
+guest, che è quello che si esercita qui. Concetti Windows da padroneggiare: cos'è
+**SMB/CIFS** e come un'esplorazione di rete usa credenziali, la differenza fra
+**autorizzazioni di condivisione** e **autorizzazioni NTFS** (in caso di conflitto
+vince la più restrittiva), il comportamento della **cache delle credenziali** e il
+comando `net use * /delete`, infine risoluzione dei nomi (NetBIOS/mDNS) e uso
+dell'indirizzo IP quando il nome non viene risolto.
+
 **Nota operativa.** Le due macchine devono stare sulla stessa rete interna con lo
 stesso nome (per esempio `intnet`): se i cloni sono stati creati con l'opzione di
 reinizializzo del MAC gli indirizzi sono già diversi, altrimenti rigenerare il MAC
@@ -599,9 +743,11 @@ riattivarlo al termine dell'esercizio.
 
 Questa sezione è **predisposta ma ancora vuota**: le attività dedicate a Linux non
 sono state ancora inserite. Verranno pubblicate qui man mano, con lo stesso formato
-delle attività Windows (documento HTML stampabile, obiettivo e argomenti toccati).
+delle attività Windows (documento HTML stampabile, obiettivo, sintesi e argomenti
+teorici da conoscere).
 
-La base di partenza è la guida introduttiva già presente nel repository, che copre
+La base di partenza è la guida introduttiva già presente nel repository e descritta
+in [Parte II](#guida-introduttiva-alpine-linux-in-macchina-virtuale), che copre
 l'installazione di Alpine Linux in macchina virtuale, la gestione della rete, del
 gestore dei pacchetti e della shell:
 
@@ -622,7 +768,8 @@ dei comandi principali).
   `ash` e delle differenze di sintassi.
 - **OpenRC** al posto di systemd: `rc-update`, `rc-service` e `/etc/init.d`.
 - **Sincronizzazione dell'orologio con NTP** (`chrony`), collegata direttamente al
-  problema della *clock drift* delle macchine virtuali descritto nella teoria.
+  problema della *clock drift* delle macchine virtuali descritto in
+  [§3](#3-la-cpu-vista-dallospite).
 - **Permessi, proprietari e gruppi** su file e cartelle (`chmod`, `chown`, `chgrp`),
   ripresi in chiave POSIX sulle attività Windows.
 - **Gestione degli utenti e dei gruppi** (`adduser`, `addgroup`, file `/etc/passwd`,
