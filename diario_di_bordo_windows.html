@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Il diario di bordo di Windows – Laboratorio sui registri eventi</title>
+<style>
+:root{--bg:#f4f6f9;--paper:#fff;--ink:#17222e;--mute:#5a6877;--line:#d5dce5;--acc:#0b5cad;--accbg:#e6f0fb;--warn:#8a5a00;--warnbg:#fff4d6;--code:#101820;--codefg:#d8e6f2;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f151c;--paper:#17202a;--ink:#e6edf4;--mute:#9aa8b7;--line:#2c3947;--acc:#6ab0f5;--accbg:#172a3f;--warn:#f0c46a;--warnbg:#3a2f12;--code:#0a0f14;--codefg:#d8e6f2;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f151c;--paper:#17202a;--ink:#e6edf4;--mute:#9aa8b7;--line:#2c3947;--acc:#6ab0f5;--accbg:#172a3f;--warn:#f0c46a;--warnbg:#3a2f12;--code:#0a0f14;--codefg:#d8e6f2;color-scheme:dark}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+main{max-width:860px;margin:0 auto;padding:0 20px 64px}
+header{padding:56px 0 28px;border-bottom:3px solid var(--acc)}
+h1{font-size:clamp(2rem,6vw,3.2rem);line-height:1.1;margin:0 0 10px;letter-spacing:-.02em}
+.sub{font-size:1.15rem;color:var(--mute);margin:0 0 18px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 24px;color:var(--mute);font-size:.95rem}
+.meta b{color:var(--ink)}
+.names{margin-top:18px}
+h2{font-size:1.7rem;margin:52px 0 14px;letter-spacing:-.01em}
+h3{font-size:1.2rem;margin:30px 0 8px}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin:0 -20px;padding:8px 20px;display:flex;gap:6px 16px;flex-wrap:wrap;font-size:.92rem}
+nav a{color:var(--acc);text-decoration:none;font-weight:600}
+nav a:hover{text-decoration:underline}
+nav button{margin-left:auto}
+button{font:inherit;font-size:.88rem;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:6px;padding:3px 10px;cursor:pointer}
+p{margin:0 0 12px;max-width:68ch}
+ul{margin:0 0 14px;padding-left:22px}
+li{margin-bottom:4px}
+.chk{list-style:none;padding:0}
+.chk li{display:flex;gap:10px;align-items:flex-start}
+.chk input{margin-top:.42em;width:1.05em;height:1.05em;accent-color:var(--acc);flex:none}
+.rule{background:var(--warnbg);color:var(--warn);border-left:5px solid var(--warn);padding:12px 16px;margin:18px 0;border-radius:0 6px 6px 0;max-width:68ch}
+.tip{background:var(--accbg);border-left:5px solid var(--acc);padding:10px 16px;margin:14px 0;border-radius:0 6px 6px 0;max-width:68ch}
+.mission{background:var(--paper);border:1px solid var(--line);border-left:6px solid var(--acc);border-radius:6px;padding:4px 20px 12px;margin:20px 0}
+.mission h3{margin-top:14px}
+.wrap{overflow-x:auto;margin:10px 0 16px}
+table{border-collapse:collapse;width:100%;min-width:420px;background:var(--paper);font-size:.96rem}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--accbg)}
+td.f{height:2.4em}
+code{font:.92em Consolas,"Cascadia Mono",Menlo,monospace;background:var(--accbg);padding:1px 5px;border-radius:4px}
+pre{background:var(--code);color:var(--codefg);padding:14px 16px;border-radius:6px;overflow-x:auto;margin:10px 0 16px;font:.9rem/1.5 Consolas,"Cascadia Mono",Menlo,monospace}
+pre code{background:none;padding:0;color:inherit}
+.line{display:inline-block;min-width:9em;border-bottom:1px solid var(--mute);height:1.1em;vertical-align:bottom}
+.line.l{min-width:min(24em,70vw)}
+footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line)}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+@media print{body{background:#fff;color:#000;font-size:11pt}nav,button{display:none}.mission{break-inside:avoid}table,pre{break-inside:avoid}h2{break-after:avoid}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<h1>Il diario di bordo di Windows</h1>
+<p class="sub">Laboratorio sui registri eventi: diventa un detective dei log</p>
+<div class="meta"><span><b>Classe:</b> 3ª Informatica</span><span><b>Lavori:</b> in coppia, ognuno con la propria VM</span><span><b>Durata:</b> 3 incontri da 2 ore</span></div>
+<p class="names">Nomi della coppia: <span class="line"></span> e <span class="line"></span></p>
+</header>
+
+<nav aria-label="Indice">
+<a href="#intro">Introduzione</a><a href="#prima">Prima di iniziare</a><a href="#i1">Incontro 1</a><a href="#i2">Incontro 2</a><a href="#i3">Incontro 3</a><a href="#valutazione">Valutazione</a><a href="#aiuto">Aiuto</a>
+<button type="button" id="tema" aria-label="Cambia tema chiaro/scuro">Tema</button>
+</nav>
+
+<section id="intro">
+<h2>Di cosa si tratta?</h2>
+<p>Ogni volta che Windows si accende, si spegne, avvia un programma, ferma un servizio o qualcuno sbaglia la password, <b>scrive una riga in un diario</b>. Questo diario si chiama <b>registro eventi</b> e si consulta con il <b>Visualizzatore eventi</b>.</p>
+<p>Chi lavora nell'informatica lo usa ogni giorno per:</p>
+<ul><li>capire <b>perché un computer si è bloccato</b></li><li>scoprire <b>chi ha fatto cosa</b> e <b>quando</b></li><li>accorgersi se qualcuno sta provando a entrare in un sistema senza permesso</li></ul>
+<p>Alla fine del laboratorio saprai fare tutte e tre le cose. L'ultimo incontro sarà una vera <b>indagine</b>: scoprirai cosa è successo su un computer solo leggendo i suoi log.</p>
+
+<h3>Cosa sarai in grado di fare</h3>
+<ul class="chk">
+<li><input type="checkbox" id="o1"><label for="o1">Spiegare cos'è un evento e a cosa serve un registro</label></li>
+<li><input type="checkbox" id="o2"><label for="o2">Aprire il Visualizzatore eventi e leggere un evento (origine, ID, livello, data)</label></li>
+<li><input type="checkbox" id="o3"><label for="o3">Distinguere i registri Applicazione, Sicurezza, Sistema e Installazione</label></li>
+<li><input type="checkbox" id="o4"><label for="o4">Filtrare gli eventi e creare una visualizzazione personalizzata</label></li>
+<li><input type="checkbox" id="o5"><label for="o5">Interrogare i log da PowerShell con <code>Get-WinEvent</code> e da prompt con <code>wevtutil</code></label></li>
+<li><input type="checkbox" id="o6"><label for="o6">Creare eventi tuoi e far partire un'azione automatica quando compaiono</label></li>
+<li><input type="checkbox" id="o7"><label for="o7">Ricostruire una cronologia partendo solo dai log</label></li>
+</ul>
+</section>
+
+<section id="prima">
+<h2>Prima di iniziare</h2>
+<ul class="chk">
+<li><input type="checkbox" id="p1"><label for="p1">Hai fatto uno <b>snapshot "pulito"</b> della VM? Così puoi sempre tornare indietro</label></li>
+<li><input type="checkbox" id="p2"><label for="p2">Sai accedere come <b>amministratore</b> e come utente <code>studente1</code>?</label></li>
+<li><input type="checkbox" id="p3"><label for="p3">Apri <b>PowerShell come amministratore</b>: senza, il registro Sicurezza non si legge</label></li>
+<li><input type="checkbox" id="p4"><label for="p4">Sai dove salvare il lavoro a fine ora (cartella condivisa o repository)?</label></li>
+</ul>
+<div class="rule"><b>Regola d'oro:</b> i log contengono dati personali, come i nomi utente. Si analizzano <b>solo sulle macchine del laboratorio</b> o su quelle tue. Mai sul computer di qualcun altro senza permesso.</div>
+</section>
+
+<section id="i1">
+<h2>Incontro 1: conosciamo i registri</h2>
+<h3>Come è fatto un evento</h3>
+<p>Ogni evento ha sempre questi campi. Imparali, ti serviranno ovunque.</p>
+<div class="wrap"><table>
+<tr><th>Campo</th><th>Cosa ti dice</th></tr>
+<tr><td><b>Data e ora</b></td><td>Quando è successo</td></tr>
+<tr><td><b>Origine</b></td><td>Chi lo ha scritto (un servizio, un programma, il sistema)</td></tr>
+<tr><td><b>ID evento</b></td><td>Un numero che identifica il tipo di fatto</td></tr>
+<tr><td><b>Livello</b></td><td>Quanto è importante: Informazioni, Avviso, Errore, Critico</td></tr>
+<tr><td><b>Utente / Computer</b></td><td>Con quale account e su quale macchina</td></tr>
+</table></div>
+
+<div class="mission">
+<h3>Missione 1: esplora</h3>
+<p>Apri il Visualizzatore eventi: premi <code>Win + R</code>, scrivi <code>eventvwr.msc</code>, premi Invio. Poi compila.</p>
+<div class="wrap"><table>
+<tr><th>Registro</th><th>Quanti eventi contiene?</th><th>A cosa pensi che serva?</th></tr>
+<tr><td>Applicazione</td><td class="f"></td><td></td></tr>
+<tr><td>Sicurezza</td><td class="f"></td><td></td></tr>
+<tr><td>Sistema</td><td class="f"></td><td></td></tr>
+<tr><td>Installazione</td><td class="f"></td><td></td></tr>
+</table></div>
+</div>
+
+<div class="mission">
+<h3>Missione 2: schede evento</h3>
+<p>Scegli <b>3 eventi</b>, uno per livello diverso, e compila una scheda per ciascuno.</p>
+<div class="wrap"><table>
+<tr><th></th><th>Evento 1</th><th>Evento 2</th><th>Evento 3</th></tr>
+<tr><td>Livello</td><td class="f"></td><td></td><td></td></tr>
+<tr><td>Origine</td><td class="f"></td><td></td><td></td></tr>
+<tr><td>ID</td><td class="f"></td><td></td><td></td></tr>
+<tr><td>Cosa significa (con parole tue)</td><td class="f"></td><td></td><td></td></tr>
+</table></div>
+</div>
+
+<div class="mission">
+<h3>Missione 3: caccia agli ID</h3>
+<p>Nel registro <b>Sistema</b>, cerca questi ID e scrivi quando compaiono l'ultima volta.</p>
+<div class="wrap"><table>
+<tr><th>ID</th><th>Significato</th><th>Ultima volta (data/ora)</th></tr>
+<tr><td>6005 / 6006</td><td>Avvio / arresto del servizio registro eventi (ti dice quando il PC è stato acceso e spento)</td><td class="f"></td></tr>
+<tr><td>41</td><td>Riavvio imprevisto (Kernel-Power)</td><td class="f"></td></tr>
+<tr><td>1074</td><td>Arresto o riavvio avviato da un utente o da un processo</td><td class="f"></td></tr>
+<tr><td>7036</td><td>Un servizio ha cambiato stato</td><td class="f"></td></tr>
+</table></div>
+<div class="tip"><b>Suggerimento:</b> usa "Filtra registro corrente" nel pannello a destra e scrivi l'ID nel campo apposito.</div>
+</div>
+
+<div class="mission">
+<h3>Missione 4: provoca un evento</h3>
+<ul><li>Apri <code>services.msc</code></li><li>Trova <b>Spooler di stampa</b>, fermalo e poi riavvialo</li><li>Torna nel registro Sistema e cerca gli eventi <b>7036</b> appena generati</li></ul>
+<p>Hai trovato entrambi (arresto e avvio)? Scrivi l'ora di ciascuno: <span class="line"></span> / <span class="line"></span></p>
+</div>
+
+<div class="mission">
+<h3>Missione 5: le impostazioni del log</h3>
+<p>Tasto destro sul registro Sistema, poi <b>Proprietà</b>. Annota:</p>
+<ul><li>Dimensione massima del log: <span class="line"></span></li><li>Cosa succede quando si riempie? <span class="line l"></span></li></ul>
+<p><b>Domanda per riflettere:</b> cosa potrebbe succedere se il log fosse troppo piccolo? E troppo grande su un disco quasi pieno?</p>
+</div>
+</section>
+
+<section id="i2">
+<h2>Incontro 2: filtri, sicurezza e riga di comando</h2>
+<h3>Parte A: il registro Sicurezza</h3>
+<p>Qui Windows annota chi entra e chi prova a entrare.</p>
+<div class="wrap"><table>
+<tr><th>ID</th><th>Significato</th></tr>
+<tr><td>4624</td><td>Accesso riuscito</td></tr>
+<tr><td>4625</td><td>Accesso <b>non</b> riuscito</td></tr>
+<tr><td>4634</td><td>Disconnessione</td></tr>
+<tr><td>4720</td><td>Account utente creato</td></tr>
+<tr><td>4672</td><td>Accesso con privilegi speciali</td></tr>
+</table></div>
+
+<div class="mission">
+<h3>Missione: ricostruisci gli accessi</h3>
+<ul><li>Prova ad accedere come <code>studente1</code> con la <b>password sbagliata per 3 volte</b></li><li>Poi accedi con la <b>password giusta</b></li><li>Torna come amministratore e ricostruisci la sequenza dai log</li></ul>
+<div class="wrap"><table>
+<tr><th>Ora</th><th>ID</th><th>Cosa è successo</th></tr>
+<tr><td class="f"></td><td></td><td></td></tr>
+<tr><td class="f"></td><td></td><td></td></tr>
+<tr><td class="f"></td><td></td><td></td></tr>
+<tr><td class="f"></td><td></td><td></td></tr>
+</table></div>
+<p>Nell'evento 4624 cerca il <b>Tipo di accesso</b>: 2 = interattivo (alla tastiera), 3 = di rete, 7 = sblocco schermo. Quale hai trovato tu? <span class="line"></span></p>
+</div>
+
+<h3>Parte B: filtri e visualizzazioni personalizzate</h3>
+<p>Scorrere migliaia di eventi non ha senso: bisogna <b>filtrare</b>.</p>
+<ul class="chk">
+<li><input type="checkbox" id="b1"><label for="b1">Usa "Filtra registro corrente" per mostrare solo gli <b>Errori</b> delle ultime 24 ore</label></li>
+<li><input type="checkbox" id="b2"><label for="b2">Crea una <b>visualizzazione personalizzata</b> chiamata "Errori ultime 24 ore"</label></li>
+<li><input type="checkbox" id="b3"><label for="b3">Creane una seconda, "Tentativi di accesso falliti" (registro Sicurezza, ID 4625)</label></li>
+<li><input type="checkbox" id="b4"><label for="b4">Esporta una visualizzazione (<code>.xml</code>) e un registro (<code>.evtx</code>) nella cartella di consegna</label></li>
+</ul>
+
+<h3>Parte C: da riga di comando</h3>
+<p>Gli informatici veri automatizzano. Apri <b>PowerShell come amministratore</b> e prova:</p>
+<pre><code># Ultimi 10 eventi del registro Sistema
+Get-WinEvent -LogName System -MaxEvents 10
+
+# Solo errori (livello 2) delle ultime 24 ore
+Get-WinEvent -FilterHashtable @{LogName='System'; Level=2; StartTime=(Get-Date).AddDays(-1)}
+
+# Accessi falliti
+Get-WinEvent -FilterHashtable @{LogName='Security'; Id=4625}
+
+# Equivalente "classico"
+wevtutil qe System /c:5 /rd:true /f:text</code></pre>
+<p>Cosa cambia tra <code>Get-WinEvent</code> e <code>wevtutil</code>? Scrivilo con parole tue: <span class="line l"></span></p>
+<div class="tip"><b>Sfida bonus:</b> conta gli eventi per origine ed esporta il risultato in un file CSV. Ti serviranno <code>Group-Object</code>, <code>Sort-Object</code> ed <code>Export-Csv</code>.</div>
+</section>
+
+<section id="i3">
+<h2>Incontro 3: automazione e indagine finale</h2>
+<div class="mission">
+<h3>Parte A: crea i tuoi eventi</h3>
+<p>Puoi scrivere tu stesso nel registro con questo comando:</p>
+<pre><code>eventcreate /T INFORMATION /ID 100 /L APPLICATION /SO LabInformatica /D "Avvio esercitazione"</code></pre>
+<p>Crea almeno 3 eventi con <b>ID</b> e <b>livelli diversi</b> (INFORMATION, WARNING, ERROR) e ritrovali nel registro Applicazione.</p>
+<div class="wrap"><table>
+<tr><th>ID usato</th><th>Livello</th><th>Descrizione</th><th>Trovato?</th></tr>
+<tr><td class="f"></td><td></td><td></td><td></td></tr>
+<tr><td class="f"></td><td></td><td></td><td></td></tr>
+<tr><td class="f"></td><td></td><td></td><td></td></tr>
+</table></div>
+</div>
+
+<div class="mission">
+<h3>Parte B: Windows reagisce da solo</h3>
+<ul><li>Nel Visualizzatore eventi seleziona il tuo evento con ID 100</li><li>Tasto destro, poi <b>Collega attività a questo evento</b></li><li>Come azione scegli di avviare un programma o uno script che scrive una riga in un file di testo</li><li>Genera di nuovo l'evento 100 e controlla che il file si aggiorni</li></ul>
+<p>Funziona? <label><input type="radio" name="f"> Sì</label> &nbsp; <label><input type="radio" name="f"> No</label>. Se no, cosa hai provato per risolvere? <span class="line l"></span></p>
+</div>
+
+<div class="mission">
+<h3>Parte C: progetto finale "Indagine forense in laboratorio"</h3>
+<p>È il momento di mettere alla prova tutto quello che hai imparato.</p>
+<ul>
+<li>Ogni coppia compie una sequenza di azioni sulla propria VM (accessi sbagliati, creazione di un utente, arresto di un servizio, riavvio forzato) e se la annota <b>in segreto</b></li>
+<li>Poi le coppie <b>si scambiano le VM</b></li>
+<li>Senza aver visto le note dei compagni, ricostruite cosa è successo usando solo i log</li>
+</ul>
+<p><b>Nel rapporto consegni:</b></p>
+<ul class="chk">
+<li><input type="checkbox" id="r1"><label for="r1"><b>Cronologia</b> ricostruita, con data, ora e ID di ogni evento importante</label></li>
+<li><input type="checkbox" id="r2"><label for="r2"><b>Schermate</b> dei log che provano quello che dici</label></li>
+<li><input type="checkbox" id="r3"><label for="r3"><b>Conclusioni:</b> cosa è accaduto e quale account lo ha fatto</label></li>
+<li><input type="checkbox" id="r4"><label for="r4">Confronto finale con le note della coppia avversaria: avete indovinato tutto?</label></li>
+</ul>
+<div class="wrap"><table>
+<tr><th>Ora</th><th>ID</th><th>Registro</th><th>Cosa è successo</th><th>Quale account</th></tr>
+<tr><td class="f"></td><td></td><td></td><td></td><td></td></tr>
+<tr><td class="f"></td><td></td><td></td><td></td><td></td></tr>
+<tr><td class="f"></td><td></td><td></td><td></td><td></td></tr>
+<tr><td class="f"></td><td></td><td></td><td></td><td></td></tr>
+<tr><td class="f"></td><td></td><td></td><td></td><td></td></tr>
+</table></div>
+</div>
+
+<h3>Sfide extra per chi finisce prima</h3>
+<ul>
+<li>Configura le <b>sottoscrizioni eventi</b> tra due VM (Windows Event Collector e WinRM)</li>
+<li>Scrivi uno script PowerShell che <b>segnala gli accessi falliti ripetuti</b></li>
+<li>Cancella il registro Sicurezza e cerca l'evento <b>1102</b>: cosa ti dice? Perché è così importante per chi indaga?</li>
+</ul>
+</section>
+
+<section id="valutazione">
+<h2>Come verrai valutato</h2>
+<div class="wrap"><table>
+<tr><th>Cosa guardiamo</th><th>Peso</th></tr>
+<tr><td>La cronologia che hai ricostruito è corretta</td><td>35%</td></tr>
+<tr><td>Usi bene filtri, visualizzazioni e comandi</td><td>25%</td></tr>
+<tr><td>Il rapporto è chiaro e ben fatto</td><td>20%</td></tr>
+<tr><td>Hai completato le schede dei primi due incontri</td><td>10%</td></tr>
+<tr><td>Collabori bene con il compagno e lavori con metodo</td><td>10%</td></tr>
+</table></div>
+</section>
+
+<section id="aiuto">
+<h2>Se qualcosa non funziona</h2>
+<div class="wrap"><table>
+<tr><th>Problema</th><th>Cosa fare</th></tr>
+<tr><td>Il registro Sicurezza non si apre o è vuoto</td><td>Hai aperto il programma <b>come amministratore</b>?</td></tr>
+<tr><td>Ci sono pochissimi eventi</td><td>La VM è nuova: genera tu gli eventi (riavvii, servizi, accessi)</td></tr>
+<tr><td>Non trovi un evento</td><td>Controlla il registro giusto e l'intervallo di tempo del filtro</td></tr>
+<tr><td>Hai combinato un disastro</td><td>Ripristina lo <b>snapshot pulito</b> e ricomincia</td></tr>
+</table></div>
+</section>
+
+<footer>
+<h3>Alla fine dell'ora</h3>
+<ul class="chk">
+<li><input type="checkbox" id="e1"><label for="e1">Salva il lavoro nella cartella di consegna</label></li>
+<li><input type="checkbox" id="e2"><label for="e2">Controlla che i file esportati (<code>.xml</code>, <code>.evtx</code>, <code>.csv</code>) ci siano</label></li>
+<li><input type="checkbox" id="e3"><label for="e3">Ripristina lo snapshot della VM se richiesto dal docente</label></li>
+</ul>
+<p><b>Autovalutazione:</b> da 1 a 5, quanto ti senti sicuro nel leggere un registro eventi? <span class="line" style="min-width:3em"></span></p>
+<p>La cosa che mi ha sorpreso di più è stata: <span class="line l"></span></p>
+</footer>
+</main>
+<script>
+(function(){var b=document.getElementById('tema'),r=document.documentElement;
+b.addEventListener('click',function(){var d=r.getAttribute('data-theme')==='dark'||(!r.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme:dark)').matches);r.setAttribute('data-theme',d?'light':'dark')});})();
+</script>
+</body>
+</html>
