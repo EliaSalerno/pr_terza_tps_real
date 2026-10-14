@@ -21,7 +21,8 @@ scorciatoia comoda ma pericolosa.
 │   ├── indice.js                          ← struttura del sito: qui si aggiungono i nuovi argomenti
 │   └── barra.js                           ← barra "← Indice" inserita in ogni documento
 ├── teoria/
-│   └── Lezione_ le macchine virtuali.html  ← lezione teorica stampabile (panoramica)
+│   ├── Lezione_ le macchine virtuali.html  ← lezione teorica stampabile (panoramica)
+│   └── guest_additions_virtualbox.html     ← approfondimento sulle Guest Additions
 ├── installazione/                         ← guide preliminari: preparare l'ambiente
 │   ├── creazione_macchina.html            ← creare e installare la macchina Windows 11
 │   ├── intro_alpine.html                  ← guida introduttiva ad Alpine Linux in VM
@@ -74,6 +75,12 @@ Il contenuto è organizzato in tre parti:
 — *Lezione: le macchine virtuali*: dispensa stampabile che ripercorre in sintesi i
 punti di questa parte (cos'è una VM, tipi di hypervisor, risorse, rete, snapshot e
 cloni, VM contro container, procedura tipica di laboratorio e domande di verifica).
+
+📄 [`teoria/guest_additions_virtualbox.html`](teoria/guest_additions_virtualbox.html)
+— *Guest Additions di VirtualBox*: approfondimento (collegato al [§7](#7-periferiche-virtuali-e-integrazione-con-lhost))
+su cosa sono, a cosa servono e quando si installano i driver e i servizi che
+integrano host e guest — risoluzione dello schermo, ridimensionamento automatico
+della finestra, mouse integrato, appunti condivisi e trascinamento dei file.
 
 ## 1. Che cos'è una macchina virtuale
 

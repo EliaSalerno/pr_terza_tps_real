@@ -17,7 +17,7 @@ window.INDICE = [
     titolo: "Teoria",
     breve: "Cos'è una VM e come funziona sotto il cofano",
     approfondimento:
-      "Il funzionamento tecnico delle macchine virtuali: hypervisor di tipo 1 e 2, CPU e memoria virtuali, dischi, rete, snapshot e cloni, pregi, limiti e ambiti di utilizzo. La dispensa si chiude con la procedura tipica di laboratorio e con le domande di verifica, ed è il presupposto per tutte le attività pratiche.",
+      "Il funzionamento tecnico delle macchine virtuali: hypervisor di tipo 1 e 2, CPU e memoria virtuali, dischi, rete, snapshot e cloni, pregi, limiti e ambiti di utilizzo. La dispensa si chiude con la procedura tipica di laboratorio e con le domande di verifica, ed è il presupposto per tutte le attività pratiche. Completa l'approfondimento sulle Guest Additions, l'integrazione tra host e guest.",
     documenti: [
       {
         titolo: "Lezione: le macchine virtuali",
@@ -33,6 +33,21 @@ window.INDICE = [
           "container"
         ],
         file: "teoria/Lezione_ le macchine virtuali.html"
+      },
+      {
+        titolo: "Guest Additions di VirtualBox",
+        descrizione:
+          "Cosa sono, a cosa servono e quando si installano i driver che integrano host e guest: schermo, mouse, appunti e trascinamento file.",
+        argomenti: [
+          "host e guest",
+          "driver e servizi",
+          "risoluzione dello schermo",
+          "mouse integrato",
+          "appunti condivisi",
+          "trascinamento file",
+          "VBoxWindowsAdditions.exe"
+        ],
+        file: "teoria/guest_additions_virtualbox.html"
       }
     ]
   },

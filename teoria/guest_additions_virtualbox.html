@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Guest Additions di VirtualBox</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1f2328;--muted:#5b636b;--card:#fff;--line:#e2e2dc;--accent:#2457c5;--soft:#e8eefb;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14161a;--fg:#e6e8eb;--muted:#9aa3ad;--card:#1d2026;--line:#2d3139;--accent:#7aa2f7;--soft:#1f2a44}}
+:root[data-theme="dark"]{--bg:#14161a;--fg:#e6e8eb;--muted:#9aa3ad;--card:#1d2026;--line:#2d3139;--accent:#7aa2f7;--soft:#1f2a44}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.65 Georgia,"Times New Roman",serif}
+main{max-width:780px;margin:0 auto;padding:28px 20px 60px}
+h1{font:700 2rem/1.2 system-ui,-apple-system,Segoe UI,sans-serif;margin:.2em 0}
+h2{font:700 1.35rem/1.3 system-ui,-apple-system,Segoe UI,sans-serif;margin:2.2em 0 .6em;padding-top:.4em;border-top:2px solid var(--line);color:var(--accent)}
+h3{font:600 1.05rem system-ui,sans-serif;margin:1.4em 0 .4em}
+.sub{color:var(--muted);font-family:system-ui,sans-serif;font-size:.95rem}
+.box{background:var(--soft);border-left:4px solid var(--accent);padding:12px 16px;border-radius:6px;margin:1em 0}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:1em 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 16px}
+.card h3{margin-top:.2em}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:.93rem;font-family:system-ui,sans-serif}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--soft)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font-size:.9em}
+ul,ol{padding-left:1.4rem}
+li{margin:.3em 0}
+ol.steps{counter-reset:passo;list-style:none;padding-left:0}
+ol.steps>li{counter-increment:passo;position:relative;padding-left:2.4rem;margin:.6em 0}
+ol.steps>li::before{content:counter(passo);position:absolute;left:0;top:.1em;width:1.7rem;height:1.7rem;
+display:flex;align-items:center;justify-content:center;background:var(--accent);color:#fff;
+font:700 .9rem system-ui,sans-serif;border-radius:50%}
+footer{margin-top:2.5em;padding-top:1em;border-top:1px solid var(--line);color:var(--muted);font:13px system-ui,sans-serif}
+@media print{
+  :root{--bg:#fff;--fg:#000;--muted:#444;--card:#fff;--line:#bbb;--accent:#1a3f8f;--soft:#eef2fb}
+  main{max-width:none;padding:0}
+  body{font-size:11pt}
+  a{color:inherit;text-decoration:none}
+}
+</style>
+</head>
+<body>
+<main>
+<p class="sub">Approfondimento &middot; Integrazione tra host e guest</p>
+<h1>Guest Additions di VirtualBox</h1>
+<p class="sub">Cosa sono, a cosa servono e quando si installano i driver che rendono la macchina virtuale comoda da usare come un computer normale.</p>
+
+<h2>1. Che cosa sono</h2>
+<p>Le <strong>Guest Additions</strong> sono un insieme di driver e servizi installati <em>all'interno</em> della macchina virtuale, cioè nel sistema operativo <strong>guest</strong> (ad esempio Windows 11), per migliorare il funzionamento della VM in collaborazione con VirtualBox.</p>
+<p>Sono componenti sviluppati da Oracle per VirtualBox e vengono installati come se fossero software del sistema operativo guest. Permettono alla macchina virtuale di &laquo;capire&raquo; di essere eseguita in un ambiente virtualizzato e di interagire meglio con l'<strong>host</strong>, cioè con il computer fisico che sta eseguendo VirtualBox.</p>
+
+<h2>2. A cosa servono</h2>
+<p>Le Guest Additions servono soprattutto a rendere l'uso della VM più naturale e più comodo:</p>
+<ul>
+<li>migliorano la risoluzione dello schermo;</li>
+<li>permettono di ridimensionare la finestra della VM in modo automatico;</li>
+<li>consentono al mouse di muoversi senza dover premere il tasto host;</li>
+<li>facilitano lo scambio di appunti tra host e guest;</li>
+<li>permettono il trascinamento di file tra i due ambienti;</li>
+<li>migliorano le prestazioni grafiche;</li>
+<li>rendono il sistema più stabile e reattivo durante l'uso quotidiano.</li>
+</ul>
+
+<h2>3. Benefici pratici</h2>
+<p>Grazie alle Guest Additions, la macchina virtuale diventa molto più semplice da usare:</p>
+<div class="cards">
+<div class="card"><h3>Mouse ed estensione</h3>Non si ha più il problema del mouse &laquo;bloccato&raquo; dentro la finestra e il desktop della VM si adatta meglio alla finestra di VirtualBox.</div>
+<div class="card"><h3>Scambio di dati</h3>È più facile copiare testo, immagini e file tra il computer reale e la VM.</div>
+<div class="card"><h3>Esperienza d'uso</h3>L'uso è più simile a quello di un computer normale e si lavora in modo più rapido durante le esercitazioni e le attività di laboratorio.</div>
+</div>
+
+<h2>4. Quando si installano</h2>
+<p>Di solito si installano <strong>dopo aver completato l'installazione del sistema operativo guest</strong>, quando la VM è già accesa e pronta all'uso. In VirtualBox questo passaggio avviene dal menu:</p>
+<div class="box">
+<strong>Dispositivi &rarr; Inserisci immagine CD delle Guest Additions</strong>
+</div>
+<ol class="steps">
+<li>Con la macchina virtuale accesa, aprire il menu <em>Dispositivi</em> e scegliere <em>Inserisci immagine CD delle Guest Additions</em>: l'immagine viene montata come un CD virtuale.</li>
+<li>All'interno della macchina virtuale, aprire l'unità CD e avviare il file <code>VBoxWindowsAdditions.exe</code>.</li>
+<li>Seguire la procedura guidata di installazione e, al termine, <strong>riavviare</strong> la macchina virtuale per attivare i nuovi driver.</li>
+</ol>
+
+<h2>5. In sintesi</h2>
+<div class="box">
+Le Guest Additions sono fondamentali per avere una macchina virtuale più facile da usare, con migliori prestazioni, migliore grafica e maggiore integrazione con il computer host. Senza di esse, la VM continua a funzionare, ma risulta più lenta, più scomoda e meno pratica per il lavoro quotidiano.
+</div>
+
+<footer>Guest Additions di VirtualBox &middot; approfondimento per il laboratorio di TPS &middot; Oracle VirtualBox 7.x</footer>
+</main>
+<script src="../assets/barra.js"></script>
+</body>
+</html>
