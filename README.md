@@ -31,6 +31,7 @@ scorciatoia comoda ma pericolosa.
     ├── Conf_windows_att1.html             ← Configurazione Windows – Attività 1 (utenti e file)
     ├── Conf_windows_att2.html             ← Configurazione Windows – Attività 2 (gruppi)
     ├── Conf_windows_att3.html             ← Configurazione Windows – Attività 3 (rete)
+    ├── Laboratorio_registro_eventi_windows.html  ← laboratorio sui registri eventi
     └── pdf/                               ← copie stampabili delle attività
 ```
 
@@ -624,15 +625,18 @@ virtualizzazione hardware abilitata nel BIOS/UEFI.
 | **1** | [Utenti e file](#configurazione-windows--attività-1-utenti-e-file) | Clonazione della macchina madre in `Windows 1`/`Windows 2`, rinominamento in `WINDOWS-1`/`WINDOWS-2`, creazione di `utente1` e `utente2`, permessi su `cartella1` (ereditarietà rimossa, diritto *Interactive* eliminato, sola lettura → modifica) | [§2](#2-architettura-lhypervisor), [§5](#5-la-memoria-di-massa) (cloni e MAC); ACL ed ereditarietà, identità speciali, admin vs standard |
 | **2** | [Gruppi](#configurazione-windows--attività-2-gruppi) | Creazione di `gruppo1` con `utente1`/`utente2`, autorizzazioni assegnate al gruppo su `cartella2`, verifica con `utente3` fuori gruppo e poi inserito | [§5](#5-la-memoria-di-massa), [§8](#8-ciclo-di-vita-e-manutenzione) (edizione Pro); gruppi locali e token di accesso, nuova sessione |
 | **3** | [Condivisione in rete](#configurazione-windows--attività-3-condivisione-in-rete) | Rete interna tra `WINDOWS-1` e `WINDOWS-2`, firewall disattivato, IP statici, accesso a `\\WINDOWS-1` con `rete1`, cartella condivisa `Condivisione1` in sola lettura | [§5](#5-la-memoria-di-massa), [§6](#6-la-rete) (modalità di rete, DHCP/APIPA); SMB, autorizzazioni di condivisione vs NTFS, cache credenziali |
+| **4** | [Registro eventi](#laboratorio-il-registro-eventi-di-windows) | Visualizzatore eventi, lettura e filtro degli eventi, registri Applicazione/Sicurezza/Sistema, interrogazione da PowerShell (`Get-WinEvent`) e prompt (`wevtutil`), creazione di eventi e attività collegate, indagine forense finale | [§3](#3-la-cpu-vista-dallospite) (orologio e ordine temporale dei log); struttura ed elementi di un evento, livelli e ID evento, ACL del registro Sicurezza e privilegi di amministratore |
 
 ## Attività su Windows
 
-**Prerequisiti.** Le tre attività seguenti si svolgono sulle macchine `WINDOWS-1` e
-`WINDOWS-2` ottenute dai cloni della macchina base, quindi richiedono di aver
-completato prima la guida [Creare la macchina virtuale
+**Prerequisiti.** Le prime tre attività seguenti si svolgono sulle macchine
+`WINDOWS-1` e `WINDOWS-2` ottenute dai cloni della macchina base, quindi richiedono di
+aver completato prima la guida [Creare la macchina virtuale
 Windows 11](#creare-la-macchina-virtuale-windows-11). Ogni attività indica in
 apertura la macchina e lo snapshot da usare, perché le verifiche richiedono spesso
-di cambiare utente più volte e quindi di poter tornare a un punto noto.
+di cambiare utente più volte e quindi di poter tornare a un punto noto. Il laboratorio
+sul **registro eventi** parte invece da una VM Windows con uno snapshot "pulito" e da
+un utente `studente1`.
 
 ### Configurazione Windows – Attività 1: utenti e file
 
@@ -760,6 +764,58 @@ stesso nome (per esempio `intnet`): se i cloni sono stati creati con l'opzione d
 reinizializzo del MAC gli indirizzi sono già diversi, altrimenti rigenerare il MAC
 manualmente. Il firewall disattivato è accettabile solo perché la rete è isolata:
 riattivarlo al termine dell'esercizio.
+
+### Laboratorio: il registro eventi di Windows
+
+📄 [`attività/Laboratorio_registro_eventi_windows.html`](attività/Laboratorio_registro_eventi_windows.html)
+
+**Obiettivo.** Imparare a leggere il **registro eventi** di Windows come un
+"diario di bordo": capire perché un computer si è bloccato, ricostruire chi ha fatto
+cosa e quando, e accorgersi di un tentativo di accesso non autorizzato. Il percorso si
+chiude con una vera **indagine forense** in cui ogni coppia ricostruisce, dai soli log,
+le azioni compiute su una macchina preparata dai compagni.
+
+**In sintesi.** Si comincia con l'anatomia di un evento (data e ora, origine, ID,
+livello, utente e computer) e con l'apertura del **Visualizzatore eventi**
+(`eventvwr.msc`) per esplorare i registri **Applicazione, Sicurezza, Sistema e
+Installazione**. Si cacciano gli ID tipici del registro Sistema (6005/6006, 41, 1074,
+7036) e se ne provoca uno fermando e riavviando lo *Spooler di stampa*. Nel secondo
+incontro si lavora sul registro **Sicurezza** (4624, 4625, 4634, 4720, 4672)
+generando accessi falliti e riusciti, si imparano i **filtri** e le **visualizzazioni
+personalizzate** (con esportazione di `.xml` e `.evtx`) e si interrogano i log da riga
+di comando con `Get-WinEvent` e `wevtutil`. Il terzo incontro è dedicato
+all'**automazione**: creare eventi con `eventcreate`, **collegare un'attività a un
+evento** e infine il progetto di gruppo "Indagine forense in laboratorio", con
+cronologia, schermate e conclusioni. Sono previsti una **griglia di valutazione**, una
+tabella di soluzione dei problemi frequenti e una checklist di fine ora.
+
+**Argomenti toccati.** Struttura ed elementi di un evento, livelli (Informazioni,
+Avviso, Errore, Critico) e significato degli ID evento, i quattro registri principali e
+il loro scopo, impostazioni del log (dimensione massima e comportamento al riempimento,
+sovrascrittura), filtri e visualizzazioni personalizzate, esportazione `.xml`/`.evtx`,
+interrogazione da PowerShell (`Get-WinEvent`) e da prompt (`wevtutil`), creazione di
+eventi con `eventcreate`, attività collegate agli eventi, sottoscrizioni eventi
+(Windows Event Collector e WinRM), evento 1102 (log di sicurezza cancellato), privacy
+dei log e metodo di indagine.
+
+**Argomenti teorici da conoscere.** Dalla [Parte I](#parte-i--teoria): [§3](#3-la-cpu-vista-dallospite)
+il paragrafo sull'**orologio**: la macchina virtuale non ha un orologio proprio e,
+dopo sospensioni e ripristini da snapshot, l'ora può derivare — è il motivo per cui in
+un'indagine la sequenza temporale dei log va letta con attenzione; [§5](#5-la-memoria-di-massa)
+**snapshot** come punto di ripristino "pulito" da cui ricominciare se l'esercizio
+degenera. Concetti Windows da padroneggiare: che cos'è un **log** e perché registrare;
+la differenza tra **evento informativo, avviso, errore e critico**; il senso di un
+**ID evento** come identificatore stabile del tipo di fatto; il fatto che il registro
+**Sicurezza** richieda privilegi di **amministratore** per essere letto; la logica di
+**filtro** su grandi quantità di dati e la differenza tra consultare a mano e
+**automatizzare** con PowerShell.
+
+**Nota operativa.** Aprire sempre il Visualizzatore eventi e PowerShell **come
+amministratore**: senza questo, il registro Sicurezza non è leggibile. Fare uno
+snapshot "pulito" prima di iniziare e generare eventi in proprio (riavvii, arresto di
+servizi, accessi falliti), perché su una VM appena installata i log sono quasi vuoti.
+I log contengono dati personali (nomi utente): analizzarli solo sulle macchine del
+laboratorio.
 
 ## Attività su Linux (Alpine Linux e Bash)
 

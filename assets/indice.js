@@ -97,9 +97,9 @@ window.INDICE = [
     id: "attivita",
     parte: "Parte III",
     titolo: "Attività",
-    breve: "Tre esercitazioni progressive su Windows",
+    breve: "Esercitazioni progressive su Windows",
     approfondimento:
-      "Utenti e file, gruppi, condivisione in rete: tre esercitazioni che partono da una macchina clonata e si complicano passo passo. Ogni documento indica la macchina, lo snapshot e gli utenti da usare, ed è pensato per essere ripetibile.",
+      "Utenti e file, gruppi, condivisione in rete: esercitazioni che partono da una macchina clonata e si complicano passo passo. Ogni documento indica la macchina, lo snapshot e gli utenti da usare, ed è pensato per essere ripetibile. Chiude la parte un laboratorio sui registri eventi, con missioni, automazione e una piccola indagine forense.",
     documenti: [
       {
         titolo: "Attività 1: utenti e file",
@@ -144,6 +144,23 @@ window.INDICE = [
         ],
         file: "attività/Conf_windows_att3.html",
         pdf: "attività/pdf/Configurazione Windows – Attività 3 – Condivisione in rete.pdf"
+      },
+      {
+        titolo: "Laboratorio: il registro eventi di Windows",
+        descrizione:
+          "Il diario di bordo di Windows: aprire il Visualizzatore eventi, leggere e filtrare gli eventi, interrogare i log con Get-WinEvent e wevtutil, creare eventi e collegare attività, fino a un'indagine forense in laboratorio.",
+        argomenti: [
+          "Visualizzatore eventi",
+          "eventvwr.msc",
+          "registri Applicazione, Sicurezza, Sistema",
+          "ID evento e livelli",
+          "filtri e visualizzazioni",
+          "Get-WinEvent e wevtutil",
+          "eventcreate",
+          "attività collegate agli eventi",
+          "indagine forense"
+        ],
+        file: "attività/Laboratorio_registro_eventi_windows.html"
       }
     ]
   },
