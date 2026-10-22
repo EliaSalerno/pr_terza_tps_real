@@ -99,7 +99,7 @@ window.INDICE = [
     titolo: "Attività",
     breve: "Esercitazioni progressive su Windows",
     approfondimento:
-      "Utenti e file, gruppi, condivisione in rete: esercitazioni che partono da una macchina clonata e si complicano passo passo. Ogni documento indica la macchina, lo snapshot e gli utenti da usare, ed è pensato per essere ripetibile. Chiude la parte un laboratorio sui registri eventi, con missioni, automazione e una piccola indagine forense.",
+      "Utenti e file, gruppi, condivisione in rete: esercitazioni che partono da una macchina clonata e si complicano passo passo. Ogni documento indica la macchina, lo snapshot e gli utenti da usare, ed è pensato per essere ripetibile. Accanto agli esercizi di rete c'è un simulatore interattivo che mostra come i permessi di condivisione e quelli NTFS si combinano, applicando alla pratica il principio del «vale il più restrittivo». Chiude la parte un laboratorio sui registri eventi, con missioni, automazione e una piccola indagine forense.",
     documenti: [
       {
         titolo: "Attività 1: utenti e file",
@@ -144,6 +144,20 @@ window.INDICE = [
         ],
         file: "attività/Conf_windows_att3.html",
         pdf: "attività/pdf/Configurazione Windows – Attività 3 – Condivisione in rete.pdf"
+      },
+      {
+        titolo: "In rete vince il permesso più restrittivo",
+        descrizione:
+          "Simulatore interattivo: una cartella condivisa attraversa due filtri in serie, i permessi di condivisione SMB e i permessi NTFS. L'utente ottiene il più restrittivo dei due, mentre in locale conta solo l'NTFS.",
+        argomenti: [
+          "permessi di condivisione",
+          "permessi NTFS",
+          "accesso effettivo",
+          "accesso locale",
+          "SMB",
+          "Nega vs Consenti"
+        ],
+        file: "attività/Condivisioni di rete_ vince il permesso più restrittivo.html"
       },
       {
         titolo: "Laboratorio: il registro eventi di Windows",

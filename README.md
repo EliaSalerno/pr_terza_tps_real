@@ -15,6 +15,9 @@ scorciatoia comoda ma pericolosa.
 .
 ├── README.md                              ← questo file (teoria + indice)
 ├── index.html                             ← sito: indice navigabile dei documenti
+├── diario_di_bordo_windows.html           ← bozza sorgente del laboratorio sui registri eventi
+├── guest_additions_virtualbox.md          ← bozza sorgente dell'approfondimento sulle Guest Additions
+├── Laboratorio_registro_eventi_windows.md ← bozza sorgente del laboratorio sui registri eventi
 ├── assets/                                ← componenti del sito (stile e script)
 │   ├── sito.css                           ← stile della pagina indice
 │   ├── sito.js                            ← rendering delle card e delle schede, tema
@@ -31,6 +34,8 @@ scorciatoia comoda ma pericolosa.
     ├── Conf_windows_att1.html             ← Configurazione Windows – Attività 1 (utenti e file)
     ├── Conf_windows_att2.html             ← Configurazione Windows – Attività 2 (gruppi)
     ├── Conf_windows_att3.html             ← Configurazione Windows – Attività 3 (rete)
+    ├── Condivisioni di rete_ vince il permesso più restrittivo.html
+                                           ← simulatore interattivo: condivisione SMB vs NTFS
     ├── Laboratorio_registro_eventi_windows.html  ← laboratorio sui registri eventi
     └── pdf/                               ← copie stampabili delle attività
 ```
@@ -626,6 +631,7 @@ virtualizzazione hardware abilitata nel BIOS/UEFI.
 | **2** | [Gruppi](#configurazione-windows--attività-2-gruppi) | Creazione di `gruppo1` con `utente1`/`utente2`, autorizzazioni assegnate al gruppo su `cartella2`, verifica con `utente3` fuori gruppo e poi inserito | [§5](#5-la-memoria-di-massa), [§8](#8-ciclo-di-vita-e-manutenzione) (edizione Pro); gruppi locali e token di accesso, nuova sessione |
 | **3** | [Condivisione in rete](#configurazione-windows--attività-3-condivisione-in-rete) | Rete interna tra `WINDOWS-1` e `WINDOWS-2`, firewall disattivato, IP statici, accesso a `\\WINDOWS-1` con `rete1`, cartella condivisa `Condivisione1` in sola lettura | [§5](#5-la-memoria-di-massa), [§6](#6-la-rete) (modalità di rete, DHCP/APIPA); SMB, autorizzazioni di condivisione vs NTFS, cache credenziali |
 | **4** | [Registro eventi](#laboratorio-il-registro-eventi-di-windows) | Visualizzatore eventi, lettura e filtro degli eventi, registri Applicazione/Sicurezza/Sistema, interrogazione da PowerShell (`Get-WinEvent`) e prompt (`wevtutil`), creazione di eventi e attività collegate, indagine forense finale | [§3](#3-la-cpu-vista-dallospite) (orologio e ordine temporale dei log); struttura ed elementi di un evento, livelli e ID evento, ACL del registro Sicurezza e privilegi di amministratore |
+| **5** | [In rete vince il permesso più restrittivo](#approfondimento-in-rete-vince-il-permesso-piu-restrittivo) | Simulatore interattivo: come i permessi di condivisione SMB e quelli NTFS si combinano sulla stessa cartella e perché l'accesso effettivo è il più restrittivo dei due | [§6](#6-la-rete); autorizzazioni di condivisione vs NTFS, ACL e token di accesso, somma dei permessi e precedenza del «Nega», accesso locale |
 
 ## Attività su Windows
 
@@ -636,7 +642,8 @@ Windows 11](#creare-la-macchina-virtuale-windows-11). Ogni attività indica in
 apertura la macchina e lo snapshot da usare, perché le verifiche richiedono spesso
 di cambiare utente più volte e quindi di poter tornare a un punto noto. Il laboratorio
 sul **registro eventi** parte invece da una VM Windows con uno snapshot "pulito" e da
-un utente `studente1`.
+un utente `studente1`. Il **simulatore** sui permessi di condivisione, invece, si
+usa nel browser senza avviare alcuna macchina virtuale.
 
 ### Configurazione Windows – Attività 1: utenti e file
 
@@ -764,6 +771,54 @@ stesso nome (per esempio `intnet`): se i cloni sono stati creati con l'opzione d
 reinizializzo del MAC gli indirizzi sono già diversi, altrimenti rigenerare il MAC
 manualmente. Il firewall disattivato è accettabile solo perché la rete è isolata:
 riattivarlo al termine dell'esercizio.
+
+**Approfondimento collegato.** Il documento
+[In rete vince il permesso più restrittivo](#approfondimento-in-rete-vince-il-permesso-piu-restrittivo)
+mostra con un simulatore perché, quando la cartella è condivisa, l'utente remoto
+ottiene il permesso più restrittivo fra condivisione e NTFS, e perché in locale vale
+solo l'NTFS.
+
+### Approfondimento: in rete vince il permesso più restrittivo
+
+📄 [`attività/Condivisioni di rete_ vince il permesso più restrittivo.html`](attività/Condivisioni di rete_ vince il permesso più restrittivo.html)
+
+**Obiettivo.** Capire che, quando una cartella è condivisa in rete, l'accesso non
+dipende da un solo elenco di permessi ma da **due filtri in serie** — i permessi di
+condivisione (SMB) e i permessi NTFS — e che l'utente ottiene comunque il più
+restrittivo dei due. Il documento è un **simulatore interattivo**: si impostano i
+due livelli e si osserva l'accesso effettivo, differenziando l'accesso dalla rete da
+quello in locale.
+
+**In sintesi.** La richiesta di apertura di `\\IP\Comune` attraversa prima la
+condivisione e poi l'NTFS: il risultato è l'**intersezione** dei due insiemi, cioè il
+livello più basso fra i due. Dentro ciascun livello i permessi di utente e gruppi si
+sommano e un «Nega» prevale su un «Consenti»; solo dopo si confrontano i due
+risultati e si prende il più restrittivo. Il simulatore riproduce i casi della tabella
+degli esempi — Lettura × Modifica = Lettura, Controllo completo × Lettura = Lettura,
+Modifica × Controllo completo = Modifica, Controllo completo × Nessuno = Negato — e
+mostra cosa cambia passando dall'accesso dalla rete a quello locale: chi siede davanti
+al PC non attraversa la condivisione, quindi conta solo l'NTFS. La pagina chiude con
+il **prassi** di lasciare la condivisione su «Controllo completo» e delegare
+all'NTFS il controllo fine, così le regole stanno in un posto solo.
+
+**Argomenti toccati.** I tre livelli dei permessi di condivisione (Lettura, Modifica,
+Controllo completo) e i permessi NTFS, la loro intersezione, la differenza fra
+accesso remoto e accesso locale, la somma dei permessi di utente e gruppi e la
+precedenza del «Nega» sul «Consenti», il criterio del «vale il più restrittivo».
+
+**Argomenti teorici da conoscere.** Dalla [Parte I](#parte-i--teoria): [§6](#6-la-rete)
+come la richiesta raggiunge la cartella condivisa e il ruolo del protocollo **SMB**;
+[§5](#5-la-memoria-di-massa) perché i due cloni devono avere **MAC** distinti e
+restare sulla stessa rete interna. Concetti Windows da padroneggiare: la differenza
+fra **autorizzazioni di condivisione** e **autorizzazioni NTFS** (in caso di conflitto
+vince la più restrittiva), la struttura delle **ACL** e del **token di accesso**,
+la somma dei permessi di utente e gruppi e la precedenza del «Nega» su un «Consenti»
+(cfr. le attività 1 e 2).
+
+**Nota operativa.** Il simulatore serve a capire il modello, non a sostituire la
+prova: nell'attività 3 i due filtri vanno impostati davvero e verificati con `utente2`
+da `WINDOWS-2`. Ricordare che una condivisione in sola lettura **non** protegge i
+file da chi è connesso localmente alla macchina che condivide.
 
 ### Laboratorio: il registro eventi di Windows
 
