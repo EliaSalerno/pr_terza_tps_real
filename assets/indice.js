@@ -99,7 +99,7 @@ window.INDICE = [
     titolo: "Attività",
     breve: "Esercitazioni progressive su Windows",
     approfondimento:
-      "Utenti e file, gruppi, condivisione in rete: esercitazioni che partono da una macchina clonata e si complicano passo passo. Ogni documento indica la macchina, lo snapshot e gli utenti da usare, ed è pensato per essere ripetibile. Accanto agli esercizi di rete c'è un simulatore interattivo che mostra come i permessi di condivisione e quelli NTFS si combinano, applicando alla pratica il principio del «vale il più restrittivo». Chiude la parte un laboratorio sui registri eventi, con missioni, automazione e una piccola indagine forense.",
+      "Utenti e file, gruppi, condivisione in rete: esercitazioni che partono da una macchina clonata e si complicano passo passo. Ogni documento indica la macchina, lo snapshot e gli utenti da usare, ed è pensato per essere ripetibile. Accanto agli esercizi di rete c'è un simulatore interattivo che mostra come i permessi di condivisione e quelli NTFS si combinano, applicando alla pratica il principio del «vale il più restrittivo». Una guida ai comandi da Prompt dei comandi raccoglie le stesse operazioni delle prime attività (net user, net localgroup, icacls) con esempi eseguibili. Chiude la parte un laboratorio sui registri eventi, con missioni, automazione e una piccola indagine forense.",
     documenti: [
       {
         titolo: "Attività 1: utenti e file",
@@ -158,6 +158,24 @@ window.INDICE = [
           "Nega vs Consenti"
         ],
         file: "attività/Condivisioni di rete_ vince il permesso più restrittivo.html"
+      },
+      {
+        titolo: "Guida ai comandi CMD: utenti, gruppi e permessi",
+        descrizione:
+          "Manuale pratico del Prompt dei comandi: net user e net localgroup, scadenza di password e account, criteri di blocco, icacls e takeown, utenti di dominio e strumenti PowerShell richiamabili da CMD.",
+        argomenti: [
+          "cmd.exe",
+          "net user",
+          "net localgroup",
+          "net accounts",
+          "scadenza password",
+          "blocco account",
+          "icacls e takeown",
+          "ACL e permessi NTFS",
+          "dominio e Active Directory",
+          "PowerShell e winget"
+        ],
+        file: "attività/Conf_windows_comandi.html"
       },
       {
         titolo: "Laboratorio: il registro eventi di Windows",

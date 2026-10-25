@@ -309,7 +309,7 @@
                 <h3>Convenzioni di lettura</h3>
                 <ul>
                     <li>I comandi si eseguono in <code>cmd.exe</code>. Il prompt di CMD mostra <code>C:\Users\TuoNome&gt;</code>, quello di PowerShell mostra <code>PS C:\Users\TuoNome&gt;</code>.</li>
-                    <li>I comandi che modificano utenti, gruppi e permessi richiedono il prompt **avviato come amministratore** (tasto destro, <em>Esegui come amministratore</em>).</li>
+                    <li>I comandi che modificano utenti, gruppi e permessi richiedono il prompt <strong>avviato come amministratore</strong> (tasto destro, <em>Esegui come amministratore</em>).</li>
                     <li>Sostituisci <code>utente</code>, <code>gruppo</code>, <code>password</code>, <code>NOMEPC</code> e <code>C:\cartella</code> con i valori reali.</li>
                     <li>Alcuni nomi (gruppi, giorni della settimana, formati data) cambiano con la lingua di Windows: in caso di dubbio usa <code>comando /?</code>.</li>
                 </ul>
@@ -636,7 +636,7 @@ net localgroup Users mrossi /add</code></pre>
                 <pre><code>net user utente</code></pre>
                 <p>Controlla le righe "Password impostata il", "Scadenza password" e "Password modificabile".</p>
 
-                <h2>3.2 Scadenza dell'account</h2>
+                <h2 id="32-scadenza-dellaccount">3.2 Scadenza dell'account</h2>
                 <pre><code>net user utente /expires:31/12/2026
 net user utente /expires:never</code></pre>
                 <p>Il formato della data dipende dalle impostazioni regionali (in Italia di solito <code>gg/mm/aaaa</code>).</p>
@@ -705,7 +705,7 @@ net user utente /expires:31/12/2027</code></pre>
                     </table>
                 </div>
 
-                <h2>4.2 Blocco account (<em>account lockout</em>)</h2>
+                <h2 id="42-blocco-account-account-lockout">4.2 Blocco account (<em>account lockout</em>)</h2>
                 <p>Il <strong>blocco account</strong> è una protezione contro chi tenta di indovinare una password con tentativi ripetuti: dopo troppi errori Windows blocca temporaneamente l'account, anche se poi viene inserita la password giusta.</p>
                 <p>Tre parametri:</p>
                 <p><strong><code>/lockoutthreshold:N</code> (soglia)</strong>: dopo quanti tentativi falliti l'account viene bloccato. Con <code>0</code> il blocco è disattivato (spesso è il valore predefinito).</p>
@@ -1282,5 +1282,6 @@ claude</code></pre>
         <p>Guida tecnica Windows Prompt dei Comandi &copy; Documentazione Amministrazione di Sistema</p>
     </footer>
 
+    <script src="../assets/barra.js"></script>
 </body>
 </html>

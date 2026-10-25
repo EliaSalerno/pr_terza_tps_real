@@ -34,6 +34,8 @@ scorciatoia comoda ma pericolosa.
     ├── Conf_windows_att1.html             ← Configurazione Windows – Attività 1 (utenti e file)
     ├── Conf_windows_att2.html             ← Configurazione Windows – Attività 2 (gruppi)
     ├── Conf_windows_att3.html             ← Configurazione Windows – Attività 3 (rete)
+    ├── Conf_windows_comandi.md            ← bozza sorgente della guida ai comandi da CMD
+    ├── Conf_windows_comandi.html          ← guida a utenti, gruppi, domini e permessi da Prompt dei comandi
     ├── Condivisioni di rete_ vince il permesso più restrittivo.html
                                            ← simulatore interattivo: condivisione SMB vs NTFS
     ├── Laboratorio_registro_eventi_windows.html  ← laboratorio sui registri eventi
@@ -630,8 +632,9 @@ virtualizzazione hardware abilitata nel BIOS/UEFI.
 | **1** | [Utenti e file](#configurazione-windows--attività-1-utenti-e-file) | Clonazione della macchina madre in `Windows 1`/`Windows 2`, rinominamento in `WINDOWS-1`/`WINDOWS-2`, creazione di `utente1` e `utente2`, permessi su `cartella1` (ereditarietà rimossa, diritto *Interactive* eliminato, sola lettura → modifica) | [§2](#2-architettura-lhypervisor), [§5](#5-la-memoria-di-massa) (cloni e MAC); ACL ed ereditarietà, identità speciali, admin vs standard |
 | **2** | [Gruppi](#configurazione-windows--attività-2-gruppi) | Creazione di `gruppo1` con `utente1`/`utente2`, autorizzazioni assegnate al gruppo su `cartella2`, verifica con `utente3` fuori gruppo e poi inserito | [§5](#5-la-memoria-di-massa), [§8](#8-ciclo-di-vita-e-manutenzione) (edizione Pro); gruppi locali e token di accesso, nuova sessione |
 | **3** | [Condivisione in rete](#configurazione-windows--attività-3-condivisione-in-rete) | Rete interna tra `WINDOWS-1` e `WINDOWS-2`, firewall disattivato, IP statici, accesso a `\\WINDOWS-1` con `rete1`, cartella condivisa `Condivisione1` in sola lettura | [§5](#5-la-memoria-di-massa), [§6](#6-la-rete) (modalità di rete, DHCP/APIPA); SMB, autorizzazioni di condivisione vs NTFS, cache credenziali |
-| **4** | [Registro eventi](#laboratorio-il-registro-eventi-di-windows) | Visualizzatore eventi, lettura e filtro degli eventi, registri Applicazione/Sicurezza/Sistema, interrogazione da PowerShell (`Get-WinEvent`) e prompt (`wevtutil`), creazione di eventi e attività collegate, indagine forense finale | [§3](#3-la-cpu-vista-dallospite) (orologio e ordine temporale dei log); struttura ed elementi di un evento, livelli e ID evento, ACL del registro Sicurezza e privilegi di amministratore |
-| **5** | [In rete vince il permesso più restrittivo](#approfondimento-in-rete-vince-il-permesso-piu-restrittivo) | Simulatore interattivo: come i permessi di condivisione SMB e quelli NTFS si combinano sulla stessa cartella e perché l'accesso effettivo è il più restrittivo dei due | [§6](#6-la-rete); autorizzazioni di condivisione vs NTFS, ACL e token di accesso, somma dei permessi e precedenza del «Nega», accesso locale |
+| **4** | [In rete vince il permesso più restrittivo](#approfondimento-in-rete-vince-il-permesso-piu-restrittivo) | Simulatore interattivo: come i permessi di condivisione SMB e quelli NTFS si combinano sulla stessa cartella e perché l'accesso effettivo è il più restrittivo dei due | [§6](#6-la-rete); autorizzazioni di condivisione vs NTFS, ACL e token di accesso, somma dei permessi e precedenza del «Nega», accesso locale |
+| **5** | [Guida ai comandi CMD](#guida-ai-comandi-cmd-utenti-gruppi-e-permessi) | Le operazioni delle prime tre attività eseguite da Prompt dei comandi: utenti, scadenza delle password e degli account, criteri di blocco, gruppi, `icacls`/`takeown`, comandi di dominio e richiami a PowerShell | [§5](#5-la-memoria-di-massa), [§6](#6-la-rete), [§8](#8-ciclo-di-vita-e-manutenzione); SID, account e gruppi locali e di dominio, ACL, ereditarietà, precedenza del «Nega», shell `cmd.exe` e PowerShell |
+| **6** | [Registro eventi](#laboratorio-il-registro-eventi-di-windows) | Visualizzatore eventi, lettura e filtro degli eventi, registri Applicazione/Sicurezza/Sistema, interrogazione da PowerShell (`Get-WinEvent`) e prompt (`wevtutil`), creazione di eventi e attività collegate, indagine forense finale | [§3](#3-la-cpu-vista-dallospite) (orologio e ordine temporale dei log); struttura ed elementi di un evento, livelli e ID evento, ACL del registro Sicurezza e privilegi di amministratore |
 
 ## Attività su Windows
 
@@ -640,10 +643,13 @@ virtualizzazione hardware abilitata nel BIOS/UEFI.
 aver completato prima la guida [Creare la macchina virtuale
 Windows 11](#creare-la-macchina-virtuale-windows-11). Ogni attività indica in
 apertura la macchina e lo snapshot da usare, perché le verifiche richiedono spesso
-di cambiare utente più volte e quindi di poter tornare a un punto noto. Il laboratorio
-sul **registro eventi** parte invece da una VM Windows con uno snapshot "pulito" e da
-un utente `studente1`. Il **simulatore** sui permessi di condivisione, invece, si
-usa nel browser senza avviare alcuna macchina virtuale.
+di cambiare utente più volte e quindi di poter tornare a un punto noto. La **guida ai
+comandi CMD** affianca le prime tre attività e raccoglie gli stessi passaggi da riga di
+comando: si può leggere anche da sola, ma i comandi vanno eseguiti su Windows con un
+prompt avviato come amministratore. Il laboratorio sul **registro eventi** parte invece
+da una VM Windows con uno snapshot "pulito" e da un utente `studente1`. Il
+**simulatore** sui permessi di condivisione, invece, si usa nel browser senza avviare
+alcuna macchina virtuale.
 
 ### Configurazione Windows – Attività 1: utenti e file
 
@@ -819,6 +825,58 @@ la somma dei permessi di utente e gruppi e la precedenza del «Nega» su un «Co
 prova: nell'attività 3 i due filtri vanno impostati davvero e verificati con `utente2`
 da `WINDOWS-2`. Ricordare che una condivisione in sola lettura **non** protegge i
 file da chi è connesso localmente alla macchina che condivide.
+
+### Guida ai comandi CMD: utenti, gruppi e permessi
+
+📄 [`attività/Conf_windows_comandi.html`](attività/Conf_windows_comandi.html)
+— *Guida a utenti, gruppi, domini e permessi in Windows da Prompt dei comandi*
+
+**Obiettivo.** Affiancare le attività 1–3 con un unico riferimento per eseguire da
+`cmd.exe` le stesse operazioni che si fanno con l'interfaccia grafica: creare e gestire
+utenti e gruppi, impostare la scadenza di password e account, configurare i criteri di
+blocco, leggere e modificare le ACL. Serve a capire che cosa fa Windows dietro a
+`lusrmgr.msc` e alla scheda *Sicurezza* e a rendere le operazioni ripetibili e
+documentabili.
+
+**In sintesi.** La guida parte dalla teoria — utenti e SID, gruppi locali e di dominio,
+ACL e permessi — e poi procede comando per comando: `net user` per creazione, password,
+attivazione e scadenza degli account; `net accounts` per durata e lunghezza minima
+delle password, cronologia e blocco account; `net localgroup` per i gruppi locali;
+`whoami`, `query user`, `logoff` e `runas` per identità, sessioni e cambio utente;
+`icacls` per visualizzare, concedere, negare, salvare e ripristinare le ACL e
+`takeown` per prendere il possesso di file e cartelle; i comandi di dominio con
+`/domain`, `net group`, `gpresult` e `gpupdate`; gli strumenti grafici lanciabili dal
+prompt e i comandi PowerShell richiamabili da CMD. Chiude con una sezione di domande
+frequenti e un'appendice per installare Git, VS Code e Claude Code con `winget`.
+
+**Argomenti toccati.** Differenza fra account locale, account Microsoft e account di
+dominio; account integrati; SID e token di accesso; gruppi locali e gruppi di dominio
+con i relativi ambiti; Active Directory, OU, GPO e Kerberos; scadenza della password e
+scadenza dell'account; criteri password e blocco account (`lockoutthreshold`,
+`lockoutduration`, `lockoutwindow`); ACL e ACE, permessi di base, ereditarietà,
+precedenza del «Nega», permessi cumulativi e principio del privilegio minimo; sigle
+`F`, `M`, `RX`, `R`, `W`, `D` e flag `(OI)`, `(CI)`, `(IO)`, `(NP)`; differenza fra
+`net user`, `net localgroup`, `net group` e i comandi PowerShell; deprecazione di
+`wmic`.
+
+**Argomenti teorici da conoscere.** Dalla [Parte I](#parte-i--teoria): [§5](#5-la-memoria-di-massa)
+cloni e snapshot come base di partenza per ripetere gli esercizi. Concetti Windows da
+padroneggiare: che cos'è un **SID** e perché i permessi sono assegnati all'identificativo
+e non al nome, la struttura di una **ACL** e delle sue **ACE**, l'**ereditarietà** e la
+sua interruzione, la somma dei permessi di utente e gruppi con la precedenza del
+«Nega», la differenza fra **autorizzazioni di condivisione** e **NTFS** (cfr. attività
+1–3 e simulatore), e la distinzione fra archivio **locale** e **dominio**. Utile anche
+la differenza fra la shell `cmd.exe` e **PowerShell**, perché alcuni comandi cambiano
+sintassi.
+
+**Nota operativa.** Aprire il Prompt dei comandi **come amministratore**: senza
+privilegi elevati i comandi che modificano utenti, gruppi e permessi falliscono. I nomi
+dei gruppi integrati, dei giorni e il formato delle date dipendono dalla lingua di
+Windows: verificare con `net localgroup`, `net help user` o `comando /?`. Usare `*` al
+posto della password per non lasciarla nella cronologia dei comandi. Eliminare un
+utente **non** cancella il suo profilo in `C:\Users`; le modifiche ai gruppi hanno
+effetto solo al successivo accesso. I comandi di dominio richiedono un PC membro del
+dominio e privilegi adeguati.
 
 ### Laboratorio: il registro eventi di Windows
 
