@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guida a Utenti, Gruppi, Domini e Permessi in Windows (CMD)</title>
+    <style>
+        :root {
+            --primary-color: #0066cc;
+            --primary-dark: #004890;
+            --secondary-color: #2c3e50;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --text-muted: #6c757d;
+            --border-color: #e9ecef;
+            --code-bg: #1e1e1e;
+            --code-color: #d4d4d4;
+            --inline-code-bg: #f1f3f5;
+            --inline-code-color: #d63384;
+            --table-header-bg: #f1f5f9;
+            --sidebar-width: 280px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            color: #bdc3c7;
+        }
+
+        /* Main Layout */
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+        }
+
+        /* Sidebar Navigation */
+        aside {
+            width: var(--sidebar-width);
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem 1rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        aside h2 {
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        aside ul {
+            list-style: none;
+        }
+
+        aside li {
+            margin-bottom: 0.5rem;
+        }
+
+        aside a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-size: 0.95rem;
+            display: block;
+            padding: 0.4rem 0.6rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        aside a:hover {
+            background-color: var(--border-color);
+            color: var(--primary-color);
+        }
+
+        /* Content Area */
+        main {
+            flex: 1;
+            padding: 2rem 3rem;
+            background-color: var(--card-bg);
+            max-width: 1120px;
+        }
+
+        /* Typography & Components */
+        h1, h2, h3, h4 {
+            color: var(--secondary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        section {
+            margin-bottom: 3rem;
+            scroll-margin-top: 2rem;
+        }
+
+        section > h1 {
+            font-size: 1.8rem;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        section > h2 {
+            font-size: 1.4rem;
+            margin-top: 1.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        ul, ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.3rem;
+        }
+
+        /* Conventions Box */
+        .conventions-box {
+            background-color: #eef6ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 1.2rem;
+            margin-bottom: 2rem;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .conventions-box h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--table-header-bg);
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        /* Code Styling */
+        code {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            background-color: var(--inline-code-bg);
+            color: var(--inline-code-color);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-color);
+            padding: 1.2rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0 1.5rem 0;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 0.9rem;
+            line-height: 1.45;
+            position: relative;
+        }
+
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        /* FAQ Styling */
+        .faq-item {
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+
+        .faq-item h3 {
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--secondary-color);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: auto;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .container {
+                flex-direction: column;
+            }
+
+            aside {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            main {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Guida a utenti, gruppi, domini e permessi in Windows</h1>
+        <p>Manuale pratico d'uso del Prompt dei comandi (cmd.exe)</p>
+    </header>
+
+    <div class="container">
+        <aside>
+            <h2>Indice Navigabile</h2>
+            <nav>
+                <ul>
+                    <li><a href="#convenzioni">Convenzioni</a></li>
+                    <li><a href="#1-teoria">1. Teoria</a></li>
+                    <li><a href="#2-gestione-degli-utenti">2. Gestione degli utenti</a></li>
+                    <li><a href="#3-scadenza-di-password-e-account">3. Scadenza password e account</a></li>
+                    <li><a href="#4-criteri-password-e-blocco-account">4. Criteri password e blocco</a></li>
+                    <li><a href="#5-gestione-dei-gruppi">5. Gestione dei gruppi</a></li>
+                    <li><a href="#6-informazioni-su-utenti-e-sessioni">6. Utenti e sessioni</a></li>
+                    <li><a href="#7-permessi-su-file-e-cartelle">7. Permessi file e cartelle</a></li>
+                    <li><a href="#8-utenti-e-gruppi-di-dominio">8. Utenti e gruppi di dominio</a></li>
+                    <li><a href="#9-strumenti-grafici-e-powershell">9. Strumenti grafici e PowerShell</a></li>
+                    <li><a href="#10-domande-frequenti">10. Domande frequenti</a></li>
+                    <li><a href="#11-appendice">11. Appendice: Git, VS Code, Claude</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main>
+            <p>Guida pratica: prima la teoria, poi i comandi spiegati sezione per sezione.</p>
+
+            <div id="convenzioni" class="conventions-box">
+                <h3>Convenzioni di lettura</h3>
+                <ul>
+                    <li>I comandi si eseguono in <code>cmd.exe</code>. Il prompt di CMD mostra <code>C:\Users\TuoNome&gt;</code>, quello di PowerShell mostra <code>PS C:\Users\TuoNome&gt;</code>.</li>
+                    <li>I comandi che modificano utenti, gruppi e permessi richiedono il prompt **avviato come amministratore** (tasto destro, <em>Esegui come amministratore</em>).</li>
+                    <li>Sostituisci <code>utente</code>, <code>gruppo</code>, <code>password</code>, <code>NOMEPC</code> e <code>C:\cartella</code> con i valori reali.</li>
+                    <li>Alcuni nomi (gruppi, giorni della settimana, formati data) cambiano con la lingua di Windows: in caso di dubbio usa <code>comando /?</code>.</li>
+                </ul>
+            </div>
+
+            <!-- SECTION 1 -->
+            <section id="1-teoria">
+                <h1>1. Teoria</h1>
+
+                <h2>1.1 Utenti</h2>
+                <p>Un <strong>utente</strong> (account) è l'identità con cui una persona, un servizio o un programma accede al sistema. Ogni account ha:</p>
+                <ul>
+                    <li>un <strong>nome</strong> e una <strong>password</strong> (o altro metodo di accesso);</li>
+                    <li>un <strong>SID</strong> (<em>Security Identifier</em>), un identificativo univoco che Windows usa internamente al posto del nome. I permessi sono assegnati al SID, per questo ricreare un utente con lo stesso nome non gli restituisce i permessi del vecchio account;</li>
+                    <li>un <strong>profilo</strong> (cartella in <code>C:\Users\nome</code>) con documenti e impostazioni;</li>
+                    <li>l'appartenenza a uno o più <strong>gruppi</strong>.</li>
+                </ul>
+
+                <h3>Tipi di account</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Dove vive</th>
+                                <th>Note</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Account locale</td>
+                                <td>Sul singolo PC</td>
+                                <td>Valido solo su quel computer</td>
+                            </tr>
+                            <tr>
+                                <td>Account Microsoft</td>
+                                <td>Online, collegato al PC</td>
+                                <td>Tipico di Windows 10/11 domestico</td>
+                            </tr>
+                            <tr>
+                                <td>Account di dominio</td>
+                                <td>Sul controller di dominio (Active Directory)</td>
+                                <td>Valido su tutti i PC del dominio</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Account integrati</h3>
+                <ul>
+                    <li><code>Administrator</code> (<em>Amministratore</em>): amministratore integrato, spesso disattivato di default.</li>
+                    <li><code>Guest</code> (<em>Ospite</em>): accesso limitato, disattivato di default.</li>
+                    <li><code>DefaultAccount</code> e <code>WDAGUtilityAccount</code>: account di sistema, non vanno toccati.</li>
+                </ul>
+                <p><strong>Account standard e amministratore</strong>: un utente standard può usare il PC ma non modificare il sistema; un amministratore può installare software e gestire utenti. Si diventa amministratori entrando nel gruppo <code>Administrators</code>.</p>
+
+                <h2>1.2 Gruppi</h2>
+                <p>Un <strong>gruppo</strong> è un insieme di utenti (e a volte di altri gruppi). Serve a <strong>gestire i permessi in blocco</strong>: invece di dare un permesso a 30 utenti, lo si dà a un gruppo e si inseriscono gli utenti nel gruppo.</p>
+
+                <h3>Gruppi locali integrati più usati</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Gruppo (inglese)</th>
+                                <th>A cosa serve</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>Administrators</code></td>
+                                <td>Controllo totale del PC</td>
+                            </tr>
+                            <tr>
+                                <td><code>Users</code></td>
+                                <td>Utenti standard</td>
+                            </tr>
+                            <tr>
+                                <td><code>Guests</code></td>
+                                <td>Accesso minimo</td>
+                            </tr>
+                            <tr>
+                                <td><code>Power Users</code></td>
+                                <td>Gruppo storico, oggi di scarso utilizzo</td>
+                            </tr>
+                            <tr>
+                                <td><code>Remote Desktop Users</code></td>
+                                <td>Possono collegarsi con Desktop remoto</td>
+                            </tr>
+                            <tr>
+                                <td><code>Backup Operators</code></td>
+                                <td>Possono fare e ripristinare backup ignorando alcuni permessi</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>Nelle versioni italiane di Windows i nomi possono essere tradotti (ad esempio <em>Amministratori</em>, <em>Utenti</em>). Con <code>net localgroup</code> vedi l'elenco reale sul tuo PC.</p>
+                <p><strong>Buona pratica (AGDLP)</strong>: negli ambienti con dominio si inseriscono gli <strong>A</strong>ccount in gruppi <strong>G</strong>lobali, i gruppi globali in gruppi <strong>D</strong>omain <strong>L</strong>ocal, e a questi ultimi si assegnano i <strong>P</strong>ermessi.</p>
+
+                <h2>1.3 Domini</h2>
+                <p>Un <strong>gruppo di lavoro</strong> (<em>workgroup</em>) è la modalità predefinita di casa e piccolo ufficio: ogni PC ha i propri utenti e le proprie regole, e nessuno gestisce gli account in modo centralizzato.</p>
+                <p>Un <strong>dominio</strong> è una rete in cui utenti, gruppi e computer sono gestiti in modo <strong>centralizzato</strong> da uno o più server chiamati <strong>controller di dominio</strong> (<em>Domain Controller</em>), che eseguono <strong>Active Directory Domain Services (AD DS)</strong>.</p>
+
+                <h3>Concetti chiave</h3>
+                <ul>
+                    <li><strong>Active Directory</strong>: il database centrale di utenti, gruppi, computer e criteri.</li>
+                    <li><strong>Account di dominio</strong>: si autentica sul controller di dominio, quindi lo stesso utente accede da qualsiasi PC del dominio. Si indica come <code>DOMINIO\utente</code> oppure <code>utente@dominio.local</code> (formato UPN).</li>
+                    <li><strong>OU</strong> (<em>Organizational Unit</em>): contenitore per organizzare utenti e computer, utile per applicare regole diverse a reparti diversi.</li>
+                    <li><strong>Criteri di gruppo</strong> (<em>GPO, Group Policy Object</em>): impostazioni applicate automaticamente a utenti e computer (criteri password, blocco account, restrizioni, installazione software).</li>
+                    <li><strong>Kerberos</strong>: protocollo di autenticazione usato nel dominio.</li>
+                </ul>
+
+                <h3>Ambiti dei gruppi di dominio</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ambito</th>
+                                <th>Può contenere</th>
+                                <th>Uso tipico</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Domain Local</td>
+                                <td>Utenti e gruppi di qualsiasi dominio</td>
+                                <td>Assegnare permessi su risorse</td>
+                            </tr>
+                            <tr>
+                                <td>Global</td>
+                                <td>Utenti e gruppi dello stesso dominio</td>
+                                <td>Raggruppare utenti per ruolo</td>
+                            </tr>
+                            <tr>
+                                <td>Universal</td>
+                                <td>Utenti e gruppi di qualsiasi dominio della foresta</td>
+                                <td>Gruppi che attraversano più domini</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>I gruppi possono inoltre essere di <strong>sicurezza</strong> (assegnano permessi) o di <strong>distribuzione</strong> (solo liste di posta).</p>
+
+                <h3>Differenze pratiche locale/dominio</h3>
+                <ul>
+                    <li>I comandi <code>net user</code> e <code>net localgroup</code> agiscono sull'archivio <strong>locale</strong> del PC.</li>
+                    <li>Per agire sul dominio servono <code>/domain</code> oppure strumenti dedicati (RSAT, PowerShell con modulo ActiveDirectory).</li>
+                    <li>I criteri password di un utente di dominio sono decisi dai criteri di gruppo del dominio, non da <code>net accounts</code> sul singolo PC.</li>
+                </ul>
+
+                <h2>1.4 Permessi su file e cartelle</h2>
+                <p>Su un volume <strong>NTFS</strong> ogni file e cartella ha una <strong>ACL</strong> (<em>Access Control List</em>, elenco di controllo di accesso): una lista di voci chiamate <strong>ACE</strong> (<em>Access Control Entry</em>). Ogni ACE dice che un certo utente o gruppo (identificato dal SID) ha o non ha un certo diritto.</p>
+
+                <h3>Concetti fondamentali</h3>
+                <ul>
+                    <li><strong>Proprietario</strong> (<em>owner</em>): chi ha creato l'oggetto o ne ha preso il possesso; può sempre modificarne i permessi.</li>
+                    <li><strong>Permessi di base</strong>:
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Permesso</th>
+                                        <th>Significato</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Controllo completo (<code>F</code>)</td>
+                                        <td>Tutto, compreso cambiare permessi e prendere il possesso</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Modifica (<code>M</code>)</td>
+                                        <td>Leggere, scrivere, creare, eliminare</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Lettura ed esecuzione (<code>RX</code>)</td>
+                                        <td>Aprire ed eseguire</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Lettura (<code>R</code>)</td>
+                                        <td>Solo leggere</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Scrittura (<code>W</code>)</td>
+                                        <td>Solo scrivere</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </li>
+                    <li><strong>Consenti e Nega</strong>: una voce <em>Nega</em> <strong>ha la precedenza</strong> su una voce <em>Consenti</em>. Usala con parsimonia perché rende i permessi difficili da capire.</li>
+                    <li><strong>Ereditarietà</strong>: i permessi di una cartella si propagano a sottocartelle e file. Si può interrompere l'ereditarietà e impostare permessi specifici.</li>
+                    <li><strong>Permessi cumulativi</strong>: i permessi effettivi di un utente sono la somma di quelli assegnati a lui e a tutti i gruppi di cui fa parte, tenendo conto dei <em>Nega</em>.</li>
+                    <li><strong>Permessi NTFS e di condivisione</strong>: se una cartella è condivisa in rete, valgono sia i permessi di condivisione sia quelli NTFS, e prevale il <strong>più restrittivo</strong> dei due.</li>
+                    <li><strong>Principio del privilegio minimo</strong>: assegna solo i permessi indispensabili, preferibilmente a gruppi e non a singoli utenti.</li>
+                </ul>
+                <p><strong>Comandi principali</strong>: <code>icacls</code> (visualizza e modifica le ACL) e <code>takeown</code> (prende il possesso di un oggetto).</p>
+            </section>
+
+            <!-- SECTION 2 -->
+            <section id="2-gestione-degli-utenti">
+                <h1>2. Gestione degli utenti</h1>
+                <p>Comando principale: <strong><code>net user</code></strong>.</p>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Azione</th>
+                                <th>Comando</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Elenca tutti gli utenti locali</td>
+                                <td><code>net user</code></td>
+                            </tr>
+                            <tr>
+                                <td>Dettagli di un utente</td>
+                                <td><code>net user utente</code></td>
+                            </tr>
+                            <tr>
+                                <td>Crea utente con password</td>
+                                <td><code>net user utente password /add</code></td>
+                            </tr>
+                            <tr>
+                                <td>Crea utente e chiede la password (non resta nella cronologia)</td>
+                                <td><code>net user utente * /add</code></td>
+                            </tr>
+                            <tr>
+                                <td>Elimina utente</td>
+                                <td><code>net user utente /delete</code></td>
+                            </tr>
+                            <tr>
+                                <td>Cambia password</td>
+                                <td><code>net user utente nuovapassword</code></td>
+                            </tr>
+                            <tr>
+                                <td>Cambia password chiedendola</td>
+                                <td><code>net user utente *</code></td>
+                            </tr>
+                            <tr>
+                                <td>Attiva account</td>
+                                <td><code>net user utente /active:yes</code></td>
+                            </tr>
+                            <tr>
+                                <td>Disattiva account</td>
+                                <td><code>net user utente /active:no</code></td>
+                            </tr>
+                            <tr>
+                                <td>Nome completo</td>
+                                <td><code>net user utente /fullname:"Mario Rossi"</code></td>
+                            </tr>
+                            <tr>
+                                <td>Descrizione</td>
+                                <td><code>net user utente /comment:"Ufficio contabilità"</code></td>
+                            </tr>
+                            <tr>
+                                <td>Impedisce all'utente di cambiare la password</td>
+                                <td><code>net user utente /passwordchg:no</code></td>
+                            </tr>
+                            <tr>
+                                <td>Password facoltativa</td>
+                                <td><code>net user utente /passwordreq:no</code></td>
+                            </tr>
+                            <tr>
+                                <td>Cartella home</td>
+                                <td><code>net user utente /homedir:C:\percorso</code></td>
+                            </tr>
+                            <tr>
+                                <td>Percorso del profilo</td>
+                                <td><code>net user utente /profilepath:percorso</code></td>
+                            </tr>
+                            <tr>
+                                <td>Script di accesso</td>
+                                <td><code>net user utente /scriptpath:file.bat</code></td>
+                            </tr>
+                            <tr>
+                                <td>Limita gli orari di accesso</td>
+                                <td><code>net user utente /times:M-F,08:00-18:00</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Spiegazioni</h3>
+                <ul>
+                    <li><code>net user</code> senza argomenti mostra solo i nomi; con il nome dell'utente mostra data di ultimo accesso, scadenza password, gruppi di appartenenza e altro.</li>
+                    <li>Usare <code>*</code> al posto della password fa digitare la password in modo nascosto: è più sicuro perché non resta nella cronologia dei comandi.</li>
+                    <li><code>/times</code> usa abbreviazioni dei giorni che dipendono dalla lingua del sistema (in inglese <code>M,T,W,Th,F,Sa,Su</code>). In caso di dubbio consulta <code>net help user</code>.</li>
+                    <li>Per attivare gli account integrati: <code>net user Administrator /active:yes</code> (o <code>Amministratore</code> nelle versioni italiane).</li>
+                    <li>Eliminare un utente <strong>non</strong> cancella la sua cartella in <code>C:\Users</code>.</li>
+                </ul>
+
+                <h3>Esempio completo: creare un utente standard</h3>
+                <pre><code>net user mrossi * /add /fullname:"Mario Rossi" /comment:"Contabilità"
+net localgroup Users mrossi /add</code></pre>
+            </section>
+
+            <!-- SECTION 3 -->
+            <section id="3-scadenza-di-password-e-account">
+                <h1>3. Scadenza di password e account</h1>
+                <p>Sono due cose distinte:</p>
+                <ul>
+                    <li>la <strong>scadenza della password</strong>: dopo N giorni l'utente deve cambiarla;</li>
+                    <li>la <strong>scadenza dell'account</strong>: a una certa data l'account non può più accedere.</li>
+                </ul>
+
+                <h2>3.1 Scadenza della password</h2>
+                <p><strong>Passo 1: imposta la durata massima per tutti gli utenti locali (in giorni)</strong></p>
+                <pre><code>net accounts /maxpwage:90</code></pre>
+                <p>Per toglierla: <code>net accounts /maxpwage:unlimited</code>. Per vedere i valori attuali: <code>net accounts</code>.</p>
+
+                <p><strong>Passo 2: assicurati che l'utente non abbia "La password non scade mai"</strong></p>
+                <p>Se questa opzione è attiva, il limite precedente viene ignorato.</p>
+                <pre><code>powershell -Command "Set-LocalUser -Name utente -PasswordNeverExpires $false"</code></pre>
+                <p>Per l'opposto (password che non scade mai):</p>
+                <pre><code>powershell -Command "Set-LocalUser -Name utente -PasswordNeverExpires $true"</code></pre>
+
+                <p><strong>Passo 3 (facoltativo): obbliga a cambiare la password al prossimo accesso</strong></p>
+                <pre><code>net user utente /logonpasswordchg:yes</code></pre>
+
+                <p><strong>Verifica</strong></p>
+                <pre><code>net user utente</code></pre>
+                <p>Controlla le righe "Password impostata il", "Scadenza password" e "Password modificabile".</p>
+
+                <h2>3.2 Scadenza dell'account</h2>
+                <pre><code>net user utente /expires:31/12/2026
+net user utente /expires:never</code></pre>
+                <p>Il formato della data dipende dalle impostazioni regionali (in Italia di solito <code>gg/mm/aaaa</code>).</p>
+
+                <h3>Cosa succede il 1° gennaio 2027?</h3>
+                <ul>
+                    <li>Fino al 31/12/2026 l'utente accede normalmente (la data indica la fine di quel giorno).</li>
+                    <li>Dal 1° gennaio 2027 l'account risulta <strong>scaduto</strong>: non può più accedere e Windows mostra un messaggio che indica che l'account è scaduto.</li>
+                    <li>L'account <strong>non viene eliminato</strong>: profilo, file e appartenenza ai gruppi restano intatti.</li>
+                    <li>Non è nemmeno "disabilitato" in senso formale: <code>net user utente</code> mostrerà <code>Account attivo: Sì</code> e <code>Account scade: 31/12/2026</code>, ma l'accesso resta bloccato.</li>
+                    <li>Una sessione già aperta alla scadenza non viene di norma interrotta subito, ma al successivo login o sblocco dello schermo l'accesso fallisce.</li>
+                    <li>Servizi e attività pianificate eseguiti con quell'utente smetteranno di funzionare.</li>
+                </ul>
+
+                <p><strong>Per riattivarlo</strong></p>
+                <pre><code>net user utente /expires:never
+net user utente /expires:31/12/2027</code></pre>
+
+                <p><strong>Verifica con PowerShell</strong></p>
+                <pre><code>powershell -Command "Get-LocalUser utente | Select Name,Enabled,AccountExpires"</code></pre>
+
+                <p><strong>Imposta la scadenza a 30 giorni da oggi con PowerShell</strong></p>
+                <pre><code>powershell -Command "Set-LocalUser -Name utente -AccountExpires (Get-Date).AddDays(30)"</code></pre>
+            </section>
+
+            <!-- SECTION 4 -->
+            <section id="4-criteri-password-e-blocco-account">
+                <h1>4. Criteri password e blocco account</h1>
+                <p>Comando principale: <strong><code>net accounts</code></strong>. Agisce sui criteri del PC locale (o del dominio con <code>/domain</code>).</p>
+
+                <h2>4.1 Criteri password</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Azione</th>
+                                <th>Comando</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Mostra i criteri attuali</td>
+                                <td><code>net accounts</code></td>
+                            </tr>
+                            <tr>
+                                <td>Durata massima della password (giorni)</td>
+                                <td><code>net accounts /maxpwage:90</code></td>
+                            </tr>
+                            <tr>
+                                <td>Nessuna scadenza</td>
+                                <td><code>net accounts /maxpwage:unlimited</code></td>
+                            </tr>
+                            <tr>
+                                <td>Durata minima prima di poterla cambiare (giorni)</td>
+                                <td><code>net accounts /minpwage:1</code></td>
+                            </tr>
+                            <tr>
+                                <td>Lunghezza minima</td>
+                                <td><code>net accounts /minpwlen:8</code></td>
+                            </tr>
+                            <tr>
+                                <td>Cronologia: quante vecchie password non si possono riutilizzare</td>
+                                <td><code>net accounts /uniquepw:5</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2>4.2 Blocco account (<em>account lockout</em>)</h2>
+                <p>Il <strong>blocco account</strong> è una protezione contro chi tenta di indovinare una password con tentativi ripetuti: dopo troppi errori Windows blocca temporaneamente l'account, anche se poi viene inserita la password giusta.</p>
+                <p>Tre parametri:</p>
+                <p><strong><code>/lockoutthreshold:N</code> (soglia)</strong>: dopo quanti tentativi falliti l'account viene bloccato. Con <code>0</code> il blocco è disattivato (spesso è il valore predefinito).</p>
+                <pre><code>net accounts /lockoutthreshold:5</code></pre>
+
+                <p><strong><code>/lockoutduration:minuti</code> (durata del blocco)</strong>: per quanto tempo l'account resta bloccato. Passato il tempo si sblocca da solo. Con <code>0</code> resta bloccato finché un amministratore non lo sblocca.</p>
+                <pre><code>net accounts /lockoutduration:30</code></pre>
+
+                <p><strong><code>/lockoutwindow:minuti</code> (finestra di osservazione)</strong>: nei criteri grafici si chiama <em>"Reimposta contatore di blocco account dopo"</em>. È il tempo che deve trascorrere <strong>dall'ultimo tentativo fallito, senza altri errori</strong>, perché il contatore degli errori torni a zero.</p>
+                <pre><code>net accounts /lockoutwindow:30</code></pre>
+
+                <p><strong>Esempio completo</strong></p>
+                <pre><code>net accounts /lockoutthreshold:5 /lockoutduration:30 /lockoutwindow:30</code></pre>
+                <p>Con questi valori: se si sbaglia la password 5 volte con errori ravvicinati (a meno di 30 minuti l'uno dall'altro) l'account si blocca per 30 minuti.</p>
+
+                <h3>Esempio di funzionamento (soglia 5, finestra 30 minuti)</h3>
+                <ul>
+                    <li>Alle 10:00 sbagli la password 3 volte: contatore = 3.</li>
+                    <li>Alle 10:40 sbagli ancora: sono passati più di 30 minuti dall'ultimo errore, il contatore era tornato a 0 e ora vale 1.</li>
+                    <li>Se invece alle 10:20 sbagli altre 2 volte, il contatore arriva a 5 e l'account si blocca.</li>
+                </ul>
+
+                <h3>Vincoli</h3>
+                <ul>
+                    <li>La finestra deve essere <strong>minore o uguale</strong> alla durata del blocco.</li>
+                    <li>Ha effetto solo se la soglia è maggiore di 0.</li>
+                </ul>
+
+                <p><strong>Sbloccare un account bloccato</strong></p>
+                <pre><code>net user utente /active:yes</code></pre>
+
+                <p><strong>Verificare lo stato</strong></p>
+                <pre><code>net accounts
+net user utente</code></pre>
+
+                <h3>Consigli</h3>
+                <ul>
+                    <li>Soglie troppo basse (1-2 tentativi) bloccano utenti legittimi che sbagliano a digitare: valori ragionevoli sono 5-10.</li>
+                    <li>Un attaccante può sfruttare il blocco per mettere fuori uso account altrui sbagliando apposta la password: evita durate eccessive.</li>
+                    <li>Tieni sempre un secondo account amministratore, per non restare tagliato fuori se l'unico amministratore si blocca.</li>
+                </ul>
+                <p>In un dominio questi criteri si impostano con i criteri di gruppo, dove la voce si trova in <em>Criteri account → Criteri di blocco account</em>. <code>secpol.msc</code> mostra la stessa struttura per il PC locale.</p>
+            </section>
+
+            <!-- SECTION 5 -->
+            <section id="5-gestione-dei-gruppi">
+                <h1>5. Gestione dei gruppi</h1>
+                <p>Comando principale: <strong><code>net localgroup</code></strong> (gruppi locali).</p>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Azione</th>
+                                <th>Comando</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Elenca i gruppi</td>
+                                <td><code>net localgroup</code></td>
+                            </tr>
+                            <tr>
+                                <td>Membri di un gruppo</td>
+                                <td><code>net localgroup gruppo</code></td>
+                            </tr>
+                            <tr>
+                                <td>Crea gruppo</td>
+                                <td><code>net localgroup gruppo /add</code></td>
+                            </tr>
+                            <tr>
+                                <td>Crea gruppo con descrizione</td>
+                                <td><code>net localgroup gruppo /add /comment:"descrizione"</code></td>
+                            </tr>
+                            <tr>
+                                <td>Elimina gruppo</td>
+                                <td><code>net localgroup gruppo /delete</code></td>
+                            </tr>
+                            <tr>
+                                <td>Aggiungi utente al gruppo</td>
+                                <td><code>net localgroup gruppo utente /add</code></td>
+                            </tr>
+                            <tr>
+                                <td>Rimuovi utente dal gruppo</td>
+                                <td><code>net localgroup gruppo utente /delete</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Esempi</h3>
+                <pre><code>net localgroup Administrators
+net localgroup Administrators utente /add
+net localgroup "Remote Desktop Users" utente /add
+net localgroup Contabilita /add /comment:"Reparto contabilità"
+net localgroup Contabilita mrossi /add</code></pre>
+
+                <h3>Note</h3>
+                <ul>
+                    <li>I nomi con spazi vanno tra virgolette.</li>
+                    <li>Nelle versioni italiane i nomi dei gruppi integrati possono essere tradotti: controllali con <code>net localgroup</code>.</li>
+                    <li>Aggiungere un utente a <code>Administrators</code> gli dà il controllo totale del PC: fallo con cautela.</li>
+                    <li>Le modifiche all'appartenenza ai gruppi hanno effetto al <strong>successivo accesso</strong> dell'utente.</li>
+                </ul>
+            </section>
+
+            <!-- SECTION 6 -->
+            <section id="6-informazioni-su-utenti-e-sessioni">
+                <h1>6. Informazioni su utenti e sessioni</h1>
+
+                <h2>6.1 Chi sono e che privilegi ho</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Azione</th>
+                                <th>Comando</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Utente corrente</td>
+                                <td><code>whoami</code></td>
+                            </tr>
+                            <tr>
+                                <td>Gruppi e SID dell'utente</td>
+                                <td><code>whoami /groups</code></td>
+                            </tr>
+                            <tr>
+                                <td>Privilegi dell'utente</td>
+                                <td><code>whoami /priv</code></td>
+                            </tr>
+                            <tr>
+                                <td>Tutto insieme</td>
+                                <td><code>whoami /all</code></td>
+                            </tr>
+                            <tr>
+                                <td>Utente in formato UPN (dominio)</td>
+                                <td><code>whoami /upn</code></td>
+                            </tr>
+                            <tr>
+                                <td>Nome utente da variabile</td>
+                                <td><code>echo %USERNAME%</code></td>
+                            </tr>
+                            <tr>
+                                <td>Dominio o nome del PC da variabile</td>
+                                <td><code>echo %USERDOMAIN%</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2>6.2 Sessioni</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Azione</th>
+                                <th>Comando</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Elenca le sessioni attive</td>
+                                <td><code>query user</code> (o <code>quser</code>)</td>
+                            </tr>
+                            <tr>
+                                <td>Sessioni su un altro PC</td>
+                                <td><code>query user /server:NOMEPC</code></td>
+                            </tr>
+                            <tr>
+                                <td>Disconnette una sessione</td>
+                                <td><code>logoff ID_SESSIONE</code></td>
+                            </tr>
+                            <tr>
+                                <td>Disconnette l'utente corrente</td>
+                                <td><code>logoff</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>L'<code>ID_SESSIONE</code> si legge nella colonna ID dell'output di <code>query user</code>.</p>
+
+                <h2>6.3 Eseguire programmi come un altro utente</h2>
+                <pre><code>runas /user:utente cmd
+runas /user:DOMINIO\utente "notepad.exe"
+runas /savecred /user:utente programma.exe</code></pre>
+                <p><code>/savecred</code> salva la password nel sistema: è comodo ma poco sicuro, meglio evitarlo.</p>
+            </section>
+
+            <!-- SECTION 7 -->
+            <section id="7-permessi-su-file-e-cartelle">
+                <h1>7. Permessi su file e cartelle</h1>
+                <p>Comandi principali: <strong><code>icacls</code></strong> e <strong><code>takeown</code></strong>.</p>
+
+                <h2>7.1 Cos'è <code>icacls</code></h2>
+                <p><code>icacls</code> permette di <strong>visualizzare, modificare, salvare, ripristinare e reimpostare</strong> le ACL di file e cartelle. È l'evoluzione dei vecchi comandi <code>cacls</code> e <code>xcacls</code>, ormai obsoleti, e aggiunge la gestione dell'ereditarietà e dei livelli di integrità.</p>
+
+                <h2>7.2 Comandi di base</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Azione</th>
+                                <th>Comando</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Mostra i permessi</td>
+                                <td><code>icacls C:\cartella</code></td>
+                            </tr>
+                            <tr>
+                                <td>Dà controllo completo a un utente (con ereditarietà)</td>
+                                <td><code>icacls C:\cartella /grant utente:(OI)(CI)F</code></td>
+                            </tr>
+                            <tr>
+                                <td>Dà modifica a un gruppo</td>
+                                <td><code>icacls C:\cartella /grant gruppo:(OI)(CI)M</code></td>
+                            </tr>
+                            <tr>
+                                <td>Dà sola lettura</td>
+                                <td><code>icacls C:\cartella /grant utente:(OI)(CI)R</code></td>
+                            </tr>
+                            <tr>
+                                <td>Nega un permesso</td>
+                                <td><code>icacls C:\cartella /deny utente:(OI)(CI)W</code></td>
+                            </tr>
+                            <tr>
+                                <td>Rimuove le voci <em>consenti</em> di un utente</td>
+                                <td><code>icacls C:\cartella /remove:g utente</code></td>
+                            </tr>
+                            <tr>
+                                <td>Rimuove le voci <em>nega</em> di un utente</td>
+                                <td><code>icacls C:\cartella /remove:d utente</code></td>
+                            </tr>
+                            <tr>
+                                <td>Rimuove tutte le voci di un utente</td>
+                                <td><code>icacls C:\cartella /remove utente</code></td>
+                            </tr>
+                            <tr>
+                                <td>Azzera i permessi ai valori ereditati</td>
+                                <td><code>icacls C:\cartella /reset /t</code></td>
+                            </tr>
+                            <tr>
+                                <td>Imposta il proprietario</td>
+                                <td><code>icacls C:\cartella /setowner utente /t</code></td>
+                            </tr>
+                            <tr>
+                                <td>Interrompe l'ereditarietà copiando le voci</td>
+                                <td><code>icacls C:\cartella /inheritance:d</code></td>
+                            </tr>
+                            <tr>
+                                <td>Interrompe l'ereditarietà rimuovendo le voci ereditate</td>
+                                <td><code>icacls C:\cartella /inheritance:r</code></td>
+                            </tr>
+                            <tr>
+                                <td>Riattiva l'ereditarietà</td>
+                                <td><code>icacls C:\cartella /inheritance:e</code></td>
+                            </tr>
+                            <tr>
+                                <td>Salva le ACL in un file</td>
+                                <td><code>icacls C:\cartella /save acl.txt /t</code></td>
+                            </tr>
+                            <tr>
+                                <td>Ripristina le ACL da file</td>
+                                <td><code>icacls C:\ /restore acl.txt</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2>7.3 Sigle dei permessi</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Sigla</th>
+                                <th>Significato</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>F</code></td>
+                                <td>Controllo completo</td>
+                            </tr>
+                            <tr>
+                                <td><code>M</code></td>
+                                <td>Modifica</td>
+                            </tr>
+                            <tr>
+                                <td><code>RX</code></td>
+                                <td>Lettura ed esecuzione</td>
+                            </tr>
+                            <tr>
+                                <td><code>R</code></td>
+                                <td>Sola lettura</td>
+                            </tr>
+                            <tr>
+                                <td><code>W</code></td>
+                                <td>Sola scrittura</td>
+                            </tr>
+                            <tr>
+                                <td><code>D</code></td>
+                                <td>Eliminazione</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2>7.4 Flag di ereditarietà</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Flag</th>
+                                <th>Significato</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>(OI)</code></td>
+                                <td><em>Object Inherit</em>: si applica ai file contenuti</td>
+                            </tr>
+                            <tr>
+                                <td><code>(CI)</code></td>
+                                <td><em>Container Inherit</em>: si applica alle sottocartelle</td>
+                            </tr>
+                            <tr>
+                                <td><code>(IO)</code></td>
+                                <td><em>Inherit Only</em>: vale solo per gli elementi contenuti, non per la cartella stessa</td>
+                            </tr>
+                            <tr>
+                                <td><code>(NP)</code></td>
+                                <td><em>No Propagate</em>: non si propaga oltre il primo livello</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>Combinazione più comune: <code>(OI)(CI)</code> per applicare il permesso alla cartella, alle sottocartelle e ai file.</p>
+
+                <h2>7.5 Opzioni utili</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Opzione</th>
+                                <th>Significato</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>/t</code></td>
+                                <td>Applica anche a sottocartelle e file</td>
+                            </tr>
+                            <tr>
+                                <td><code>/c</code></td>
+                                <td>Continua anche in caso di errori</td>
+                            </tr>
+                            <tr>
+                                <td><code>/q</code></td>
+                                <td>Modalità silenziosa</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2>7.6 Prendere il possesso (<code>takeown</code>)</h2>
+                <p>Se non hai più accesso a una cartella, prima ne prendi il possesso e poi ti assegni i permessi:</p>
+                <pre><code>takeown /f C:\cartella /r /d s
+icacls C:\cartella /grant utente:(OI)(CI)F /t</code></pre>
+                <p><code>/r</code> agisce in modo ricorsivo; <code>/d</code> indica la risposta da dare quando non si può elencare una cartella (<code>s</code> nelle versioni italiane, <code>y</code> in quelle inglesi).</p>
+
+                <h2>7.7 Esempio completo: cartella riservata a un gruppo</h2>
+                <pre><code>mkdir C:\Contabilita
+icacls C:\Contabilita /inheritance:d
+icacls C:\Contabilita /remove Users
+icacls C:\Contabilita /grant Contabilita:(OI)(CI)M
+icacls C:\Contabilita /grant Administrators:(OI)(CI)F
+icacls C:\Contabilita</code></pre>
+                <p>Cosa fa: crea la cartella, ne stacca l'ereditarietà conservando le voci attuali, toglie l'accesso al gruppo <code>Users</code>, dà modifica al gruppo <code>Contabilita</code> e controllo completo agli amministratori, poi mostra il risultato.</p>
+            </section>
+
+            <!-- SECTION 8 -->
+            <section id="8-utenti-e-gruppi-di-dominio">
+                <h1>8. Utenti e gruppi di dominio</h1>
+                <p>Servono un PC appartenente al dominio e privilegi adeguati.</p>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Azione</th>
+                                <th>Comando</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Dettagli di un utente di dominio</td>
+                                <td><code>net user utente /domain</code></td>
+                            </tr>
+                            <tr>
+                                <td>Crea utente di dominio</td>
+                                <td><code>net user utente password /add /domain</code></td>
+                            </tr>
+                            <tr>
+                                <td>Elenca i gruppi di dominio</td>
+                                <td><code>net group /domain</code></td>
+                            </tr>
+                            <tr>
+                                <td>Membri di un gruppo di dominio</td>
+                                <td><code>net group "Domain Admins" /domain</code></td>
+                            </tr>
+                            <tr>
+                                <td>Aggiunge utente a un gruppo di dominio</td>
+                                <td><code>net group gruppo utente /add /domain</code></td>
+                            </tr>
+                            <tr>
+                                <td>Criteri password del dominio</td>
+                                <td><code>net accounts /domain</code></td>
+                            </tr>
+                            <tr>
+                                <td>Mostra i criteri di gruppo applicati</td>
+                                <td><code>gpresult /r</code></td>
+                            </tr>
+                            <tr>
+                                <td>Aggiorna subito i criteri di gruppo</td>
+                                <td><code>gpupdate /force</code></td>
+                            </tr>
+                            <tr>
+                                <td>Trova un controller di dominio</td>
+                                <td><code>nltest /dsgetdc:NOMEDOMINIO</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Note</h3>
+                <ul>
+                    <li><code>net group</code> agisce sui gruppi del dominio, mentre <code>net localgroup</code> agisce sui gruppi locali del PC.</li>
+                    <li>I criteri di password e di blocco account di un utente di dominio dipendono dai criteri di gruppo del dominio.</li>
+                    <li>Con gli strumenti RSAT installati sono disponibili anche comandi come <code>dsquery</code> e <code>dsget</code>; per l'amministrazione avanzata di Active Directory si usa di solito PowerShell con il modulo ActiveDirectory.</li>
+                </ul>
+            </section>
+
+            <!-- SECTION 9 -->
+            <section id="9-strumenti-grafici-e-powershell">
+                <h1>9. Strumenti grafici e PowerShell</h1>
+
+                <h2>9.1 Strumenti grafici lanciabili dal prompt</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Comando</th>
+                                <th>Cosa apre</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>lusrmgr.msc</code></td>
+                                <td>Utenti e gruppi locali</td>
+                            </tr>
+                            <tr>
+                                <td><code>netplwiz</code></td>
+                                <td>Gestione account utente</td>
+                            </tr>
+                            <tr>
+                                <td><code>control userpasswords2</code></td>
+                                <td>Come <code>netplwiz</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>compmgmt.msc</code></td>
+                                <td>Gestione computer</td>
+                            </tr>
+                            <tr>
+                                <td><code>secpol.msc</code></td>
+                                <td>Criteri di sicurezza locali</td>
+                            </tr>
+                            <tr>
+                                <td><code>gpedit.msc</code></td>
+                                <td>Editor criteri di gruppo locali</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p><code>lusrmgr.msc</code>, <code>secpol.msc</code> e <code>gpedit.msc</code> non sono disponibili nelle edizioni Home di Windows.</p>
+
+                <h2>9.2 Comandi PowerShell richiamabili da cmd</h2>
+                <p>Più completi di <code>net user</code> per alcune operazioni:</p>
+                <pre><code>powershell -Command "Get-LocalUser"
+powershell -Command "Get-LocalGroup"
+powershell -Command "Get-LocalGroupMember -Group Administrators"
+powershell -Command "Set-LocalUser -Name utente -PasswordNeverExpires $false"
+powershell -Command "Set-LocalUser -Name utente -AccountExpires (Get-Date).AddDays(30)"
+powershell -Command "Get-LocalUser utente | Select Name,Enabled,PasswordLastSet,PasswordExpires,LastLogon"</code></pre>
+                <p><strong>Nota su <code>wmic</code></strong>: comandi come <code>wmic useraccount list brief</code> funzionano ancora in molte versioni, ma Microsoft ha dichiarato <code>wmic</code> deprecato e lo rimuove dalle versioni più recenti di Windows. Meglio <code>net user</code> o PowerShell.</p>
+            </section>
+
+            <!-- SECTION 10 -->
+            <section id="10-domande-frequenti">
+                <h1>10. Domande frequenti</h1>
+
+                <div class="faq-item">
+                    <h3>Cosa significa <code>icacls</code>?</h3>
+                    <p>È il comando per gestire le ACL (<em>Access Control List</em>) di file e cartelle. È la versione migliorata (<em>improved</em>) del vecchio <code>cacls</code> (<em>Control Access Control Lists</em>).</p>
+                </div>
+
+                <div class="faq-item">
+                    <h3>Il 1° gennaio, dopo <code>/expires:31/12/2026</code>, l'account è disabilitato o eliminato?</h3>
+                    <p>Né l'uno né l'altro: risulta scaduto, quindi non può più accedere, ma non viene eliminato. Vedi la <a href="#32-scadenza-dellaccount">sezione 3.2</a>.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h3>Cos'è la finestra di conteggio dei tentativi (<code>/lockoutwindow</code>)?</h3>
+                    <p>Il tempo che deve passare dall'ultimo errore, senza altri errori, perché il contatore dei tentativi falliti torni a zero. Vedi la <a href="#42-blocco-account-account-lockout">sezione 4.2</a>.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h3>Qual è la differenza tra <code>net user</code> e <code>net localgroup</code>?</h3>
+                    <p><code>net user</code> gestisce gli utenti, <code>net localgroup</code> i gruppi locali. Per il dominio si aggiunge <code>/domain</code> oppure si usa <code>net group</code>.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h3>Come vedo a quali gruppi appartiene un utente?</h3>
+                    <p><code>net user utente</code> (sezione "Appartenenze al gruppo locale") oppure, per l'utente corrente, <code>whoami /groups</code>.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h3>Come sblocco un account bloccato per troppi tentativi?</h3>
+                    <p>Da amministratore: <code>net user utente /active:yes</code>.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h3>Le modifiche ai gruppi sono immediate?</h3>
+                    <p>Hanno effetto al successivo accesso dell'utente: se l'utente è connesso deve uscire e rientrare.</p>
+                </div>
+            </section>
+
+            <!-- SECTION 11 -->
+            <section id="11-appendice">
+                <h1>11. Appendice: installare Git, VS Code e Claude Code</h1>
+                <p>Comandi da eseguire in <code>cmd.exe</code>.</p>
+
+                <p><strong>Git</strong></p>
+                <pre><code>winget install --id Git.Git -e --source winget</code></pre>
+
+                <p><strong>Visual Studio Code</strong></p>
+                <pre><code>winget install --id Microsoft.VisualStudioCode -e --source winget</code></pre>
+
+                <p><strong>Claude Code</strong> (installazione nativa, comando per CMD)</p>
+                <pre><code>curl -fsSL https://claude.ai/install.cmd -o install.cmd &amp;&amp; install.cmd &amp;&amp; del install.cmd</code></pre>
+                <p>Se compare l'errore <code>The token '&amp;&amp;' is not a valid statement separator</code>, sei in PowerShell e non in CMD.</p>
+
+                <h3>Dopo l'installazione</h3>
+                <p>Chiudi e riapri il prompt dei comandi, così il PATH viene aggiornato, poi verifica:</p>
+                <pre><code>git --version
+code --version
+claude --version</code></pre>
+
+                <p>Configura Git:</p>
+                <pre><code>git config --global user.name "Il Tuo Nome"
+git config --global user.email "tua@email.it"</code></pre>
+
+                <p>Avvia un progetto:</p>
+                <pre><code>cd C:\percorso\del\progetto
+code .
+claude</code></pre>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <p>Guida tecnica Windows Prompt dei Comandi &copy; Documentazione Amministrazione di Sistema</p>
+    </footer>
+
+</body>
+</html>
