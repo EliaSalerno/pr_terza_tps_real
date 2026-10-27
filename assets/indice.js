@@ -157,7 +157,7 @@ window.INDICE = [
           "SMB",
           "Nega vs Consenti"
         ],
-        file: "attività/Condivisioni di rete_ vince il permesso più restrittivo.html"
+        file: "attività/esercitazioni/configurazione/Condivisioni di rete_ vince il permesso più restrittivo.html"
       },
       {
         titolo: "Guida ai comandi CMD: utenti, gruppi e permessi",
@@ -192,7 +192,7 @@ window.INDICE = [
           "attività collegate agli eventi",
           "indagine forense"
         ],
-        file: "attività/Laboratorio_registro_eventi_windows.html"
+        file: "attività/esercitazioni/configurazione/Laboratorio_registro_eventi_windows.html"
       },
       {
         titolo: "Attività 7: Active Directory – Dominio, OU, utenti e workstation",
