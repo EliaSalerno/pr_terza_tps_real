@@ -4,54 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Esercitazione: gestire le workstation con un dominio Active Directory</title>
-<style>
-:root{--bg:#eef1f4;--card:#fff;--ink:#14213a;--muted:#56637a;--line:#c9d2de;--code:#f3f5f8;--a:#1d4ed8;--a-soft:#dbe6ff;--b:#0f766e;--b-soft:#d3efea;--warn:#fff4d6;--warn-line:#d9a514;color-scheme:light}
-@media (prefers-color-scheme:dark){:root{--bg:#0d1523;--card:#151f31;--ink:#e6ecf5;--muted:#9aa8bf;--line:#2b3a52;--code:#0d1523;--a:#7ea6ff;--a-soft:#1b2c55;--b:#4fd1c0;--b-soft:#12363a;--warn:#3a2f10;--warn-line:#b08a1a;color-scheme:dark}}
-*{box-sizing:border-box}
-html{scroll-padding-top:1rem}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,-apple-system,sans-serif;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
-main{max-width:56rem;margin:0 auto;padding:2rem 1.1rem 4rem}
-h1{font:700 2rem/1.2 "Bahnschrift","Segoe UI Semibold","Segoe UI",sans-serif;margin:0 0 .6rem;letter-spacing:-.01em}
-h2{font:700 1.4rem/1.3 "Bahnschrift","Segoe UI Semibold","Segoe UI",sans-serif;margin:2.6rem 0 .8rem;padding-top:1.2rem;border-top:2px solid var(--line)}
-h3{font-size:1.05rem;margin:1.5rem 0 .4rem}
-p,li{max-width:70ch}
-.lead{color:var(--muted);font-size:1.1rem;max-width:62ch}
-code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.9em;background:var(--code);padding:.08em .3em;border-radius:3px}
-pre{background:var(--code);border:1px solid var(--line);border-radius:6px;padding:.8rem 1rem;overflow-x:auto;margin:.6rem 0}
-pre code{padding:0;background:none;font-size:.86rem;line-height:1.5}
-.table-wrap{overflow-x:auto;margin:.7rem 0}
-table{border-collapse:collapse;width:100%;background:var(--card);font-size:.95rem}
-th,td{border:1px solid var(--line);padding:.45rem .7rem;text-align:left;vertical-align:top}
-th{background:var(--code)}
-.note{background:var(--warn);border-left:4px solid var(--warn-line);padding:.7rem 1rem;margin:1rem 0;border-radius:0 6px 6px 0}
-.note p{margin:.2rem 0}
-.tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin:1.2rem 0 0}
-.tab{font:inherit;font-weight:600;cursor:pointer;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:8px;padding:.6rem 1rem;text-align:left}
-.tab small{display:block;font-weight:400;color:var(--muted)}
-.tab[data-s=a][aria-selected=true]{border-color:var(--a);background:var(--a-soft)}
-.tab[data-s=b][aria-selected=true]{border-color:var(--b);background:var(--b-soft)}
-.tab:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:1.2rem 1.3rem;margin-top:.8rem}
-.panel[data-s=a]{border-top:5px solid var(--a)}
-.panel[data-s=b]{border-top:5px solid var(--b)}
-.panel[hidden]{display:none}
-.panel>h3:first-child{margin-top:.2rem}
-.tag{display:inline-block;font-weight:700;font-size:.85rem;padding:.05rem .5rem;border-radius:4px;margin-right:.3rem}
-.tag.a{background:var(--a-soft);color:var(--a)}
-.tag.b{background:var(--b-soft);color:var(--b)}
-svg{max-width:100%;height:auto;display:block;margin:.8rem 0}
-svg text{fill:var(--ink);font:13px "Segoe UI",sans-serif}
-svg .box{fill:var(--card);stroke:var(--ink);stroke-width:1.5}
-svg .vm{fill:var(--a-soft);stroke:var(--a);stroke-width:1.5}
-svg .vmb{fill:var(--b-soft);stroke:var(--b);stroke-width:1.5}
-svg .ln{stroke:var(--ink);stroke-width:2}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-@media (max-width:640px){.two{grid-template-columns:1fr}h1{font-size:1.6rem}}
-ul.check{list-style:none;padding-left:0}
-ul.check li{padding-left:1.6rem;position:relative;margin:.3rem 0}
-ul.check li::before{content:"☐";position:absolute;left:0}
-@media print{body{background:#fff}.tabs{display:none}.panel[hidden]{display:block}.panel{break-inside:avoid-page}h2{break-after:avoid}}
-</style>
+<link rel="stylesheet" href="../assets/documento.css">
 </head>
 <body>
 <main>
@@ -269,5 +222,7 @@ panels.forEach(function(p){p.hidden=p.dataset.s!==s});
 tabs.forEach(function(t){t.addEventListener('click',function(){show(t.dataset.s)})});
 })();
 </script>
+<script src="../assets/barra.js"></script>
+<script src="../assets/barra.js"></script>
 </body>
 </html>
