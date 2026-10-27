@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Esercitazione: gestire le workstation con un dominio Active Directory</title>
+<style>
+:root{--bg:#eef1f4;--card:#fff;--ink:#14213a;--muted:#56637a;--line:#c9d2de;--code:#f3f5f8;--a:#1d4ed8;--a-soft:#dbe6ff;--b:#0f766e;--b-soft:#d3efea;--warn:#fff4d6;--warn-line:#d9a514;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1523;--card:#151f31;--ink:#e6ecf5;--muted:#9aa8bf;--line:#2b3a52;--code:#0d1523;--a:#7ea6ff;--a-soft:#1b2c55;--b:#4fd1c0;--b-soft:#12363a;--warn:#3a2f10;--warn-line:#b08a1a;color-scheme:dark}}
+*{box-sizing:border-box}
+html{scroll-padding-top:1rem}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,-apple-system,sans-serif;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+main{max-width:56rem;margin:0 auto;padding:2rem 1.1rem 4rem}
+h1{font:700 2rem/1.2 "Bahnschrift","Segoe UI Semibold","Segoe UI",sans-serif;margin:0 0 .6rem;letter-spacing:-.01em}
+h2{font:700 1.4rem/1.3 "Bahnschrift","Segoe UI Semibold","Segoe UI",sans-serif;margin:2.6rem 0 .8rem;padding-top:1.2rem;border-top:2px solid var(--line)}
+h3{font-size:1.05rem;margin:1.5rem 0 .4rem}
+p,li{max-width:70ch}
+.lead{color:var(--muted);font-size:1.1rem;max-width:62ch}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.9em;background:var(--code);padding:.08em .3em;border-radius:3px}
+pre{background:var(--code);border:1px solid var(--line);border-radius:6px;padding:.8rem 1rem;overflow-x:auto;margin:.6rem 0}
+pre code{padding:0;background:none;font-size:.86rem;line-height:1.5}
+.table-wrap{overflow-x:auto;margin:.7rem 0}
+table{border-collapse:collapse;width:100%;background:var(--card);font-size:.95rem}
+th,td{border:1px solid var(--line);padding:.45rem .7rem;text-align:left;vertical-align:top}
+th{background:var(--code)}
+.note{background:var(--warn);border-left:4px solid var(--warn-line);padding:.7rem 1rem;margin:1rem 0;border-radius:0 6px 6px 0}
+.note p{margin:.2rem 0}
+.tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin:1.2rem 0 0}
+.tab{font:inherit;font-weight:600;cursor:pointer;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:8px;padding:.6rem 1rem;text-align:left}
+.tab small{display:block;font-weight:400;color:var(--muted)}
+.tab[data-s=a][aria-selected=true]{border-color:var(--a);background:var(--a-soft)}
+.tab[data-s=b][aria-selected=true]{border-color:var(--b);background:var(--b-soft)}
+.tab:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:1.2rem 1.3rem;margin-top:.8rem}
+.panel[data-s=a]{border-top:5px solid var(--a)}
+.panel[data-s=b]{border-top:5px solid var(--b)}
+.panel[hidden]{display:none}
+.panel>h3:first-child{margin-top:.2rem}
+.tag{display:inline-block;font-weight:700;font-size:.85rem;padding:.05rem .5rem;border-radius:4px;margin-right:.3rem}
+.tag.a{background:var(--a-soft);color:var(--a)}
+.tag.b{background:var(--b-soft);color:var(--b)}
+svg{max-width:100%;height:auto;display:block;margin:.8rem 0}
+svg text{fill:var(--ink);font:13px "Segoe UI",sans-serif}
+svg .box{fill:var(--card);stroke:var(--ink);stroke-width:1.5}
+svg .vm{fill:var(--a-soft);stroke:var(--a);stroke-width:1.5}
+svg .vmb{fill:var(--b-soft);stroke:var(--b);stroke-width:1.5}
+svg .ln{stroke:var(--ink);stroke-width:2}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media (max-width:640px){.two{grid-template-columns:1fr}h1{font-size:1.6rem}}
+ul.check{list-style:none;padding-left:0}
+ul.check li{padding-left:1.6rem;position:relative;margin:.3rem 0}
+ul.check li::before{content:"☐";position:absolute;left:0}
+@media print{body{background:#fff}.tabs{display:none}.panel[hidden]{display:block}.panel{break-inside:avoid-page}h2{break-after:avoid}}
+</style>
+</head>
+<body>
+<main>
+
+<h1>Esercitazione: gestire le workstation con un dominio Active Directory</h1>
+<p class="lead">Si crea un piccolo dominio aziendale, si collegano le postazioni di lavoro e si gestiscono centralmente utenti, criteri e cartelle condivise. L’attività è descritta in due varianti: tutto su un solo PC, oppure su più PC in una rete locale.</p>
+
+<h2 id="obiettivi">Obiettivi</h2>
+<p>Al termine lo studente sa:</p>
+<ul>
+<li>installare e configurare un controller di dominio (AD DS e DNS)</li>
+<li>unire una workstation al dominio</li>
+<li>organizzare utenti, gruppi e unità organizzative (OU)</li>
+<li>applicare criteri centralizzati con le GPO</li>
+<li>condividere cartelle assegnando i permessi ai gruppi</li>
+</ul>
+
+<h2 id="requisiti">Requisiti comuni</h2>
+<div class="table-wrap"><table>
+<tr><th>Macchina</th><th>Sistema</th><th>Risorse minime</th></tr>
+<tr><td>DC01 (server)</td><td>Windows Server 2022 (ISO di valutazione gratuita Microsoft)</td><td>2 GB RAM, 40 GB disco</td></tr>
+<tr><td>PC01 (client)</td><td>Windows 10 o 11 <strong>Pro/Enterprise</strong> (ISO di valutazione). La edizione Home non entra in un dominio.</td><td>2–4 GB RAM, 40 GB disco</td></tr>
+</table></div>
+<p>Il dominio usato nell’esercitazione si chiama <code>lab.local</code> (NetBIOS: <code>LAB</code>). Va bene in laboratorio; in produzione si usa un sottodominio di un dominio registrato.</p>
+
+<h2 id="scenari">Scelta dello scenario</h2>
+<p>La differenza sta solo nella <strong>preparazione della rete</strong> (fase 1). Dalla fase 2 in poi i passaggi sono uguali.</p>
+
+<div class="tabs" role="tablist" aria-label="Scenario">
+<button class="tab" role="tab" id="t-a" data-s="a" aria-selected="true" aria-controls="p-a">Scenario A<small>Due VM sullo stesso PC</small></button>
+<button class="tab" role="tab" id="t-b" data-s="b" aria-selected="false" aria-controls="p-b">Scenario B<small>Più PC, una VM su ciascuno</small></button>
+</div>
+
+<!-- SCENARIO A -->
+<section class="panel" data-s="a" id="p-a" role="tabpanel" aria-labelledby="t-a">
+<h3>Scenario A: due macchine virtuali sullo stesso PC</h3>
+<p>Il PC ospite esegue l’hypervisor con due VM collegate fra loro da una rete virtuale privata. È la variante più semplice: non serve toccare la rete reale e l’ambiente è isolato.</p>
+
+<svg viewBox="0 0 560 190" role="img" aria-label="Un PC ospite contiene DC01 e PC01 collegati da una rete interna">
+<rect class="box" x="10" y="10" width="540" height="170" rx="8"/>
+<text x="24" y="32" font-weight="700">PC fisico (ospite) con hypervisor</text>
+<rect class="vm" x="50" y="65" width="170" height="80" rx="6"/>
+<text x="70" y="95" font-weight="700">DC01 · Server 2022</text><text x="70" y="117">192.168.10.10</text>
+<rect class="vm" x="340" y="65" width="170" height="80" rx="6"/>
+<text x="360" y="95" font-weight="700">PC01 · Windows 11 Pro</text><text x="360" y="117">192.168.10.20</text>
+<line class="ln" x1="220" y1="105" x2="340" y2="105"/>
+<text x="232" y="96">rete interna</text><text x="240" y="126">“labnet”</text>
+</svg>
+
+<h3>Requisiti del PC ospite</h3>
+<ul>
+<li>almeno 8 GB di RAM (16 GB consigliati) e 100 GB liberi</li>
+<li>virtualizzazione attiva nel BIOS/UEFI (Intel VT-x o AMD-V)</li>
+<li>VirtualBox, VMware Workstation Player o Hyper-V</li>
+</ul>
+
+<h3>Fase 1A: rete tra le due VM</h3>
+<div class="table-wrap"><table>
+<tr><th>Hypervisor</th><th>Impostazione della scheda di rete</th></tr>
+<tr><td>VirtualBox</td><td>Collegata a: <strong>Rete interna</strong>, nome <code>labnet</code> (uguale su entrambe le VM)</td></tr>
+<tr><td>Hyper-V</td><td>Switch virtuale di tipo <strong>Privato</strong>, assegnato a entrambe le VM</td></tr>
+<tr><td>VMware</td><td>Segmento LAN (Workstation Pro) oppure <strong>Solo host</strong> con il DHCP del servizio disattivato</td></tr>
+</table></div>
+<div class="table-wrap"><table>
+<tr><th></th><th>DC01</th><th>PC01</th></tr>
+<tr><td>IP</td><td>192.168.10.10</td><td>192.168.10.20</td></tr>
+<tr><td>Subnet</td><td>255.255.255.0</td><td>255.255.255.0</td></tr>
+<tr><td>Gateway</td><td>vuoto</td><td>vuoto</td></tr>
+<tr><td>DNS</td><td>192.168.10.10</td><td><strong>192.168.10.10</strong></td></tr>
+</table></div>
+<p>Rete isolata significa niente internet. Se serve (aggiornamenti, download), aggiungi a DC01 una seconda scheda in modalità NAT e imposta un <em>forwarder</em> DNS (vedi fase 2).</p>
+<pre><code>Rename-Computer -NewName DC01 -Restart     # sul server
+Rename-Computer -NewName PC01 -Restart     # sul client
+ping 192.168.10.10                         # dal client</code></pre>
+<p>Se il ping fallisce, attiva la regola ICMP in ingresso sul firewall del server.</p>
+<div class="note"><p><strong>Consiglio:</strong> a installazione finita fai un’istantanea (snapshot) di entrambe le VM. Se uno studente rompe qualcosa, si torna indietro in pochi secondi.</p></div>
+</section>
+
+<!-- SCENARIO B -->
+<section class="panel" data-s="b" id="p-b" role="tabpanel" aria-labelledby="t-b" hidden>
+<h3>Scenario B: più PC, ciascuno con la propria macchina virtuale</h3>
+<p>Un PC ospita la VM server (DC01), gli altri PC ospitano ciascuno una VM client. Le VM comunicano attraverso la rete locale reale, quindi la scheda di rete va impostata in <strong>bridge</strong>.</p>
+
+<svg viewBox="0 0 560 250" role="img" aria-label="Uno switch collega un PC con la VM server e tre PC con una VM client ciascuno">
+<rect class="box" x="215" y="10" width="130" height="40" rx="6"/><text x="243" y="35" font-weight="700">Switch / router</text>
+<rect class="box" x="10" y="110" width="125" height="125" rx="6"/><text x="22" y="130">PC docente</text>
+<rect class="vmb" x="22" y="145" width="100" height="75" rx="5"/><text x="30" y="170" font-weight="700">DC01</text><text x="30" y="190">.10</text>
+<rect class="box" x="155" y="110" width="125" height="125" rx="6"/><text x="167" y="130">PC studente 1</text>
+<rect class="vmb" x="167" y="145" width="100" height="75" rx="5"/><text x="175" y="170" font-weight="700">PC01</text><text x="175" y="190">.21</text>
+<rect class="box" x="290" y="110" width="125" height="125" rx="6"/><text x="302" y="130">PC studente 2</text>
+<rect class="vmb" x="302" y="145" width="100" height="75" rx="5"/><text x="310" y="170" font-weight="700">PC02</text><text x="310" y="190">.22</text>
+<rect class="box" x="425" y="110" width="125" height="125" rx="6"/><text x="437" y="130">PC studente 3</text>
+<rect class="vmb" x="437" y="145" width="100" height="75" rx="5"/><text x="445" y="170" font-weight="700">PC03</text><text x="445" y="190">.23</text>
+<line class="ln" x1="280" y1="50" x2="72" y2="110"/><line class="ln" x1="280" y1="50" x2="217" y2="110"/><line class="ln" x1="280" y1="50" x2="352" y2="110"/><line class="ln" x1="280" y1="50" x2="487" y2="110"/>
+</svg>
+
+<h3>Requisiti</h3>
+<ul>
+<li>ogni PC con almeno 8 GB di RAM, virtualizzazione attiva e VirtualBox, VMware Player o Hyper-V</li>
+<li>PC collegati via <strong>cavo Ethernet</strong>: il bridge su Wi-Fi spesso non funziona</li>
+<li>preferibilmente uno switch o un router dedicato all’aula, senza collegamento alla rete della scuola</li>
+</ul>
+
+<h3>Fase 1B: rete in bridge e indirizzi</h3>
+<p>Su ogni PC imposta la scheda di rete della VM su <strong>Bridged</strong> (VirtualBox/VMware) o su uno switch virtuale <strong>Esterno</strong> (Hyper-V), scegliendo la scheda Ethernet fisica. Esempio con subnet <code>192.168.1.0/24</code> (adatta gli indirizzi alla tua rete):</p>
+<div class="table-wrap"><table>
+<tr><th>Macchina</th><th>Ospitata su</th><th>IP statico</th><th>DNS</th></tr>
+<tr><td>DC01</td><td>PC docente</td><td>192.168.1.10</td><td>192.168.1.10</td></tr>
+<tr><td>PC01</td><td>PC studente 1</td><td>192.168.1.21</td><td><strong>192.168.1.10</strong></td></tr>
+<tr><td>PC02</td><td>PC studente 2</td><td>192.168.1.22</td><td><strong>192.168.1.10</strong></td></tr>
+<tr><td>PC03</td><td>PC studente 3</td><td>192.168.1.23</td><td><strong>192.168.1.10</strong></td></tr>
+</table></div>
+<p>Subnet 255.255.255.0 e gateway del router (ad esempio 192.168.1.1) su tutte le macchine. Ogni client deve avere un <strong>nome diverso</strong>, altrimenti il join fallisce.</p>
+<ul>
+<li><strong>IP statici fuori dal range DHCP</strong> del router, per evitare conflitti.</li>
+<li><strong>DNS dei client solo sul server</strong>, mai sul router o su 8.8.8.8. Per andare su internet, DC01 inoltra le richieste esterne (forwarder) al router.</li>
+<li><strong>DHCP:</strong> o lasci quello del router e imposti il DNS a mano, oppure lo disattivi sul router e attivi il ruolo DHCP su DC01. Mai due DHCP insieme.</li>
+<li>Su ogni PC ospite controlla il firewall di Windows e che le VM raggiungano DC01: <code>ping 192.168.1.10</code>.</li>
+</ul>
+<div class="note"><p><strong>Attenzione:</strong> non fare l’esercitazione sulla rete didattica o aziendale condivisa senza il permesso dell’amministratore. Un DC o un DHCP “abusivo” può disturbare tutta la rete. Meglio una LAN dedicata.</p></div>
+
+<h3>Organizzazione del lavoro</h3>
+<ul>
+<li>Il docente (o un gruppo) gestisce DC01. Gli studenti lavorano ciascuno sul proprio client e sul proprio utente di dominio.</li>
+<li>Per creare molti utenti in una volta, importa un file CSV con <code>Import-Csv</code> e <code>New-ADUser</code>.</li>
+<li>In alternativa, ogni gruppo di 2–3 studenti costruisce il proprio dominio con un DC e un client su PC diversi, usando domini con nomi diversi (<code>lab1.local</code>, <code>lab2.local</code>) e subnet o switch separati.</li>
+</ul>
+</section>
+
+<h2 id="f2">Fase 2: creazione del dominio (su DC01)</h2>
+<pre><code>Install-WindowsFeature AD-Domain-Services -IncludeManagementTools
+Install-ADDSForest -DomainName "lab.local" -DomainNetbiosName "LAB" -InstallDns</code></pre>
+<p>Inserisci la password DSRM (ripristino). Il server si riavvia: accedi come <code>LAB\Administrator</code>. In alternativa usa Server Manager → Aggiungi ruoli → Servizi di dominio Active Directory → Promuovi a controller di dominio → Nuova foresta.</p>
+<p>Se serve internet, aggiungi un forwarder DNS (nell’Scenario A solo con la scheda NAT, nello Scenario B verso il router):</p>
+<pre><code>Add-DnsServerForwarder -IPAddress 192.168.1.1     # Scenario B (o 8.8.8.8)</code></pre>
+
+<h2 id="f3">Fase 3: struttura del dominio</h2>
+<p>Crea un’OU <code>Azienda</code> con le sotto-OU <code>Utenti</code>, <code>Computer</code> e <code>Gruppi</code>, poi gruppi e utenti.</p>
+<pre><code>New-ADOrganizationalUnit -Name "Azienda" -Path "DC=lab,DC=local"
+New-ADOrganizationalUnit -Name "Utenti" -Path "OU=Azienda,DC=lab,DC=local"
+New-ADOrganizationalUnit -Name "Computer" -Path "OU=Azienda,DC=lab,DC=local"
+New-ADOrganizationalUnit -Name "Gruppi" -Path "OU=Azienda,DC=lab,DC=local"
+
+New-ADGroup -Name "GG_Amministrazione" -GroupScope Global -Path "OU=Gruppi,OU=Azienda,DC=lab,DC=local"
+New-ADUser -Name "Mario Rossi" -SamAccountName "mrossi" `
+  -AccountPassword (Read-Host -AsSecureString "Password") -Enabled $true `
+  -Path "OU=Utenti,OU=Azienda,DC=lab,DC=local"
+Add-ADGroupMember -Identity "GG_Amministrazione" -Members "mrossi"</code></pre>
+<p>Crea almeno 4 utenti e 2 gruppi (<code>GG_Amministrazione</code>, <code>GG_Tecnico</code>).</p>
+
+<h2 id="f4">Fase 4: unione del client al dominio</h2>
+<ol>
+<li>Sul client verifica il DNS: <code>nslookup lab.local</code> deve rispondere con l’IP di DC01.</li>
+<li>Impostazioni → Sistema → Informazioni → Dominio o gruppo di lavoro → inserisci <code>lab.local</code>.</li>
+<li>Autentica con un amministratore di dominio e riavvia.</li>
+<li>Al login scegli “Altro utente” e accedi con <code>LAB\mrossi</code>.</li>
+<li>Su DC01 sposta l’oggetto computer dal contenitore <code>Computers</code> all’OU <code>Azienda\Computer</code>.</li>
+</ol>
+
+<h2 id="f5">Fase 5: criteri di gruppo (GPO)</h2>
+<p>Da <code>gpmc.msc</code> crea e collega alle OU queste GPO:</p>
+<ol>
+<li><strong>Sfondo aziendale</strong> sull’OU Utenti (Configurazione utente → Modelli amministrativi → Desktop).</li>
+<li><strong>Blocco del Pannello di controllo</strong> per gli utenti standard.</li>
+<li><strong>Criteri password</strong> (lunghezza, scadenza, blocco account) nella Default Domain Policy.</li>
+<li><strong>Mappatura unità di rete</strong> (Preferenze → Impostazioni Windows → Mappature unità).</li>
+<li><strong>Blocco delle unità rimovibili</strong> sull’OU Computer.</li>
+</ol>
+<p>Sul client, per applicare e verificare:</p>
+<pre><code>gpupdate /force
+gpresult /r</code></pre>
+
+<h2 id="f6">Fase 6: cartelle condivise e permessi</h2>
+<p>Su DC01 crea <code>C:\Condivisi\Amministrazione</code> e <code>C:\Condivisi\Tecnico</code>, condividile e assegna i permessi NTFS ai <strong>gruppi</strong> di dominio, non ai singoli utenti. Verifica dal client che un utente di Amministrazione apra la propria cartella ma non quella del Tecnico.</p>
+
+<h2 id="f7">Fase 7: verifiche e consegna</h2>
+<p>Lo studente consegna una relazione con screenshot commentati:</p>
+<ul class="check">
+<li>output di <code>ipconfig /all</code> sulle macchine coinvolte</li>
+<li>join riuscito: <code>systeminfo | findstr Dominio</code></li>
+<li>struttura delle OU in “Utenti e computer di Active Directory”</li>
+<li>effetto di almeno 3 GPO tramite <code>gpresult</code></li>
+<li>test dei permessi sulle cartelle (accesso consentito e negato)</li>
+<li><em>Scenario B:</em> prova da due client diversi con due utenti diversi</li>
+</ul>
+
+<h2 id="problemi">Problemi frequenti</h2>
+<div class="table-wrap"><table>
+<tr><th>Sintomo</th><th>Causa probabile</th></tr>
+<tr><td>“Impossibile trovare il dominio”</td><td>Il DNS del client non punta a DC01.</td></tr>
+<tr><td>Errori di autenticazione</td><td>Orario sfasato di oltre 5 minuti (Kerberos).</td></tr>
+<tr><td>Le GPO non si applicano</td><td>Computer o utente nell’OU sbagliata, oppure manca <code>gpupdate /force</code>.</td></tr>
+<tr><td>Join fallito (Scenario B)</td><td>Due client con lo stesso nome, o IP in conflitto.</td></tr>
+<tr><td>Le VM non si vedono (Scenario B)</td><td>Bridge su Wi-Fi, scheda fisica sbagliata o firewall dell’ospite.</td></tr>
+<tr><td>Il ping non risponde</td><td>Regola ICMP in ingresso disattivata sul firewall di Windows.</td></tr>
+</table></div>
+
+<h2 id="est">Estensioni per il livello avanzato</h2>
+<ul>
+<li>ruolo <strong>DHCP</strong> su DC01 e client in IP dinamico</li>
+<li>secondo controller di dominio e verifica della replica</li>
+<li>profili roaming o redirezione cartelle</li>
+<li>distribuzione di software con una GPO (pacchetto MSI)</li>
+<li>delega limitata, ad esempio solo il reset delle password a un gruppo</li>
+</ul>
+
+</main>
+<script>
+(function(){
+var tabs=document.querySelectorAll('.tab'),panels=document.querySelectorAll('.panel');
+function show(s){
+tabs.forEach(function(t){t.setAttribute('aria-selected',t.dataset.s===s)});
+panels.forEach(function(p){p.hidden=p.dataset.s!==s});
+}
+tabs.forEach(function(t){t.addEventListener('click',function(){show(t.dataset.s)})});
+})();
+</script>
+</body>
+</html>
