@@ -193,6 +193,22 @@ window.INDICE = [
           "indagine forense"
         ],
         file: "attività/Laboratorio_registro_eventi_windows.html"
+      },
+      {
+        titolo: "Attività 7: Active Directory – Dominio, OU, utenti e workstation",
+        descrizione:
+          "Esercitazione su Active Directory: creazione e gestione di un dominio, unità organizzative, utenti, gruppi e join di workstation al dominio, con verifica dei criteri e delle autorizzazioni.",
+        argomenti: [
+          "Active Directory",
+          "Dominio",
+          "OU",
+          "Utenti e gruppi",
+          "Computer nel dominio",
+          "Join al dominio",
+          "Group Policy",
+          "Autenticazione"
+        ],
+        file: "attività/active_directory.html"
       }
     ]
   },
