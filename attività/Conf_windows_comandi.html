@@ -433,6 +433,22 @@ net user utente /expires:31/12/2027</code></pre>
                                 <td>Cronologia: quante vecchie password non si possono riutilizzare</td>
                                 <td><code>net accounts /uniquepw:5</code></td>
                             </tr>
+			    <tr>
+				<td>Tentativi errati prima del blocco</td>
+				<td>net accounts /lockoutthreshold:5</td>
+			    </tr>
+			    <tr>
+				<td>Durata blocco (minuti)</td>
+				<td>net accounts /lockoutduration:30</td>
+			    </tr>
+			    <tr>
+				<td>Finestra conteggio tentativi (azzerata ad ogni errore)</td>
+				<td>net accounts /lockoutwindow:30</td>
+			    </tr>
+			    <tr>
+				<td>Nessuna scadenza password</td>
+				<td>net accounts /maxpwage:unlimited</td>
+			    </tr>
                         </tbody>
                     </table>
                 </div>
