@@ -34,6 +34,8 @@ scorciatoia comoda ma pericolosa.
     ├── Conf_windows_att1.html             ← Configurazione Windows – Attività 1 (utenti e file)
     ├── Conf_windows_att2.html             ← Configurazione Windows – Attività 2 (gruppi)
     ├── Conf_windows_att3.html             ← Configurazione Windows – Attività 3 (rete)
+    ├── att_conf_windows_ufficio.html       ← esercitazione di riepilogo: ufficio commerciale
+    ├── active_directory.html              ← Attività 7: Active Directory (dominio, OU, workstation)
     ├── Conf_windows_comandi.md            ← bozza sorgente della guida ai comandi da CMD
     ├── Conf_windows_comandi.html          ← guida a utenti, gruppi, domini e permessi da Prompt dei comandi
     ├── Condivisioni di rete_ vince il permesso più restrittivo.html
@@ -636,6 +638,7 @@ virtualizzazione hardware abilitata nel BIOS/UEFI.
 | **5** | [Guida ai comandi CMD](#guida-ai-comandi-cmd-utenti-gruppi-e-permessi) | Le operazioni delle prime tre attività eseguite da Prompt dei comandi: utenti, scadenza delle password e degli account, criteri di blocco, gruppi, `icacls`/`takeown`, comandi di dominio e richiami a PowerShell | [§5](#5-la-memoria-di-massa), [§6](#6-la-rete), [§8](#8-ciclo-di-vita-e-manutenzione); SID, account e gruppi locali e di dominio, ACL, ereditarietà, precedenza del «Nega», shell `cmd.exe` e PowerShell |
 | **6** | [Registro eventi](#laboratorio-il-registro-eventi-di-windows) | Visualizzatore eventi, lettura e filtro degli eventi, registri Applicazione/Sicurezza/Sistema, interrogazione da PowerShell (`Get-WinEvent`) e prompt (`wevtutil`), creazione di eventi e attività collegate, indagine forense finale | [§3](#3-la-cpu-vista-dallospite) (orologio e ordine temporale dei log); struttura ed elementi di un evento, livelli e ID evento, ACL del registro Sicurezza e privilegi di amministratore |
 | **7** | [Active Directory – Dominio, OU, utenti e workstation](#configurazione-windows--attività-7-active-directory--dominio-ou-utenti-e-workstation) | Creazione del dominio, organizzazione in OU, gestione di utenti e gruppi, aggiunta delle workstation al dominio e verifica delle autenticazioni | [§2](#2-architettura-lhypervisor), [§8](#8-ciclo-di-vita-e-manutenzione); directory services, autenticazione centralizzata, ambiti dominio/OU, join al dominio |
+| **8** | [Ufficio commerciale (riepilogo)](#attività-8-ufficio-commerciale-esercitazione-di-riepilogo) | Esercitazione completa su uno scenario aziendale: gruppi e utenti locali da CMD, criteri password e blocco account, permessi NTFS secondo una matrice, condivisione SMB, script di accesso, collaudo e relazione finale | [§5](#5-la-memoria-di-massa), [§6](#6-la-rete); SID, account e gruppi locali, ACL ed ereditarietà, precedenza del «Nega», minimo privilegio, condivisione vs NTFS |
 
 ## Attività su Windows
 
@@ -650,7 +653,9 @@ comando: si può leggere anche da sola, ma i comandi vanno eseguiti su Windows c
 prompt avviato come amministratore. Il laboratorio sul **registro eventi** parte invece
 da una VM Windows con uno snapshot "pulito" e da un utente `studente1`. Il
 **simulatore** sui permessi di condivisione, invece, si usa nel browser senza avviare
-alcuna macchina virtuale.
+alcuna macchina virtuale. L'**esercitazione di riepilogo** sull'ufficio commerciale
+richiede una VM Windows pulita e un prompt avviato come amministratore: mette insieme
+in un unico scenario utenti, gruppi, permessi e condivisione.
 
 ### Configurazione Windows – Attività 1: utenti e file
 
@@ -930,6 +935,46 @@ snapshot "pulito" prima di iniziare e generare eventi in proprio (riavvii, arres
 servizi, accessi falliti), perché su una VM appena installata i log sono quasi vuoti.
 I log contengono dati personali (nomi utente): analizzarli solo sulle macchine del
 laboratorio.
+
+### Attività 8: ufficio commerciale (esercitazione di riepilogo)
+
+📄 [`attività/att_conf_windows_ufficio.html`](attività/att_conf_windows_ufficio.html)
+
+**Obiettivo.** Mettere in pratica, in un unico scenario aziendale, tutte le competenze
+delle attività precedenti: creare gruppi e utenti locali, applicare una politica delle
+password, assegnare permessi NTFS e di condivisione secondo una matrice e il principio
+del **minimo privilegio**, predisporre uno script di accesso e collaudare il tutto.
+
+**In sintesi.** La società **Rossi & Partners S.r.l.** apre un ufficio commerciale con
+sei persone e un PC che fa da "server" di file. Si progetta prima la struttura (utenti,
+gruppi e matrice dei permessi), poi da Prompt dei comandi si impostano i criteri
+password con `net accounts`, si creano i cinque gruppi (`GRP_Direzione`,
+`GRP_Responsabili`, `GRP_Agenti`, `GRP_BackOffice`, `GRP_Stagisti`) e i sei utenti, con
+cambio password al primo accesso, orari di lavoro e scadenza dello stagista. Si creano
+le cartelle in `C:\Azienda\Commerciale`, si interrompe l'ereditarietà e si assegnano i
+permessi con `icacls` seguendo la matrice, si condivide la cartella con SMB e si prepara
+lo script `accesso.bat` che collega l'unità `S:`. L'esercitazione si chiude con il
+collaudo utente per utente, una griglia di valutazione e una relazione con comandi,
+schermate e problemi risolti.
+
+**Argomenti toccati.** `net accounts` (lunghezza, scadenza, cronologia e blocco),
+`net localgroup`, `net user` con `/logonpasswordchg`, `/time` e `/expires`, `net share`,
+`icacls` con `(OI)(CI)`, SID dei gruppi integrati, ereditarietà delle ACL, permessi
+cumulativi e precedenza del «Nega», differenza fra autorizzazioni di condivisione e
+NTFS, script di accesso e criterio del minimo privilegio.
+
+**Argomenti teorici da conoscere.** Dalla [Parte I](#parte-i--teoria): [§5](#5-la-memoria-di-massa)
+snapshot e cloni come base di partenza ripetibile; [§6](#6-la-rete) condivisione SMB e
+differenza con le cartelle condivise host-guest. Concetti Windows da padroneggiare:
+SID e token di accesso, gruppi locali, struttura di una **ACL** e delle sue **ACE**,
+ereditarietà, somma dei permessi e precedenza del «Nega», differenza fra condivisione e
+NTFS (cfr. attività 1–3 e il simulatore) e shell `cmd.exe`.
+
+**Nota operativa.** Aprire il Prompt dei comandi **come amministratore** e fare uno
+snapshot della VM prima di iniziare: l'esercizio crea molti oggetti e conviene poter
+ripartire da una macchina pulita. I nomi dei gruppi integrati, dei giorni e il formato
+delle date dipendono dalla lingua di Windows; usare `*` al posto della password per non
+lasciarla nella cronologia dei comandi.
 
 ## Attività su Linux (Alpine Linux e Bash)
 

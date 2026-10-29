@@ -4,42 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Esercitazione Windows: ufficio commerciale di Rossi &amp; Partners</title>
-<style>
-:root{--ink:#1c2733;--mute:#5a6876;--line:#d5dce3;--bg:#fff;--soft:#f1f5f8;--acc:#0b6a8f;--code:#16222e;--codefg:#e6edf3;--warn:#fff4d6}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 "Segoe UI",system-ui,sans-serif}
-.wrap{max-width:860px;margin:0 auto;padding:32px 20px 80px}
-header{border-left:6px solid var(--acc);padding:4px 0 4px 18px;margin-bottom:28px}
-h1{font-size:2rem;line-height:1.2;margin:0 0 6px}
-header p{margin:0;color:var(--mute)}
-h2{font-size:1.35rem;margin:2.4rem 0 .6rem;padding-top:.8rem;border-top:1px solid var(--line)}
-h2 .t{color:var(--acc)}
-p,li{max-width:70ch}
-code{font-family:Consolas,"Cascadia Mono",monospace;background:var(--soft);padding:1px 5px;border-radius:3px;font-size:.92em}
-.cb{position:relative;margin:.8rem 0}
-pre{margin:0;background:var(--code);color:var(--codefg);padding:14px 16px;border-radius:6px;overflow-x:auto;font:14px/1.5 Consolas,"Cascadia Mono",monospace}
-.cp{position:absolute;top:6px;right:6px;background:#2c3e50;color:#fff;border:0;border-radius:4px;padding:3px 10px;font:12px "Segoe UI",sans-serif;cursor:pointer}
-.cp:hover,.cp:focus-visible{background:var(--acc);outline:2px solid #fff}
-.table{overflow-x:auto;margin:1rem 0}
-table{border-collapse:collapse;width:100%;font-size:.93rem}
-th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
-th{background:var(--soft)}
-.ok{color:#17703a;font-weight:600}.no{color:#b3261e;font-weight:600}
-.note{background:var(--warn);border-left:4px solid #d9a400;padding:10px 14px;margin:1rem 0;border-radius:3px}
-.q{border:1px dashed var(--acc);padding:10px 14px;margin:1rem 0;border-radius:4px}
-.q b{color:var(--acc)}
-.chk{margin:0;padding:0;list-style:none}
-.chk li{padding-left:1.7rem;position:relative}
-.chk li::before{content:"";position:absolute;left:0;top:.45em;width:.95rem;height:.95rem;border:2px solid var(--acc);border-radius:3px}
-@media print{.cp{display:none}pre{white-space:pre-wrap;background:#f3f3f3;color:#000;border:1px solid #bbb}body{font-size:12px}h2{break-after:avoid}table,pre{break-inside:avoid}}
-</style>
+<link rel="stylesheet" href="../assets/documento.css">
 </head>
 <body>
-<div class="wrap">
-<header>
+<main>
+
 <h1>Esercitazione: configurare l'ufficio commerciale di Rossi &amp; Partners S.r.l.</h1>
-<p>Ambiente Windows 10/11 (account locali). Durata: 3-4 ore. Lavoro a coppie.</p>
-</header>
+<p class="lead">Ambiente Windows 10/11 (account locali). Durata: 3-4 ore. Lavoro a coppie.</p>
 
 <h2>1. Scenario e obiettivi</h2>
 <p>La società <b>Rossi &amp; Partners S.r.l.</b> apre un nuovo ufficio commerciale con 6 persone. Voi siete i tecnici incaricati di preparare il PC dell'ufficio (che farà da "server" di file) in modo che ognuno veda <b>solo ciò che gli serve</b>.</p>
@@ -56,19 +27,22 @@ th{background:var(--soft)}
 
 <h2>2. Fase 1 - Progettate prima di digitare</h2>
 <p>Un buon tecnico pianifica prima di configurare. Verificate queste tabelle.</p>
-<div class="table"><table>
-<tr><th>Utente</th><th>Nome completo</th><th>Ruolo</th><th>Gruppo</th></tr>
+<div class="table-wrap"><table>
+<thead><tr><th>Utente</th><th>Nome completo</th><th>Ruolo</th><th>Gruppo</th></tr></thead>
+<tbody>
 <tr><td>m.bianchi</td><td>Marco Bianchi</td><td>Direttore commerciale</td><td>GRP_Direzione</td></tr>
 <tr><td>l.verdi</td><td>Laura Verdi</td><td>Responsabile vendite</td><td>GRP_Responsabili</td></tr>
 <tr><td>a.neri</td><td>Andrea Neri</td><td>Agente</td><td>GRP_Agenti</td></tr>
 <tr><td>g.gialli</td><td>Giulia Gialli</td><td>Agente</td><td>GRP_Agenti</td></tr>
 <tr><td>s.russo</td><td>Sara Russo</td><td>Back office / contratti</td><td>GRP_BackOffice</td></tr>
 <tr><td>t.blu</td><td>Tommaso Blu</td><td>Stagista</td><td>GRP_Stagisti</td></tr>
+</tbody>
 </table></div>
 <p>Cartelle in <code>C:\Azienda\Commerciale</code>: <code>Clienti</code>, <code>Offerte</code>, <code>Listini</code>, <code>Contratti</code>, <code>Report</code>, <code>Direzione</code>, <code>Comune</code>.</p>
 <p>Matrice dei permessi (L = sola lettura, M = modifica, - = nessun accesso):</p>
-<div class="table"><table>
-<tr><th>Cartella</th><th>Direzione</th><th>Responsabili</th><th>Agenti</th><th>BackOffice</th><th>Stagisti</th></tr>
+<div class="table-wrap"><table>
+<thead><tr><th>Cartella</th><th>Direzione</th><th>Responsabili</th><th>Agenti</th><th>BackOffice</th><th>Stagisti</th></tr></thead>
+<tbody>
 <tr><td>Clienti</td><td>M</td><td>M</td><td>M</td><td>L</td><td>-</td></tr>
 <tr><td>Offerte</td><td>M</td><td>M</td><td>M</td><td>L</td><td>-</td></tr>
 <tr><td>Listini</td><td>M</td><td>M</td><td>L</td><td>L</td><td>L</td></tr>
@@ -76,63 +50,64 @@ th{background:var(--soft)}
 <tr><td>Report</td><td>M</td><td>M</td><td>-</td><td>L</td><td>-</td></tr>
 <tr><td>Direzione</td><td>M</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>Comune</td><td>M</td><td>M</td><td>M</td><td>M</td><td>L</td></tr>
+</tbody>
 </table></div>
-<div class="q"><b>Domanda 1:</b> perché i permessi si assegnano ai <i>gruppi</i> e non ai singoli utenti? Rispondete in due righe nella relazione.</div>
+<div class="note"><b>Domanda 1:</b> perché i permessi si assegnano ai <i>gruppi</i> e non ai singoli utenti? Rispondete in due righe nella relazione.</div>
 
 <h2>3. Fase 2 - Criteri password</h2>
-<div class="cb"><pre>net accounts /minpwlen:10 /maxpwage:90 /minpwage:1 /uniquepw:5
+<pre>net accounts /minpwlen:10 /maxpwage:90 /minpwage:1 /uniquepw:5
 net accounts /lockoutthreshold:5 /lockoutduration:30 /lockoutwindow:30
-net accounts</pre></div>
+net accounts</pre>
 <p>Lunghezza minima 10 caratteri, scadenza ogni 90 giorni, nessun cambio multiplo nello stesso giorno, memoria delle ultime 5 password, blocco dopo 5 tentativi errati per 30 minuti.</p>
 <p>Attivate anche la <b>complessità</b>: <code>secpol.msc</code> → <i>Criteri account</i> → <i>Criteri password</i> → <b>La password deve soddisfare requisiti di complessità</b> → <i>Attivato</i>.</p>
 <p><b>Verifica:</b> l'ultimo <code>net accounts</code> mostra i valori impostati. Fate uno screenshot.</p>
 
 <h2>4. Fase 3 - Creazione dei gruppi</h2>
-<div class="cb"><pre>net localgroup GRP_Direzione /add
+<pre>net localgroup GRP_Direzione /add
 net localgroup GRP_Responsabili /add
 net localgroup GRP_Agenti /add
 net localgroup GRP_BackOffice /add
 net localgroup GRP_Stagisti /add
-net localgroup</pre></div>
+net localgroup</pre>
 <p><b>Verifica:</b> i cinque gruppi compaiono nell'elenco.</p>
 
 <h2>5. Fase 4 - Creazione degli utenti</h2>
 <p>Ogni utente riceve una password temporanea e <b>deve cambiarla al primo accesso</b> (<code>/logonpasswordchg:yes</code>).</p>
-<div class="cb"><pre>net user m.bianchi Ufficio#Mb2026 /add /fullname:"Marco Bianchi" /logonpasswordchg:yes
+<pre>net user m.bianchi Ufficio#Mb2026 /add /fullname:"Marco Bianchi" /logonpasswordchg:yes
 net user l.verdi Ufficio#Lv2026 /add /fullname:"Laura Verdi" /logonpasswordchg:yes
 net user a.neri Ufficio#An2026 /add /fullname:"Andrea Neri" /logonpasswordchg:yes
 net user g.gialli Ufficio#Gg2026 /add /fullname:"Giulia Gialli" /logonpasswordchg:yes
 net user s.russo Ufficio#Sr2026 /add /fullname:"Sara Russo" /logonpasswordchg:yes
-net user t.blu Ufficio#Tb2026 /add /fullname:"Tommaso Blu" /logonpasswordchg:yes</pre></div>
+net user t.blu Ufficio#Tb2026 /add /fullname:"Tommaso Blu" /logonpasswordchg:yes</pre>
 <p>Associate ogni utente al proprio gruppo:</p>
-<div class="cb"><pre>net localgroup GRP_Direzione m.bianchi /add
+<pre>net localgroup GRP_Direzione m.bianchi /add
 net localgroup GRP_Responsabili l.verdi /add
 net localgroup GRP_Agenti a.neri /add
 net localgroup GRP_Agenti g.gialli /add
 net localgroup GRP_BackOffice s.russo /add
-net localgroup GRP_Stagisti t.blu /add</pre></div>
+net localgroup GRP_Stagisti t.blu /add</pre>
 <p>Limitate gli orari di agenti e stagista (lun-ven) e fate scadere l'account dello stagista a fine stage:</p>
-<div class="cb"><pre>net user a.neri /time:L-V,08:00-19:00
+<pre>net user a.neri /time:L-V,08:00-19:00
 net user g.gialli /time:L-V,08:00-19:00
-net user t.blu /time:L-V,09:00-17:00 /expires:31/12/2026</pre></div>
+net user t.blu /time:L-V,09:00-17:00 /expires:31/12/2026</pre>
 <p><i>I nomi dei giorni dipendono dalla lingua di Windows (italiano: L, M, Me, G, V, S, D; inglese: M, T, W, Th, F, Sa, Su). Il formato della data di <code>/expires</code> segue le impostazioni regionali.</i></p>
 <p><b>Verifica:</b> <code>net user a.neri</code> mostra gruppi, orari consentiti e "Password deve essere cambiata: Sì".</p>
-<div class="q"><b>Domanda 2:</b> perché nessuno di questi utenti è stato inserito nel gruppo Administrators?</div>
+<div class="note"><b>Domanda 2:</b> perché nessuno di questi utenti è stato inserito nel gruppo Administrators?</div>
 
 <h2>6. Fase 5 - Cartelle e permessi NTFS</h2>
-<div class="cb"><pre>mkdir C:\Azienda\Commerciale\Clienti
+<pre>mkdir C:\Azienda\Commerciale\Clienti
 mkdir C:\Azienda\Commerciale\Offerte
 mkdir C:\Azienda\Commerciale\Listini
 mkdir C:\Azienda\Commerciale\Contratti
 mkdir C:\Azienda\Commerciale\Report
 mkdir C:\Azienda\Commerciale\Direzione
-mkdir C:\Azienda\Commerciale\Comune</pre></div>
+mkdir C:\Azienda\Commerciale\Comune</pre>
 <p>Sigle di <code>icacls</code>: <b>M</b> = modifica, <b>RX</b> = lettura ed esecuzione, <b>F</b> = controllo completo. <code>(OI)(CI)</code> fa ereditare il permesso a file e sottocartelle. Amministratori e sistema si indicano con il SID (<code>*S-1-5-32-544</code> e <code>*S-1-5-18</code>) per non dipendere dalla lingua di Windows.</p>
 <p><b>Passo A - Interrompete l'ereditarietà</b> e lasciate solo amministratori e sistema. Esempio per <code>Clienti</code>; ripetete per <code>Offerte</code>, <code>Listini</code>, <code>Contratti</code>, <code>Report</code>, <code>Direzione</code>, <code>Comune</code>:</p>
-<div class="cb"><pre>icacls C:\Azienda\Commerciale\Clienti /inheritance:r
-icacls C:\Azienda\Commerciale\Clienti /grant *S-1-5-32-544:(OI)(CI)F *S-1-5-18:(OI)(CI)F</pre></div>
+<pre>icacls C:\Azienda\Commerciale\Clienti /inheritance:r
+icacls C:\Azienda\Commerciale\Clienti /grant *S-1-5-32-544:(OI)(CI)F *S-1-5-18:(OI)(CI)F</pre>
 <p><b>Passo B - Assegnate i permessi ai gruppi</b> seguendo la matrice:</p>
-<div class="cb"><pre>rem --- Clienti ---
+<pre>rem --- Clienti ---
 icacls C:\Azienda\Commerciale\Clienti /grant GRP_Direzione:(OI)(CI)M GRP_Responsabili:(OI)(CI)M GRP_Agenti:(OI)(CI)M GRP_BackOffice:(OI)(CI)RX
 rem --- Offerte ---
 icacls C:\Azienda\Commerciale\Offerte /grant GRP_Direzione:(OI)(CI)M GRP_Responsabili:(OI)(CI)M GRP_Agenti:(OI)(CI)M GRP_BackOffice:(OI)(CI)RX
@@ -145,43 +120,45 @@ icacls C:\Azienda\Commerciale\Report /grant GRP_Direzione:(OI)(CI)M GRP_Responsa
 rem --- Direzione (riservata) ---
 icacls C:\Azienda\Commerciale\Direzione /grant GRP_Direzione:(OI)(CI)M
 rem --- Comune ---
-icacls C:\Azienda\Commerciale\Comune /grant GRP_Direzione:(OI)(CI)M GRP_Responsabili:(OI)(CI)M GRP_Agenti:(OI)(CI)M GRP_BackOffice:(OI)(CI)M GRP_Stagisti:(OI)(CI)RX</pre></div>
+icacls C:\Azienda\Commerciale\Comune /grant GRP_Direzione:(OI)(CI)M GRP_Responsabili:(OI)(CI)M GRP_Agenti:(OI)(CI)M GRP_BackOffice:(OI)(CI)M GRP_Stagisti:(OI)(CI)RX</pre>
 <p><b>Passo C - Consentite di raggiungere le cartelle.</b> La cartella padre deve essere attraversabile da chi ha accesso a una sottocartella. Senza <code>(OI)(CI)</code> il permesso vale solo per la cartella padre:</p>
-<div class="cb"><pre>icacls C:\Azienda\Commerciale /grant GRP_Direzione:RX GRP_Responsabili:RX GRP_Agenti:RX GRP_BackOffice:RX GRP_Stagisti:RX</pre></div>
+<pre>icacls C:\Azienda\Commerciale /grant GRP_Direzione:RX GRP_Responsabili:RX GRP_Agenti:RX GRP_BackOffice:RX GRP_Stagisti:RX</pre>
 <p><b>Verifica:</b> <code>icacls C:\Azienda\Commerciale\Contratti</code> elenca i gruppi con i permessi previsti. Controllate anche da Esplora risorse → <i>Proprietà</i> → <i>Sicurezza</i>.</p>
-<div class="q"><b>Domanda 3:</b> cosa succederebbe se lasciaste attiva l'ereditarietà da <code>C:\Azienda</code>? Quale gruppo potrebbe vedere cartelle che non dovrebbe?</div>
+<div class="note"><b>Domanda 3:</b> cosa succederebbe se lasciaste attiva l'ereditarietà da <code>C:\Azienda</code>? Quale gruppo potrebbe vedere cartelle che non dovrebbe?</div>
 
 <h2>7. Fase 6 - Condivisione di rete</h2>
 <p>I permessi NTFS sono già restrittivi, quindi sulla condivisione si lascia un permesso ampio: <b>vale sempre il più restrittivo tra condivisione e NTFS</b>.</p>
-<div class="cb"><pre>net share Commerciale=C:\Azienda\Commerciale /grant:Everyone,CHANGE
-net share</pre></div>
+<pre>net share Commerciale=C:\Azienda\Commerciale /grant:Everyone,CHANGE
+net share</pre>
 <p><b>Verifica:</b> <code>net share</code> mostra <code>Commerciale</code>. Da un secondo PC (o dallo stesso) aprite <code>\\NOME-PC\Commerciale</code>.</p>
 
 <h2>8. Fase 7 - Script di accesso</h2>
 <p>Create <code>C:\Azienda\Script\accesso.bat</code>:</p>
-<div class="cb"><pre>@echo off
+<pre>@echo off
 net use S: /delete /y &gt;nul 2&gt;&amp;1
 net use S: \\NOME-PC\Commerciale /persistent:no
-echo %DATE% %TIME% - %USERNAME% &gt;&gt; C:\Azienda\Script\accessi.log</pre></div>
+echo %DATE% %TIME% - %USERNAME% &gt;&gt; C:\Azienda\Script\accessi.log</pre>
 <p>Assegnatelo agli utenti con <code>gpedit.msc</code> → <i>Configurazione utente</i> → <i>Impostazioni di Windows</i> → <i>Script (Accesso/Disconnessione)</i> → <i>Accesso</i> → <i>Aggiungi</i>. Su Windows Home usate l'Utilità di pianificazione con trigger "All'accesso".</p>
 <p>La cartella <code>C:\Azienda\Script</code> deve essere leggibile da tutti e scrivibile solo dagli amministratori; per il log serve il permesso di scrittura sul solo file <code>accessi.log</code>.</p>
 
 <h2>9. Fase 8 - Collaudo</h2>
 <p>Accedete con <b>ciascun utente</b> e compilate la tabella. Il risultato deve coincidere con la matrice della Fase 1.</p>
-<div class="table"><table>
-<tr><th>Utente</th><th>Azione di test</th><th>Atteso</th><th>Esito</th></tr>
-<tr><td>a.neri</td><td>Creare un file in Clienti</td><td class="ok">Riuscito</td><td></td></tr>
-<tr><td>a.neri</td><td>Creare un file in Contratti</td><td class="no">Negato</td><td></td></tr>
-<tr><td>a.neri</td><td>Aprire Report</td><td class="no">Negato</td><td></td></tr>
-<tr><td>s.russo</td><td>Creare un file in Contratti</td><td class="ok">Riuscito</td><td></td></tr>
-<tr><td>s.russo</td><td>Modificare un file in Clienti</td><td class="no">Negato</td><td></td></tr>
-<tr><td>t.blu</td><td>Leggere Listini</td><td class="ok">Riuscito</td><td></td></tr>
-<tr><td>t.blu</td><td>Aprire Clienti</td><td class="no">Negato</td><td></td></tr>
-<tr><td>l.verdi</td><td>Aprire Direzione</td><td class="no">Negato</td><td></td></tr>
-<tr><td>m.bianchi</td><td>Creare un file in Direzione</td><td class="ok">Riuscito</td><td></td></tr>
-<tr><td>g.gialli</td><td>Accedere di domenica</td><td class="no">Negato</td><td></td></tr>
+<div class="table-wrap"><table>
+<thead><tr><th>Utente</th><th>Azione di test</th><th>Atteso</th><th>Esito</th></tr></thead>
+<tbody>
+<tr><td>a.neri</td><td>Creare un file in Clienti</td><td>Riuscito</td><td></td></tr>
+<tr><td>a.neri</td><td>Creare un file in Contratti</td><td>Negato</td><td></td></tr>
+<tr><td>a.neri</td><td>Aprire Report</td><td>Negato</td><td></td></tr>
+<tr><td>s.russo</td><td>Creare un file in Contratti</td><td>Riuscito</td><td></td></tr>
+<tr><td>s.russo</td><td>Modificare un file in Clienti</td><td>Negato</td><td></td></tr>
+<tr><td>t.blu</td><td>Leggere Listini</td><td>Riuscito</td><td></td></tr>
+<tr><td>t.blu</td><td>Aprire Clienti</td><td>Negato</td><td></td></tr>
+<tr><td>l.verdi</td><td>Aprire Direzione</td><td>Negato</td><td></td></tr>
+<tr><td>m.bianchi</td><td>Creare un file in Direzione</td><td>Riuscito</td><td></td></tr>
+<tr><td>g.gialli</td><td>Accedere di domenica</td><td>Negato</td><td></td></tr>
 <tr><td>qualsiasi</td><td>Sbagliare la password 5 volte</td><td>Account bloccato</td><td></td></tr>
 <tr><td>qualsiasi</td><td>Primo accesso</td><td>Cambio password richiesto</td><td></td></tr>
+</tbody>
 </table></div>
 <p>Se un test non coincide, cercate la causa: gruppo sbagliato? ereditarietà? permesso mancante sulla cartella padre? Annotate errore e correzione: è la parte più importante dell'esercizio.</p>
 
@@ -194,10 +171,10 @@ echo %DATE% %TIME% - %USERNAME% &gt;&gt; C:\Azienda\Script\accessi.log</pre></di
 <li>la tabella di collaudo compilata, con gli errori trovati e come li avete risolti;</li>
 <li>le risposte alle domande 1, 2 e 3.</li>
 </ol>
-<div class="q"><b>Domanda finale:</b> arriva un nuovo agente, Paolo Marrone. Elencate i comandi necessari per inserirlo e dite quali cartelle potrà modificare.</div>
+<div class="note"><b>Domanda finale:</b> arriva un nuovo agente, Paolo Marrone. Elencate i comandi necessari per inserirlo e dite quali cartelle potrà modificare.</div>
 
 <h2>11. Ripristino (a fine attività)</h2>
-<div class="cb"><pre>net share Commerciale /delete
+<pre>net share Commerciale /delete
 net user m.bianchi /delete
 net user l.verdi /delete
 net user a.neri /delete
@@ -208,12 +185,13 @@ net localgroup GRP_Direzione /delete
 net localgroup GRP_Responsabili /delete
 net localgroup GRP_Agenti /delete
 net localgroup GRP_BackOffice /delete
-net localgroup GRP_Stagisti /delete</pre></div>
+net localgroup GRP_Stagisti /delete</pre>
 <p>Eliminate <code>C:\Azienda</code> da Esplora risorse; se serve, prendete prima la proprietà con <code>takeown /f C:\Azienda /r /d s</code>.</p>
 
 <h2>12. Griglia di valutazione (100 punti)</h2>
-<div class="table"><table>
-<tr><th>Criterio</th><th>Punti</th></tr>
+<div class="table-wrap"><table>
+<thead><tr><th>Criterio</th><th>Punti</th></tr></thead>
+<tbody>
 <tr><td>Pianificazione corretta (tabelle e matrice)</td><td>15</td></tr>
 <tr><td>Criteri password e account configurati</td><td>15</td></tr>
 <tr><td>Gruppi e appartenenze corretti</td><td>15</td></tr>
@@ -221,6 +199,7 @@ net localgroup GRP_Stagisti /delete</pre></div>
 <tr><td>Condivisione e script di accesso funzionanti</td><td>10</td></tr>
 <tr><td>Collaudo completo e problemi documentati</td><td>15</td></tr>
 <tr><td>Qualità della relazione e risposte alle domande</td><td>5</td></tr>
+</tbody>
 </table></div>
 
 <h2>13. Varianti per approfondire</h2>
@@ -230,17 +209,8 @@ net localgroup GRP_Stagisti /delete</pre></div>
 <li><b>Audit:</b> attivate il controllo degli accessi sulla cartella <code>Contratti</code> e leggete gli eventi nel Visualizzatore eventi.</li>
 <li><b>Backup:</b> pianificate una copia notturna con <code>robocopy /copyall</code> e verificate che i permessi vengano conservati.</li>
 </ul>
-</div>
-<script>
-document.querySelectorAll('.cb').forEach(function(b){
-  var btn=document.createElement('button');btn.className='cp';btn.type='button';btn.textContent='Copia';
-  btn.onclick=function(){
-    var t=b.querySelector('pre').innerText;
-    var done=function(){btn.textContent='Copiato';setTimeout(function(){btn.textContent='Copia'},1500)};
-    if(navigator.clipboard){navigator.clipboard.writeText(t).then(done,done)}else{done()}
-  };
-  b.appendChild(btn);
-});
-</script>
+
+</main>
+<script src="../assets/barra.js"></script>
 </body>
 </html>

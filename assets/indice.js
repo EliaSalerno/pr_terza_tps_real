@@ -209,6 +209,23 @@ window.INDICE = [
           "Autenticazione"
         ],
         file: "attività/active_directory.html"
+      },
+      {
+        titolo: "Attività 8: ufficio commerciale (esercitazione di riepilogo)",
+        descrizione:
+          "Esercitazione completa su uno scenario aziendale: gruppi e utenti locali da CMD, criteri password, permessi NTFS secondo una matrice, condivisione di rete, script di accesso e collaudo finale.",
+        argomenti: [
+          "net user e net localgroup",
+          "net accounts",
+          "criteri password e blocco account",
+          "icacls",
+          "permessi NTFS",
+          "minimo privilegio",
+          "condivisione SMB",
+          "script di accesso",
+          "collaudo e documentazione"
+        ],
+        file: "attività/att_conf_windows_ufficio.html"
       }
     ]
   },
