@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privilegi Windows assegnabili a un utente</title>
+<style>
+:root{--bg:#eef2f6;--panel:#fff;--ink:#14243a;--mute:#5b6b80;--line:#d3dbe5;--accent:#1f5fae;
+--low:#2e7d5b;--med:#b07a00;--high:#c4510c;--crit:#b3202f;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101922;--panel:#17232f;--ink:#e6edf5;--mute:#9aabbd;--line:#2c3c4d;--accent:#6aa6ee;
+--low:#5fc496;--med:#e2b13c;--high:#f08a4b;--crit:#f2707d;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,sans-serif}
+main{max-width:1040px;margin:0 auto;padding:32px 20px 64px}
+h1{font-size:clamp(1.6rem,4vw,2.3rem);line-height:1.15;margin:0 0 8px;letter-spacing:-.01em}
+.lead{color:var(--mute);max-width:64ch;margin:0 0 24px}
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+input[type=search]{flex:1 1 240px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);font:inherit}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+button{font:inherit;padding:8px 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);cursor:pointer}
+button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.count{color:var(--mute);font-size:.9rem;margin:0 0 8px}
+.wrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;min-width:680px}
+th,td{text-align:left;padding:12px 14px;vertical-align:top;border-bottom:1px solid var(--line)}
+th{font-size:.85rem;color:var(--mute);font-weight:600;background:var(--panel);position:sticky;top:0}
+tr:last-child td{border-bottom:0}
+td.p{border-left:5px solid var(--c);width:34%}
+code{font:600 .88rem Consolas,"Cascadia Mono",monospace;word-break:break-all}
+.it{display:block;color:var(--mute);font-size:.9rem;margin-top:2px}
+.r{white-space:nowrap;font-weight:600;color:var(--c)}
+.d{max-width:60ch}
+.note{margin-top:28px;padding:16px 18px;border-left:4px solid var(--accent);background:var(--panel);border-radius:0 8px 8px 0;max-width:80ch}
+.note p{margin:0 0 8px}.note p:last-child{margin:0}
+.empty{padding:24px;color:var(--mute)}
+</style>
+</head>
+<body>
+<main>
+<h1>Privilegi Windows assegnabili a un utente</h1>
+<p class="lead">Elenco dei privilegi che si possono concedere a un account tramite <em>Criteri di sicurezza locali → Assegnazione diritti utente</em> (<code>secpol.msc</code>). Il livello di rischio è una valutazione orientativa per la sicurezza.</p>
+
+<div class="tools">
+<input type="search" id="q" placeholder="Cerca per nome o descrizione…" aria-label="Cerca privilegi">
+<div class="chips" id="chips" role="group" aria-label="Filtra per rischio"></div>
+</div>
+<p class="count" id="count" aria-live="polite"></p>
+<div class="wrap"><table>
+<thead><tr><th>Privilegio</th><th>Cosa consente</th><th>Rischio</th></tr></thead>
+<tbody id="rows"></tbody>
+</table></div>
+
+<div class="note">
+<p><strong>Presente non vuol dire attivo.</strong> Un privilegio nel token può essere <em>Abilitato</em> o <em>Disabilitato</em>; i programmi abilitano da soli quelli che gli servono. Per l'analisi di sicurezza conta la presenza.</p>
+<p><strong>Privilegi e diritti di accesso sono cose diverse.</strong> Voci come <code>SeInteractiveLogonRight</code> o <code>SeNetworkLogonRight</code> sono "diritti di accesso" (chi può fare login e come) e non compaiono in <code>whoami /priv</code>.</p>
+<p>Verifica i tuoi con <code>whoami /priv</code>. Dopo una modifica serve un nuovo login per aggiornare il token.</p>
+</div>
+</main>
+
+<script>
+const R={low:["Basso","--low"],med:["Medio","--med"],high:["Alto","--high"],crit:["Critico","--crit"]};
+const D=[
+["SeAssignPrimaryTokenPrivilege","Sostituzione di un token a livello di processo","Permette di assegnare il token primario a un processo, ad esempio per avviarlo con un'altra identità.","high"],
+["SeAuditPrivilege","Generazione di controlli di sicurezza","Permette di scrivere voci nel registro eventi di sicurezza.","low"],
+["SeBackupPrivilege","Backup di file e directory","Lettura di qualsiasi file ignorando i permessi NTFS. Può servire a copiare SAM o NTDS.dit.","high"],
+["SeChangeNotifyPrivilege","Ignorare controllo incrociato","Attraversare cartelle senza avere permessi su quelle intermedie. Assegnato a tutti.","low"],
+["SeCreateGlobalPrivilege","Creazione di oggetti globali","Creare oggetti globali (file mapping, link simbolici) nelle sessioni di Terminal Services.","low"],
+["SeCreatePagefilePrivilege","Creazione di un file di paging","Creare e ridimensionare il file di paging.","low"],
+["SeCreatePermanentPrivilege","Creazione di oggetti condivisi permanenti","Creare oggetti del gestore oggetti che restano anche senza riferimenti.","low"],
+["SeCreateSymbolicLinkPrivilege","Creazione di collegamenti simbolici","Creare link simbolici nel file system; può facilitare attacchi di reindirizzamento.","med"],
+["SeCreateTokenPrivilege","Creazione di un oggetto token","Creare token di accesso arbitrari, con qualsiasi gruppo e privilegio. Equivale al controllo totale.","crit"],
+["SeDebugPrivilege","Debug di programmi","Agganciarsi a qualsiasi processo, anche di sistema, leggerne la memoria e iniettare codice.","crit"],
+["SeDelegateSessionUserImpersonatePrivilege","Ottenere token di rappresentazione per altri utenti nella stessa sessione","Ottenere token di impersonazione di altri utenti della stessa sessione.","med"],
+["SeEnableDelegationPrivilege","Abilitare account utente e computer come attendibili per la delega","Impostare la delega Kerberos su account in Active Directory.","high"],
+["SeImpersonatePrivilege","Rappresentazione di un client dopo l'autenticazione","Eseguire codice con l'identità di un client autenticato. Base di molte tecniche \"Potato\" per diventare SYSTEM.","high"],
+["SeIncreaseBasePriorityPrivilege","Aumento della priorità di pianificazione","Alzare la priorità di un processo, anche a tempo reale.","low"],
+["SeIncreaseQuotaPrivilege","Modifica delle quote di memoria per un processo","Aumentare la quota di memoria di un processo; usato anche per assegnare token.","low"],
+["SeIncreaseWorkingSetPrivilege","Aumento di un working set di processo","Riservare più RAM fisica a un processo.","low"],
+["SeLoadDriverPrivilege","Caricamento e rimozione di driver di dispositivo","Caricare driver in modalità kernel: esecuzione di codice con i massimi privilegi.","crit"],
+["SeLockMemoryPrivilege","Blocco di pagine in memoria","Impedire che le pagine vengano scaricate su disco. Se abusato, può esaurire la RAM.","med"],
+["SeMachineAccountPrivilege","Aggiunta di workstation al dominio","Creare account computer in Active Directory (fino alla quota prevista).","med"],
+["SeManageVolumePrivilege","Esecuzione di attività di manutenzione del volume","Operazioni a basso livello sul volume, come la lettura del disco grezzo.","high"],
+["SeProfileSingleProcessPrivilege","Profilo di un singolo processo","Raccogliere dati sulle prestazioni di un processo.","low"],
+["SeRelabelPrivilege","Modifica di un'etichetta oggetto","Cambiare il livello di integrità di un oggetto.","med"],
+["SeRemoteShutdownPrivilege","Imposizione dell'arresto da un sistema remoto","Spegnere o riavviare il computer da remoto.","med"],
+["SeRestorePrivilege","Ripristino di file e directory","Scrivere qualsiasi file ignorando i permessi e impostare qualsiasi proprietario. Consente di sovrascrivere file di sistema.","high"],
+["SeSecurityPrivilege","Gestione del controllo e del registro di sicurezza","Configurare l'audit e leggere o cancellare il registro eventi di sicurezza.","high"],
+["SeShutdownPrivilege","Arresto del sistema","Spegnere o riavviare il computer locale.","low"],
+["SeSyncAgentPrivilege","Sincronizzazione dei dati del servizio directory","Leggere tutti gli oggetti e le password in Active Directory (base dell'attacco DCSync).","high"],
+["SeSystemEnvironmentPrivilege","Modifica dei valori dell'ambiente firmware","Modificare le variabili NVRAM del firmware, incluso l'avvio.","med"],
+["SeSystemProfilePrivilege","Profilo delle prestazioni del sistema","Raccogliere dati sulle prestazioni dell'intero sistema.","low"],
+["SeSystemtimePrivilege","Modifica dell'ora di sistema","Cambiare data e ora, con effetti su log e autenticazione Kerberos.","med"],
+["SeTakeOwnershipPrivilege","Acquisizione della proprietà di file o altri oggetti","Diventare proprietario di qualsiasi oggetto e quindi modificarne i permessi.","high"],
+["SeTcbPrivilege","Agire come parte del sistema operativo","Agire come parte del Trusted Computing Base: può impersonare qualsiasi utente senza credenziali.","crit"],
+["SeTimeZonePrivilege","Modifica del fuso orario","Cambiare il fuso orario (non l'ora).","low"],
+["SeTrustedCredManAccessPrivilege","Accesso a Gestione credenziali come chiamante attendibile","Accedere alle credenziali salvate in Credential Manager.","high"],
+["SeUndockPrivilege","Rimozione del computer dall'alloggiamento","Sganciare un portatile dalla docking station.","low"],
+["SeUnsolicitedInputPrivilege","Lettura di dati di input non richiesti da un terminale","Obsoleto, non più usato nelle versioni recenti.","low"]
+];
+let lvl="all";
+const rows=document.getElementById("rows"),q=document.getElementById("q"),cnt=document.getElementById("count"),chips=document.getElementById("chips");
+[["all","Tutti"],["crit","Critico"],["high","Alto"],["med","Medio"],["low","Basso"]].forEach(([k,t])=>{
+const b=document.createElement("button");b.textContent=t;b.dataset.k=k;b.setAttribute("aria-pressed",k==="all");
+b.onclick=()=>{lvl=k;[...chips.children].forEach(c=>c.setAttribute("aria-pressed",c.dataset.k===k));draw()};chips.appendChild(b)});
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function draw(){
+const t=q.value.trim().toLowerCase();
+const f=D.filter(d=>(lvl==="all"||d[3]===lvl)&&(!t||(d[0]+d[1]+d[2]).toLowerCase().includes(t)));
+cnt.textContent=f.length+" di "+D.length+" privilegi";
+rows.innerHTML=f.length?f.map(d=>`<tr style="--c:var(${R[d[3]][1]})"><td class="p"><code>${esc(d[0])}</code><span class="it">${esc(d[1])}</span></td><td class="d">${esc(d[2])}</td><td class="r">${R[d[3]][0]}</td></tr>`).join(""):`<tr><td colspan="3" class="empty">Nessun privilegio corrisponde alla ricerca.</td></tr>`;
+}
+q.addEventListener("input",draw);draw();
+</script>
+</body>
+</html>
