@@ -2,6 +2,7 @@
   "use strict";
 
   var dati = window.INDICE || [];
+  var gruppi = window.GRUPPI || [];
   var contenuti = document.getElementById("contenuti");
   var overlay = document.getElementById("scheda-overlay");
   var corpoScheda = document.getElementById("scheda-corpo");
@@ -33,17 +34,39 @@
     return null;
   }
 
+  function trovaGruppo(id) {
+    for (var i = 0; i < gruppi.length; i++) {
+      if (gruppi[i].id === id) {
+        return gruppi[i];
+      }
+    }
+    return null;
+  }
+
+  function etichettaSezione(sezione) {
+    var parti = [];
+    var gruppo = trovaGruppo(sezione.gruppo);
+    if (gruppo) {
+      parti.push(gruppo.titolo);
+    }
+    if (sezione.categoria) {
+      parti.push(sezione.categoria);
+    }
+    return parti.join(" · ") || sezione.parte || "";
+  }
+
   function renderCard(sezione) {
     var documenti = sezione.documenti || [];
     var contatore = documenti.length
       ? documenti.length + (documenti.length === 1 ? " documento" : " documenti")
       : "In preparazione";
+    var etichetta = sezione.etichetta || sezione.parte || "";
 
     return (
       '<button class="card-sezione" type="button" data-sezione="' +
       esc(sezione.id) +
       '" aria-haspopup="dialog">' +
-      '<span class="etichetta">' + esc(sezione.parte || sezione.titolo) + "</span>" +
+      (etichetta ? '<span class="etichetta">' + esc(etichetta) + "</span>" : "") +
       '<span class="card-titolo">' + esc(sezione.titolo) + "</span>" +
       '<span class="card-breve">' + esc(sezione.breve || "") + "</span>" +
       '<span class="card-piede">' +
@@ -58,11 +81,57 @@
     if (!contenuti) {
       return;
     }
-    var html = '<div class="griglia-sezioni">';
+
+    var ordineGruppi = [];
+    var perGruppo = {};
+
     for (var i = 0; i < dati.length; i++) {
-      html += renderCard(dati[i]);
+      var sezione = dati[i];
+      var idGruppo = sezione.gruppo || "altro";
+      var categoria = sezione.categoria || "Documenti";
+
+      if (!perGruppo[idGruppo]) {
+        perGruppo[idGruppo] = { categorie: [], perCategoria: {} };
+        ordineGruppi.push(idGruppo);
+      }
+
+      var gruppo = perGruppo[idGruppo];
+      if (!gruppo.perCategoria[categoria]) {
+        gruppo.perCategoria[categoria] = [];
+        gruppo.categorie.push(categoria);
+      }
+      gruppo.perCategoria[categoria].push(sezione);
     }
-    html += "</div>";
+
+    var html = "";
+    for (var g = 0; g < ordineGruppi.length; g++) {
+      var id = ordineGruppi[g];
+      var datiGruppo = perGruppo[id];
+      var meta = trovaGruppo(id) || { titolo: id, breve: "" };
+
+      html += '<section class="gruppo-sezioni">';
+      html += '<div class="gruppo-testa">';
+      html += '<h2 class="gruppo-titolo">' + esc(meta.titolo) + "</h2>";
+      if (meta.breve) {
+        html += '<p class="gruppo-breve">' + esc(meta.breve) + "</p>";
+      }
+      html += "</div>";
+
+      for (var c = 0; c < datiGruppo.categorie.length; c++) {
+        var nomeCategoria = datiGruppo.categorie[c];
+        html += '<div class="categoria-sezioni">';
+        html += '<h3 class="categoria-titolo">' + esc(nomeCategoria) + "</h3>";
+        html += '<div class="griglia-sezioni">';
+        var sezioni = datiGruppo.perCategoria[nomeCategoria];
+        for (var s = 0; s < sezioni.length; s++) {
+          html += renderCard(sezioni[s]);
+        }
+        html += "</div></div>";
+      }
+
+      html += "</section>";
+    }
+
     contenuti.innerHTML = html;
   }
 
@@ -119,7 +188,7 @@
     if (!sezione || !overlay) {
       return;
     }
-    parteScheda.textContent = sezione.parte || "";
+    parteScheda.textContent = etichettaSezione(sezione);
     titoloScheda.textContent = sezione.titolo;
     corpoScheda.innerHTML = corpo(sezione);
     chiaveSezione = apertoDa || null;

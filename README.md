@@ -15,52 +15,61 @@ scorciatoia comoda ma pericolosa.
 .
 ├── README.md                              ← questo file (teoria + indice)
 ├── index.html                             ← sito: indice navigabile dei documenti
-├── diario_di_bordo_windows.html           ← bozza sorgente del laboratorio sui registri eventi
-├── guest_additions_virtualbox.md          ← bozza sorgente dell'approfondimento sulle Guest Additions
-├── Laboratorio_registro_eventi_windows.md ← bozza sorgente del laboratorio sui registri eventi
 ├── assets/                                ← componenti del sito (stile e script)
 │   ├── sito.css                           ← stile della pagina indice
-│   ├── sito.js                            ← rendering delle card e delle schede, tema
+│   ├── sito.js                            ← rendering di gruppi, card e schede, tema
 │   ├── indice.js                          ← struttura del sito: qui si aggiungono i nuovi argomenti
 │   └── barra.js                           ← barra "← Indice" inserita in ogni documento
-├── teoria/
-│   ├── Lezione_ le macchine virtuali.html  ← lezione teorica stampabile (panoramica)
-│   └── guest_additions_virtualbox.html     ← approfondimento sulle Guest Additions
-├── installazione/                         ← guide preliminari: preparare l'ambiente
-│   ├── creazione_macchina.html            ← creare e installare la macchina Windows 11
-│   ├── intro_alpine.html                  ← guida introduttiva ad Alpine Linux in VM
-│   └── pdf/                               ← copie stampabili delle guide
-└── attività/                              ← esercitazioni
-    ├── Conf_windows_att1.html             ← Configurazione Windows – Attività 1 (utenti e file)
-    ├── Conf_windows_att2.html             ← Configurazione Windows – Attività 2 (gruppi)
-    ├── Conf_windows_att3.html             ← Configurazione Windows – Attività 3 (rete)
-    ├── att_conf_windows_ufficio.html       ← esercitazione di riepilogo: ufficio commerciale
-    ├── active_directory.html              ← Attività 7: Active Directory (dominio, OU, workstation)
+├── teoria/                                ← tutta la teoria
+│   ├── Lezione_ le macchine virtuali.html ← lezione teorica stampabile (panoramica)
+│   ├── guest_additions_virtualbox.html    ← approfondimento sulle Guest Additions
+│   ├── guest_additions_virtualbox.md      ← bozza sorgente dell'approfondimento
+│   ├── Privilegi_windows_assegnabili.html ← privilegi Windows e diritti utente
+│   └── installazione/                     ← guide di preparazione dell'ambiente
+│       ├── creazione_macchina.html        ← creare e installare la macchina Windows 11
+│       ├── intro_alpine.html              ← guida introduttiva ad Alpine Linux in VM
+│       └── pdf/                           ← copie stampabili delle guide
+└── attività/                              ← tutte le attività di laboratorio
+    ├── Conf_windows_att1.html             ← Attività 1: utenti e file
+    ├── Conf_windows_att2.html             ← Attività 2: gruppi
+    ├── Conf_windows_att3.html             ← Attività 3: condivisione in rete
+    ├── att_conf_windows_ufficio.html       ← Attività 8: ufficio commerciale (riepilogo)
+    ├── active_directory.html              ← Attività 7: Active Directory
     ├── Conf_windows_comandi.md            ← bozza sorgente della guida ai comandi da CMD
-    ├── Conf_windows_comandi.html          ← guida a utenti, gruppi, domini e permessi da Prompt dei comandi
-    ├── Condivisioni di rete_ vince il permesso più restrittivo.html
-                                           ← simulatore interattivo: condivisione SMB vs NTFS
-    ├── Laboratorio_registro_eventi_windows.html  ← laboratorio sui registri eventi
+    ├── Conf_windows_comandi.html          ← guida a utenti, gruppi, domini e permessi da CMD
+    ├── esercitazioni/
+    │   └── configurazione/
+    │       ├── Condivisioni di rete_ vince il permesso più restrittivo.html
+    │       │                               ← simulatore: condivisione SMB vs NTFS
+    │       ├── Laboratorio_registro_eventi_windows.html
+    │       │                               ← laboratorio sui registri eventi
+    │       ├── Laboratorio_registro_eventi_windows.md
+    │       │                               ← bozza sorgente del laboratorio
+    │       ├── diario_di_bordo_windows.html
+    │       │                               ← versione stampabile del laboratorio
+    │       └── Attività_studioVerdisrl_2vm_*.md
+    │                                       ← esercitazione StudioVerdi (studente/docente)
     └── pdf/                               ← copie stampabili delle attività
 ```
 
-Il repository è suddiviso in tre cartelle distinte:
+Il repository è suddiviso in due cartelle principali:
 
-- **`teoria/`** — la **lezione** sulle macchine virtuali in formato stampabile, la
-  dispensa che accompagna la [Parte I](#parte-i--teoria).
-- **`installazione/`** — le guide di **preparazione dell'ambiente**: come si crea e si
-  installa una macchina virtuale. Vanno lette una volta sola, prima delle attività,
-  perché tutte le esercitazioni partono da una macchina già pronta e clonabile.
-- **`attività/`** — le **esercitazioni** vere e proprie, ordinate per argomento.
+- **`teoria/`** — tutta la **teoria**: la lezione sulle macchine virtuali, gli
+  approfondimenti su Guest Additions e privilegi Windows, più le guide di
+  **preparazione dell'ambiente** in `teoria/installazione/`. Queste guide vanno lette
+  una volta sola, prima delle attività, perché tutte le esercitazioni partono da una
+  macchina già pronta e clonabile.
+- **`attività/`** — tutte le **esercitazioni** di laboratorio, con le risorse collegate
+  (PDF, simulatore, laboratorio sui registri eventi).
 
-La pagina **`index.html`** è la versione navigabile di questo indice: una card per
-sezione, con spiegazione in poche parole; cliccandola si apre una **scheda** con un
-breve approfondimento e i documenti che contiene, che si aprono direttamente nel
-browser (funziona anche da file locale), con tema chiaro/scuro. Ogni documento
-propone in alto il link di ritorno all'indice. La struttura del sito è definita
-interamente in `assets/indice.js`: per aggiungere un nuovo argomento basta inserire
-il file HTML nella cartella giusta e la corrispondente voce in quell'elenco, senza
-toccare gli altri file.
+La pagina **`index.html`** è la versione navigabile di questo indice. È organizzata in
+due gruppi — **Teoria** e **Attività** — e ogni gruppo è diviso in sottocategorie per
+argomento. Ogni card apre una **scheda** con un breve approfondimento e i documenti che
+contiene, che si aprono direttamente nel browser (funziona anche da file locale), con
+tema chiaro/scuro. Ogni documento propone in alto il link di ritorno all'indice. La
+struttura del sito è definita interamente in `assets/indice.js`: per aggiungere un
+nuovo argomento basta inserire il file HTML nella cartella giusta e la corrispondente
+voce in quell'elenco, indicando `gruppo` e `categoria`, senza toccare gli altri file.
 
 Ogni documento è un HTML autonomo, ottimizzato per la stampa in A4, che contiene la
 traccia passo-passo, le note sulle differenze tra versioni del sistema, gli avvisi
@@ -232,7 +241,7 @@ ripristini da snapshot e spegnimenti prolungati, l'ora della VM **deriva** e i s
 che si basano sul tempo (autenticazione Kerberos, TLS, log, `cron`, firme
 digitali) falliscono con errori fuorvianti. La correzione è sincronizzare il guest con
 un server NTP esterno: è l'operazione descritta nella guida introduttiva ad Alpine
-Linux presente in `installazione/`.
+Linux presente in `teoria/installazione/`.
 
 ## 4. La memoria
 
@@ -527,7 +536,7 @@ VirtualBox: vedere la tabella dei problemi frequenti nella guida Windows.
 
 ## Creare la macchina virtuale Windows 11
 
-📄 [`installazione/creazione_macchina.html`](installazione/creazione_macchina.html)
+📄 [`teoria/installazione/creazione_macchina.html`](teoria/installazione/creazione_macchina.html)
 
 **Obiettivo.** Costruire da zero la macchina virtuale Windows 11 che fa da base a
 tutte le attività Windows, con un'hardware virtuale adeguato, l'installazione già
@@ -570,7 +579,7 @@ Windows 11 Pro).
 
 ## Guida introduttiva: Alpine Linux in macchina virtuale
 
-📄 [`installazione/intro_alpine.html`](installazione/intro_alpine.html)
+📄 [`teoria/installazione/intro_alpine.html`](teoria/installazione/intro_alpine.html)
 
 **Obiettivo.** Allestire una seconda macchina virtuale, leggera e velocissima, basata
 su **Alpine Linux**, che fa da base alle attività Linux: rete in NAT, installazione
@@ -792,7 +801,7 @@ solo l'NTFS.
 
 ### Approfondimento: in rete vince il permesso più restrittivo
 
-📄 [`attività/Condivisioni di rete_ vince il permesso più restrittivo.html`](attività/Condivisioni di rete_ vince il permesso più restrittivo.html)
+📄 [`attività/esercitazioni/configurazione/Condivisioni di rete_ vince il permesso più restrittivo.html`](attività/esercitazioni/configurazione/Condivisioni di rete_ vince il permesso più restrittivo.html)
 
 **Obiettivo.** Capire che, quando una cartella è condivisa in rete, l'accesso non
 dipende da un solo elenco di permessi ma da **due filtri in serie** — i permessi di
@@ -886,7 +895,7 @@ dominio e privilegi adeguati.
 
 ### Laboratorio: il registro eventi di Windows
 
-📄 [`attività/Laboratorio_registro_eventi_windows.html`](attività/Laboratorio_registro_eventi_windows.html)
+📄 [`attività/esercitazioni/configurazione/Laboratorio_registro_eventi_windows.html`](attività/esercitazioni/configurazione/Laboratorio_registro_eventi_windows.html)
 
 **Obiettivo.** Imparare a leggere il **registro eventi** di Windows come un
 "diario di bordo": capire perché un computer si è bloccato, ricostruire chi ha fatto
@@ -988,7 +997,7 @@ in [Parte II](#guida-introduttiva-alpine-linux-in-macchina-virtuale), che copre
 l'installazione di Alpine Linux in macchina virtuale, la gestione della rete, del
 gestore dei pacchetti e della shell:
 
-📄 [`installazione/intro_alpine.html`](installazione/intro_alpine.html) — *Guida
+📄 [`teoria/installazione/intro_alpine.html`](teoria/installazione/intro_alpine.html) — *Guida
 introduttiva: Alpine Linux in Macchina Virtuale* (rete in NAT, `setup-alpine`,
 `setup-disk`, ripristino dei repository con `apk`, Bash come shell predefinita,
 sincronizzazione dell'ora con `chrony`, editor `micro`, font della console e tabella
