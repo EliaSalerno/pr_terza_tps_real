@@ -41,6 +41,8 @@ scorciatoia comoda ma pericolosa.
     ├── active_directory.html              ← Attività 7: Active Directory
     ├── Conf_windows_comandi.md            ← bozza sorgente della guida ai comandi da CMD
     ├── Conf_windows_comandi.html          ← guida a utenti, gruppi, domini e permessi da CMD
+    ├── Esercitazione_permessi_file_cartelle_CMD.html
+    │                                       ← esercizi con soluzioni su icacls, takeown e attrib
     ├── esercitazioni/
     │   └── configurazione/
     │       ├── Condivisioni di rete_ vince il permesso più restrittivo.html
@@ -694,6 +696,7 @@ virtualizzazione hardware abilitata nel BIOS/UEFI.
 | **6** | [Registro eventi](#laboratorio-il-registro-eventi-di-windows) | Visualizzatore eventi, lettura e filtro degli eventi, registri Applicazione/Sicurezza/Sistema, interrogazione da PowerShell (`Get-WinEvent`) e prompt (`wevtutil`), creazione di eventi e attività collegate, indagine forense finale | [§3](#3-la-cpu-vista-dallospite) (orologio e ordine temporale dei log); struttura ed elementi di un evento, livelli e ID evento, ACL del registro Sicurezza e privilegi di amministratore |
 | **7** | [Active Directory – Dominio, OU, utenti e workstation](#configurazione-windows--attività-7-active-directory--dominio-ou-utenti-e-workstation) | Creazione del dominio, organizzazione in OU, gestione di utenti e gruppi, aggiunta delle workstation al dominio e verifica delle autenticazioni | [§2](#2-architettura-lhypervisor), [§8](#8-ciclo-di-vita-e-manutenzione); directory services, autenticazione centralizzata, ambiti dominio/OU, join al dominio |
 | **8** | [Ufficio commerciale (riepilogo)](#attività-8-ufficio-commerciale-esercitazione-di-riepilogo) | Esercitazione completa su uno scenario aziendale: gruppi e utenti locali da CMD, criteri password e blocco account, permessi NTFS secondo una matrice, condivisione SMB, script di accesso, collaudo e relazione finale | [§5](#5-la-memoria-di-massa), [§6](#6-la-rete); SID, account e gruppi locali, ACL ed ereditarietà, precedenza del «Nega», minimo privilegio, condivisione vs NTFS |
+| **9** | [Permessi di file e cartelle da CMD](#esercitazione-permessi-di-file-e-cartelle-da-prompt-dei-comandi) | Dodici esercizi con soluzioni: ACL, lettura e scrittura, Nega e Consenti, ereditarietà, salvataggio e ripristino delle ACL, `takeown`, attributi, SID e PowerShell | [§5](#5-la-memoria-di-massa); ACL e ACE, ereditarietà, precedenza del «Nega», permessi cumulativi, differenza fra permessi e attributi, `cmd.exe` e PowerShell |
 
 ## Attività su Windows
 
@@ -710,7 +713,9 @@ da una VM Windows con uno snapshot "pulito" e da un utente `studente1`. Il
 **simulatore** sui permessi di condivisione, invece, si usa nel browser senza avviare
 alcuna macchina virtuale. L'**esercitazione di riepilogo** sull'ufficio commerciale
 richiede una VM Windows pulita e un prompt avviato come amministratore: mette insieme
-in un unico scenario utenti, gruppi, permessi e condivisione.
+in un unico scenario utenti, gruppi, permessi e condivisione. L'**esercitazione sui
+permessi da CMD** raccoglie dodici esercizi brevi con soluzioni, da eseguire su una VM
+Windows pulita con il Prompt dei comandi avviato come amministratore.
 
 ### Configurazione Windows – Attività 1: utenti e file
 
@@ -1030,6 +1035,44 @@ snapshot della VM prima di iniziare: l'esercizio crea molti oggetti e conviene p
 ripartire da una macchina pulita. I nomi dei gruppi integrati, dei giorni e il formato
 delle date dipendono dalla lingua di Windows; usare `*` al posto della password per non
 lasciarla nella cronologia dei comandi.
+
+### Esercitazione: permessi di file e cartelle da Prompt dei comandi
+
+📄 [`attività/Esercitazione_permessi_file_cartelle_CMD.html`](attività/Esercitazione_permessi_file_cartelle_CMD.html)
+
+**Obiettivo.** Fare pratica in modo diretto sui **permessi NTFS** di file e cartelle
+da `cmd.exe`, con esempi brevi e la soluzione subito sotto ogni esercizio: leggere le
+ACL, concedere e negare l'accesso, togliere permessi, gestire l'ereditarietà,
+salvare e ripristinare le ACL, prendere possesso di un file e usare gli attributi.
+
+**In sintesi.** Si prepara una cartella `C:\LabPermessi` con una sottocartella e due
+file, più due utenti di prova `prova1` e `prova2`. I dodici esercizi usano `icacls`
+per visualizzare le ACL e per concedere `(R)`, `(M)` e `(W)`, `takeown` per il
+possesso, `attrib` per gli attributi, `powershell` per ricavare il SID e i comandi
+`/save` e `/restore` per il backup dei permessi. Ogni esercizio ha la soluzione, una
+tabella di verifica dei risultati e un riepilogo finale dei comandi; si chiude con la
+pulizia di utenti e cartella di laboratorio.
+
+**Argomenti toccati.** ACL e ACE, livelli di accesso `R`, `M`, `W`, `F`, diritti
+specifici, flag `(OI)`, `(CI)` e `(I)`, ereditarietà e sua conversione in permessi
+espliciti, precedenza del «Nega» sul «Consenti», rimozione di un permesso con
+`/remove`, `/remove:g` e `/remove:d`, salvataggio e ripristino delle ACL, possesso con
+`takeown` e `takeown /A`, differenza fra permessi e attributi (`attrib +R`, `+H`), uso
+dei SID al posto dei nomi e richiamo di PowerShell da CMD.
+
+**Argomenti teorici da conoscere.** Concetti Windows da padroneggiare: la struttura di
+una **ACL** e delle sue **ACE**, il significato dell'**ereditarietà** e dei flag
+`(OI)`/`(CI)`, la somma dei permessi di utente e gruppi con la precedenza del «Nega»,
+la differenza fra **permessi NTFS**, **proprietario** e **attributi** del file, il
+fatto che i permessi siano legati al **SID** e non al nome, e la distinzione fra la
+shell `cmd.exe` e **PowerShell**. Utile anche la lettura del riferimento
+[Permessi di file e cartelle da Prompt dei comandi](#riferimenti-rapidi-permessi-da-prompt-dei-comandi).
+
+**Nota operativa.** Aprire il Prompt dei comandi **come amministratore** e lavorare in
+una macchina virtuale Windows 11: l'esercitazione crea utenti e modifica permessi. Per
+provare l'accesso come `prova1` o `prova2` usare `runas /user:prova1 cmd` oppure
+cambiare utente nella VM. Le password uguali ai nomi utente servono solo per il
+laboratorio.
 
 ## Attività su Linux (Alpine Linux e Bash)
 
