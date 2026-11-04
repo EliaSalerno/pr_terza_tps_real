@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guida Permessi Cartella via CMD</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent-color: #38bdf8;
+            --accent-hover: #0284c7;
+            --cmd-bg: #000000;
+            --cmd-text: #4af626;
+            --border-color: #334155;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1, h2, h3 {
+            color: var(--accent-color);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            color: #94a3b8;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background-color: #0f172a;
+            color: #fff;
+            box-sizing: border-box;
+        }
+
+        .step-number {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: #000;
+            font-weight: bold;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            margin-right: 10px;
+        }
+
+        .command-box {
+            background-color: #000;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 12px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            color: #fff;
+            position: relative;
+            margin: 10px 0;
+        }
+
+        .command-text {
+            color: #38bdf8;
+            word-break: break-all;
+        }
+
+        .cmd-window {
+            background-color: var(--cmd-bg);
+            color: var(--cmd-text);
+            font-family: 'Consolas', 'Courier New', monospace;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            height: 220px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: #0f172a;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+            color: #fff;
+        }
+
+        .btn-copy {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            padding: 4px 8px;
+            font-size: 0.8em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #0f172a;
+            color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Configurazione Permessi Cartella tramite Prompt dei Comandi</h1>
+    <p>Utilizza questo strumento per personalizzare i comandi e simulare l'intero processo da terminale Windows.</p>
+
+    <!-- Parametri Utente -->
+    <div class="card">
+        <h2>1. Personalizza i Parametri</h2>
+        <div class="grid">
+            <div>
+                <label for="folderPath">Percorso Cartella:</label>
+                <input type="text" id="folderPath" value="C:\Dati\CartellaRiservata" oninput="updateCommands()">
+            </div>
+            <div>
+                <label for="groupName">Nome Gruppo:</label>
+                <input type="text" id="groupName" value="MieiCollaboratori" oninput="updateCommands()">
+            </div>
+            <div>
+                <label for="userName">Nome Utente da Aggiungere:</label>
+                <input type="text" id="userName" value="MarioRossi" oninput="updateCommands()">
+            </div>
+        </div>
+    </div>
+
+    <!-- Passaggi Operativi -->
+    <div class="card">
+        <h2>2. Passaggi da Eseguire nel Prompt (Amministratore)</h2>
+        
+        <h3><span class="step-number">1</span>Apri il Terminale come Amministratore</h3>
+        <p>Premi <code>Win + X</code> e seleziona <strong>Terminal (Amministratore)</strong> o <strong>Prompt dei comandi (Amministratore)</strong>.</p>
+
+        <h3><span class="step-number">2</span>Crea il nuovo gruppo locale</h3>
+        <div class="command-box">
+            <span class="command-text" id="cmd1">net localgroup MieiCollaboratori /add</span>
+        </div>
+
+        <h3><span class="step-number">3</span>Aggiungi l'utente al gruppo</h3>
+        <div class="command-box">
+            <span class="command-text" id="cmd2">net localgroup MieiCollaboratori MarioRossi /add</span>
+        </div>
+
+        <h3><span class="step-number">4</span>Disabilita l'ereditarietà ACL sulla cartella</h3>
+        <p>Rimuove i permessi ereditati dalla cartella padre e converte le regole esistenti in regole esplicite.</p>
+        <div class="command-box">
+            <span class="command-text" id="cmd3">icacls "C:\Dati\CartellaRiservata" /inheritance:d</span>
+        </div>
+
+        <h3><span class="step-number">5</span>Rimuovi i permessi per gli altri utenti</h3>
+        <p>Rimuove l'accesso al gruppo utenti standard <code>BUILTIN\Users</code> per isolare la cartella.</p>
+        <div class="command-box">
+            <span class="command-text" id="cmd4">icacls "C:\Dati\CartellaRiservata" /remove "BUILTIN\Users"</span>
+        </div>
+
+        <h3><span class="step-number">6</span>Assegna il permesso di Modifica esclusivo al gruppo</h3>
+        <p>Il flag <code>(OI)(CI)</code> assicura che il permesso sia ereditato da tutti i file e cartelle figli.</p>
+        <div class="command-box">
+            <span class="command-text" id="cmd5">icacls "C:\Dati\CartellaRiservata" /grant MieiCollaboratori:(OI)(CI)(M)</span>
+        </div>
+
+        <h3><span class="step-number">7</span>Verifica finale dei permessi</h3>
+        <div class="command-box">
+            <span class="command-text" id="cmd6">icacls "C:\Dati\CartellaRiservata"</span>
+        </div>
+    </div>
+
+    <!-- Simulatore Terminale -->
+    <div class="card">
+        <h2>3. Simulatore Output Terminale</h2>
+        <p>Clicca sul pulsante sottostante per simulare l'esecuzione dei comandi sopra indicati nel Prompt dei comandi:</p>
+        <button onclick="runSimulation()">Esegui Simulazione CMD</button>
+        <br><br>
+        <div class="cmd-window" id="terminalOutput">Microsoft Windows [Version 10.0.19045.3803]
+(c) Microsoft Corporation. Tutti i diritti riservati.
+
+C:\Windows\System32> _</div>
+    </div>
+
+    <!-- Legenda dei Flag icacls -->
+    <div class="card">
+        <h2>4. Legenda Sintassi icacls</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Flag</th>
+                    <th>Significato</th>
+                    <th>Descrizione</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>(OI)</strong></td>
+                    <td>Object Inherit</td>
+                    <td>I file contenuti erediteranno le autorizzazioni.</td>
+                </tr>
+                <tr>
+                    <td><strong>(CI)</strong></td>
+                    <td>Container Inherit</td>
+                    <td>Le sottocartelle erediteranno le autorizzazioni.</td>
+                </tr>
+                <tr>
+                    <td><strong>(M)</strong></td>
+                    <td>Modify</td>
+                    <td>Permesso di lettura, scrittura, esecuzione ed eliminazione.</td>
+                </tr>
+                <tr>
+                    <td><strong>(F)</strong></td>
+                    <td>Full Control</td>
+                    <td>Controllo totale (incluso il cambio di permessi e proprietà).</td>
+                </tr>
+                <tr>
+                    <td><strong>/inheritance:d</strong></td>
+                    <td>Disable Inheritance</td>
+                    <td>Interrompe l'ereditarietà e copia le voci correnti.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function updateCommands() {
+        const folder = document.getElementById('folderPath').value || 'C:\\Dati\\CartellaRiservata';
+        const group = document.getElementById('groupName').value || 'MieiCollaboratori';
+        const user = document.getElementById('userName').value || 'MarioRossi';
+
+        document.getElementById('cmd1').innerText = `net localgroup ${group} /add`;
+        document.getElementById('cmd2').innerText = `net localgroup ${group} ${user} /add`;
+        document.getElementById('cmd3').innerText = `icacls "${folder}" /inheritance:d`;
+        document.getElementById('cmd4').innerText = `icacls "${folder}" /remove "BUILTIN\\Users"`;
+        document.getElementById('cmd5').innerText = `icacls "${folder}" /grant ${group}:(OI)(CI)(M)`;
+        document.getElementById('cmd6').innerText = `icacls "${folder}"`;
+    }
+
+    function runSimulation() {
+        const folder = document.getElementById('folderPath').value || 'C:\\Dati\\CartellaRiservata';
+        const group = document.getElementById('groupName').value || 'MieiCollaboratori';
+        const user = document.getElementById('userName').value || 'MarioRossi';
+
+        const output = `C:\\Windows\\System32> net localgroup ${group} /add
+Esecuzione del comando riuscita.
+
+C:\\Windows\\System32> net localgroup ${group} ${user} /add
+Esecuzione del comando riuscita.
+
+C:\\Windows\\System32> icacls "${folder}" /inheritance:d
+Elaborazione file completata: ${folder}
+Elaborati file: 1. Non riusciti file: 0
+
+C:\\Windows\\System32> icacls "${folder}" /remove "BUILTIN\\Users"
+Elaborazione file completata: ${folder}
+Elaborati file: 1. Non riusciti file: 0
+
+C:\\Windows\\System32> icacls "${folder}" /grant ${group}:(OI)(CI)(M)
+Elaborazione file completata: ${folder}
+Elaborati file: 1. Non riusciti file: 0
+
+C:\\Windows\\System32> icacls "${folder}"
+${folder} ${group}:(OI)(CI)(M)
+${folder} NT AUTHORITY\\SYSTEM:(I)(F)
+${folder} BUILTIN\\Administrators:(I)(F)
+
+Elaborati file: 1. Non riusciti file: 0
+
+C:\\Windows\\System32> _`;
+
+        document.getElementById('terminalOutput').innerText = output;
+    }
+</script>
+
+</body>
+</html>
