@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Permessi dei file da Prompt dei comandi</title>
+<style>
+:root{--bg:#f7f8f6;--surface:#fff;--ink:#1a2118;--mute:#5a6657;--line:#d9ded5;--accent:#2f6b2a;--code-bg:#ecf1e8;--warn:#8a3b12;--warn-bg:#fbeee4;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10150f;--surface:#171e16;--ink:#e4ebe1;--mute:#9aa896;--line:#29332700;--line:#293327;--accent:#8fd486;--code-bg:#1d281c;--warn:#f1b48c;--warn-bg:#2e2119}}
+:root[data-theme="dark"]{--bg:#10150f;--surface:#171e16;--ink:#e4ebe1;--mute:#9aa896;--line:#293327;--accent:#8fd486;--code-bg:#1d281c;--warn:#f1b48c;--warn-bg:#2e2119}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 76px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+code,.cmd{font-family:"JetBrains Mono",ui-monospace,Consolas,"Courier New",monospace}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--surface);z-index:10}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--surface);border-bottom:1px solid var(--line);padding:12px 16px}
+.bar{max-width:880px;margin:0 auto;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.bar h1{font-size:1.05rem;margin:0;flex:1 1 260px;font-weight:600}
+input[type=search]{flex:1 1 220px;padding:9px 12px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit}
+input[type=search]:focus-visible,a:focus-visible,.cmd:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main{max-width:880px;margin:0 auto;padding:20px 16px 60px}
+.lead{color:var(--mute);margin:0 0 18px;max-width:68ch}
+#toc{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 0 26px;padding:0;list-style:none;font-size:.9rem}
+#toc a{color:var(--accent);text-decoration:none}#toc a:hover{text-decoration:underline}
+section{margin:0 0 34px}
+h2{font-size:1.25rem;margin:0 0 4px;font-weight:600}
+.intro{margin:0 0 10px;color:var(--mute);max-width:68ch}
+.note{margin:10px 0 0;padding:10px 12px;border-radius:6px;background:var(--warn-bg);color:var(--warn);font-size:.92rem;max-width:68ch}
+.rows{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.row{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:6px 18px;padding:10px 14px;border-top:1px solid var(--line);align-items:start}
+.row:first-child{border-top:0}
+.cmd{background:var(--code-bg);border-radius:5px;padding:6px 8px;font-size:.84rem;white-space:pre-wrap;word-break:break-word;position:relative;margin:0}
+.row.copy .cmd{cursor:pointer}
+.row.copy .cmd::after{content:"Copia";position:absolute;right:6px;top:5px;font:600 .68rem/1 "IBM Plex Sans",system-ui,sans-serif;color:var(--accent);opacity:0}
+.row.copy .cmd:hover::after,.row.copy .cmd:focus-visible::after{opacity:1}
+.row.copy .cmd.done::after{content:"Copiato";opacity:1}
+.desc{font-size:.93rem}
+.hide{display:none}
+.empty{color:var(--mute);padding:20px 0}
+footer{color:var(--mute);font-size:.85rem;margin-top:10px}
+@media (max-width:640px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="bar"><h1>Permessi dei file da Prompt dei comandi</h1><input type="search" id="q" placeholder="Cerca un comando o un’opzione…" aria-label="Cerca"></div></header>
+<main>
+<p class="lead">Riferimento per Windows sui singoli file: <b>icacls</b>, <b>takeown</b>, <b>attrib</b> e PowerShell. Apri il Prompt dei comandi come amministratore. Tocca un comando per copiarlo.</p>
+<ul id="toc"></ul>
+<div id="out"></div>
+<p class="empty hide" id="none">Nessun risultato.</p>
+<footer>Sostituisci percorsi e nomi utente con i tuoi. Racchiudi tra virgolette i percorsi con spazi. Sui file non servono i flag (OI) e (CI).</footer>
+</main>
+<script>
+var S=[
+{id:"vedi",t:"Visualizzare i permessi",i:"ACL, proprietario e attributi di un file.",copy:1,r:[
+["icacls \"C:\\Dati\\file.txt\"","Mostra la ACL del file."],
+["icacls \"C:\\Dati\\*.pdf\"","Mostra la ACL di tutti i PDF della cartella."],
+["icacls \"C:\\Dati\\*.pdf\" /T","Include anche le sottocartelle."],
+["icacls \"C:\\Dati\\*\" /findsid Utente","Trova i file con una voce per quell’utente o SID."],
+["icacls \"C:\\Dati\\file.txt\" /verify","Verifica che la ACL sia coerente."],
+["dir /Q \"C:\\Dati\\file.txt\"","Mostra il proprietario del file."],
+["attrib \"C:\\Dati\\file.txt\"","Mostra gli attributi (R, H, S, A, I)."]]},
+{id:"liv",t:"Livelli di accesso semplici",i:"Si usano dopo i due punti, ad esempio Utente:M.",r:[
+["F","Controllo completo."],["M","Modifica (lettura, scrittura, esecuzione, eliminazione)."],["RX","Lettura ed esecuzione."],["R","Sola lettura."],["W","Sola scrittura."],["D","Eliminazione."]]},
+{id:"dir",t:"Diritti specifici",i:"Si combinano con la virgola, ad esempio Utente:(R,WD). Sui file hanno questo significato.",r:[
+["RD","Legge il contenuto del file."],["WD","Scrive nel file (sovrascrive)."],["AD","Aggiunge dati in coda al file."],["X","Esegue il file."],["DE","Elimina il file."],["RA","Legge gli attributi."],["WA","Scrive gli attributi."],["REA","Legge gli attributi estesi."],["WEA","Scrive gli attributi estesi."],["RC","Legge la ACL."],["WDAC","Modifica la ACL (cambia i permessi)."],["WO","Cambia il proprietario."],["S","Sincronizza."],["GR / GW / GE / GA","Lettura, scrittura, esecuzione, tutto (generici)."],["MA","Massimo consentito."],["AS","Accesso alla ACL di sistema (audit)."]],
+n:"DC (elimina elementi figli) e i flag (OI), (CI), (IO), (NP) riguardano le cartelle e non servono per un singolo file."},
+{id:"ered",t:"Ereditarietà sui file",i:"Un file riceve di norma i permessi dalla cartella che lo contiene. Nell’output compare (I) accanto alle voci ereditate.",copy:1,r:[
+["icacls \"C:\\Dati\\file.txt\" /inheritance:e","Abilita l’ereditarietà dalla cartella padre."],
+["icacls \"C:\\Dati\\file.txt\" /inheritance:d","Disabilita l’ereditarietà, copiando le voci ereditate."],
+["icacls \"C:\\Dati\\file.txt\" /inheritance:r","Disabilita l’ereditarietà e rimuove le voci ereditate."],
+["icacls \"C:\\Dati\\file.txt\" /reset","Riporta il file ai permessi ereditati dalla cartella."]]},
+{id:"cmd",t:"Comandi di icacls",i:"Sintassi: icacls file [/comando ...].",copy:1,r:[
+["icacls \"C:\\Dati\\file.txt\" /grant Utente:M","Aggiunge il permesso, mantenendo gli altri."],
+["icacls \"C:\\Dati\\file.txt\" /grant:r Utente:R","Sostituisce i permessi esistenti dell’utente."],
+["icacls \"C:\\Dati\\file.txt\" /grant Utente:R Gruppo:M","Concede permessi a più soggetti insieme."],
+["icacls \"C:\\Dati\\file.txt\" /deny Utente:W","Nega esplicitamente: prevale sulle concessioni."],
+["icacls \"C:\\Dati\\file.txt\" /remove Utente","Rimuove tutte le voci dell’utente."],
+["icacls \"C:\\Dati\\file.txt\" /remove:g Utente","Rimuove solo le concessioni."],
+["icacls \"C:\\Dati\\file.txt\" /remove:d Utente","Rimuove solo le negazioni."],
+["icacls \"C:\\Dati\\file.txt\" /setowner Utente","Imposta il proprietario."],
+["icacls \"C:\\Dati\\file.txt\" /setintegritylevel M","Imposta il livello di integrità (L, M, H)."],
+["icacls \"C:\\Dati\\file.txt\" /save acl.txt","Salva la ACL in un file."],
+["icacls \"C:\\Dati\" /restore acl.txt","Ripristina le ACL salvate (indica la cartella che contiene i file)."]],
+n:"Il nome può essere un utente, un gruppo, DOMINIO\\Utente o un SID preceduto da asterisco (*S-1-5-32-545)."},
+{id:"jol",t:"Più file con i caratteri jolly",i:"Con * e ? si agisce su molti file con un solo comando.",copy:1,r:[
+["icacls \"C:\\Dati\\*.pdf\" /grant Utente:R","Tutti i PDF della cartella."],
+["icacls \"C:\\Dati\\*.log\" /grant Utente:R /T /C","Tutti i .log anche nelle sottocartelle, ignorando gli errori."],
+["icacls \"C:\\Dati\\rapporto?.docx\" /deny Utente:W","? sostituisce un solo carattere (rapporto1.docx, rapporto2.docx...)."],
+["icacls \"C:\\Dati\\*\" /grant Utente:R /C","Tutti gli elementi della cartella, file e sottocartelle."],
+["for /R \"C:\\Dati\" %f in (*.txt) do icacls \"%f\" /grant Utente:R","Ciclo su file in profondità (nei file .bat usa %%f)."]]},
+{id:"opz",t:"Opzioni di icacls",i:"Si aggiungono in fondo al comando.",copy:1,r:[
+["/T","Applica ai file che corrispondono al pattern anche nelle sottocartelle."],["/C","Continua in caso di errori."],["/L","Agisce sul collegamento simbolico, non sul file di destinazione."],["/Q","Silenzioso: non mostra i messaggi di riuscita."]]},
+{id:"tk",t:"takeown: possesso di un file",i:"Serve quando icacls risponde “Accesso negato”. Prima il possesso, poi i permessi.",copy:1,r:[
+["takeown /F \"C:\\Dati\\file.txt\"","Rende proprietario l’utente corrente."],
+["takeown /F \"C:\\Dati\\file.txt\" /A","Assegna il possesso al gruppo Administrators."],
+["takeown /F \"C:\\Dati\\*.txt\"","Prende il possesso di tutti i .txt della cartella."],
+["takeown /F \"C:\\Dati\\*.txt\" /R","Include anche le sottocartelle."],
+["takeown /F \"C:\\Dati\\file.txt\" /SKIPSL","Non segue i collegamenti simbolici."],
+["takeown /F \"C:\\Dati\\file.txt\" && icacls \"C:\\Dati\\file.txt\" /grant Administrators:F","Sequenza classica: possesso, poi controllo completo."]]},
+{id:"att",t:"attrib: attributi dei file",i:"Non sono permessi, ma incidono su modifica e visibilità.",copy:1,r:[
+["attrib +r \"C:\\Dati\\file.txt\"","Imposta la sola lettura."],
+["attrib -r \"C:\\Dati\\file.txt\"","Toglie la sola lettura."],
+["attrib +h \"C:\\Dati\\file.txt\"","Nasconde il file."],
+["attrib +s +h \"C:\\Dati\\file.txt\"","Lo imposta come file di sistema nascosto."],
+["attrib -s -h \"C:\\Dati\\file.txt\"","Rimuove i due attributi."],
+["attrib +a \"C:\\Dati\\file.txt\"","Imposta l’attributo archivio."],
+["attrib +i \"C:\\Dati\\file.txt\"","Esclude il file dall’indicizzazione."],
+["attrib -r \"C:\\Dati\\*.txt\" /S","Agisce sui file corrispondenti anche nelle sottocartelle."],
+["attrib -r \"C:\\Dati\\*\" /S /D","/D include anche le cartelle."],
+["attrib -r /L \"C:\\Dati\\link\"","/L agisce sul collegamento simbolico."]]},
+{id:"ric",t:"Ricette frequenti",i:"Sequenze pronte da adattare.",copy:1,r:[
+["takeown /F \"C:\\Dati\\file.txt\" && icacls \"C:\\Dati\\file.txt\" /grant %username%:F","Recuperare un file che dà “Accesso negato”."],
+["icacls \"C:\\Dati\\file.txt\" /inheritance:r /grant:r Administrators:F SYSTEM:F Utente:M","File riservato: solo amministratori, sistema e un utente."],
+["icacls \"C:\\Dati\\file.txt\" /deny Utente:(DE)","Impedisce a un utente di eliminare il file."],
+["icacls \"C:\\Dati\\file.txt\" /grant Utente:R /deny Utente:W","Sola lettura per un utente."],
+["icacls \"C:\\Dati\\file.exe\" /deny Utente:X","Impedisce l’esecuzione di un programma."],
+["icacls \"C:\\Dati\\file.txt\" /grant *S-1-1-0:R","Lettura per Everyone."],
+["attrib +r +h \"C:\\Dati\\file.txt\"","Protegge e nasconde il file."],
+["icacls \"C:\\Dati\\*.docx\" /reset /T /C /Q","Reimposta i permessi di tutti i .docx ai valori ereditati."]]},
+{id:"sid",t:"SID e nomi utili",i:"I SID funzionano su qualsiasi lingua di Windows.",copy:1,r:[
+["*S-1-1-0","Everyone (Tutti)."],["*S-1-5-18","SYSTEM."],["*S-1-5-32-544","Administrators."],["*S-1-5-32-545","Users (Utenti)."],["*S-1-5-11","Authenticated Users."],["whoami /user","SID dell’utente corrente."],["whoami /groups","Gruppi dell’utente corrente."]]},
+{id:"ps",t:"Equivalenti PowerShell",i:"Per script più articolati.",copy:1,r:[
+["Get-Acl \"C:\\Dati\\file.txt\" | Format-List","Mostra la ACL del file."],
+["$a = Get-Acl \"C:\\Dati\\file.txt\"; $r = New-Object System.Security.AccessControl.FileSystemAccessRule(\"Utente\",\"Modify\",\"Allow\"); $a.AddAccessRule($r); Set-Acl \"C:\\Dati\\file.txt\" $a","Aggiunge una regola di modifica."],
+["$a.SetAccessRuleProtection($true,$false)","Disabilita l’ereditarietà e rimuove le voci ereditate (poi Set-Acl)."],
+["$a.SetOwner([System.Security.Principal.NTAccount]\"Utente\"); Set-Acl \"C:\\Dati\\file.txt\" $a","Cambia il proprietario."],
+["Get-ChildItem \"C:\\Dati\" -Filter *.pdf -Recurse | Get-Acl","Legge le ACL di tutti i PDF, ricorsivamente."],
+["(Get-Item \"C:\\Dati\\file.txt\").IsReadOnly = $true","Imposta la sola lettura."]]},
+{id:"err",t:"Problemi tipici sui file",i:"",r:[
+["Accesso negato","Apri il Prompt come amministratore e usa prima takeown."],
+["Il file è in uso da un altro processo","Chiudi il programma che lo usa. I permessi si possono modificare, ma eliminare o rinominare il file no."],
+["Impossibile modificare un file in sola lettura","Togli l’attributo con attrib -r, oppure verifica che non ci sia un /deny W."],
+["Nessun mapping tra nomi account e SID","Nome utente errato o account inesistente: controlla o usa il SID."],
+["Il comando elabora 0 file","Percorso errato, virgolette mancanti o pattern che non corrisponde."],
+["Il permesso nega nonostante /grant","Una voce /deny prevale: rimuovila con /remove:d."]],
+n:"Prima di /reset o /inheritance:r su molti file salva la ACL con /save: così puoi tornare indietro con /restore."}
+];
+var out=document.getElementById('out'),toc=document.getElementById('toc');
+S.forEach(function(s){
+ var li=document.createElement('li'),a=document.createElement('a');a.href='#'+s.id;a.textContent=s.t;li.appendChild(a);toc.appendChild(li);
+ var sec=document.createElement('section');sec.id=s.id;
+ var h=document.createElement('h2');h.textContent=s.t;sec.appendChild(h);
+ if(s.i){var p=document.createElement('p');p.className='intro';p.textContent=s.i;sec.appendChild(p);}
+ var box=document.createElement('div');box.className='rows';
+ s.r.forEach(function(r){
+  var row=document.createElement('div');row.className='row'+(s.copy?' copy':'');
+  var c=document.createElement('pre');c.className='cmd';c.textContent=r[0];
+  if(s.copy){c.tabIndex=0;c.setAttribute('role','button');
+   var go=function(){try{navigator.clipboard.writeText(r[0]).then(function(){c.classList.add('done');setTimeout(function(){c.classList.remove('done')},1200)},function(){})}catch(e){}};
+   c.addEventListener('click',go);c.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}});}
+  var d=document.createElement('div');d.className='desc';d.textContent=r[1];
+  row.appendChild(c);row.appendChild(d);box.appendChild(row);
+ });
+ sec.appendChild(box);
+ if(s.n){var n=document.createElement('p');n.className='note';n.textContent=s.n;sec.appendChild(n);}
+ out.appendChild(sec);
+});
+document.getElementById('q').addEventListener('input',function(e){
+ var v=e.target.value.trim().toLowerCase(),any=false;
+ out.querySelectorAll('section').forEach(function(sec){
+  var shown=0;
+  sec.querySelectorAll('.row').forEach(function(r){var m=!v||r.textContent.toLowerCase().indexOf(v)>-1;r.classList.toggle('hide',!m);if(m)shown++;});
+  sec.classList.toggle('hide',!shown);if(shown)any=true;
+ });
+ document.getElementById('none').classList.toggle('hide',any);
+});
+</script>
+<script src="../assets/barra.js"></script>
+</body>
+</html>

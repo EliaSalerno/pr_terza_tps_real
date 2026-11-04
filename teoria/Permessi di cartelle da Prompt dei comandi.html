@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Permessi di cartelle e file da Prompt dei comandi</title>
+<style>
+:root{--bg:#f6f8f9;--surface:#fff;--ink:#14212b;--mute:#566673;--line:#d5dde2;--accent:#0b6e79;--code-bg:#e9f1f3;--warn:#8a3b12;--warn-bg:#fbeee4;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e161c;--surface:#152028;--ink:#e3ebf0;--mute:#93a5b1;--line:#27363f;--accent:#4cc3cf;--code-bg:#1b2b34;--warn:#f1b48c;--warn-bg:#2e2119}}
+:root[data-theme="dark"]{--bg:#0e161c;--surface:#152028;--ink:#e3ebf0;--mute:#93a5b1;--line:#27363f;--accent:#4cc3cf;--code-bg:#1b2b34;--warn:#f1b48c;--warn-bg:#2e2119}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 76px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+code,.cmd{font-family:"JetBrains Mono",ui-monospace,Consolas,"Courier New",monospace}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--surface);z-index:10}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--surface);border-bottom:1px solid var(--line);padding:12px 16px}
+.bar{max-width:880px;margin:0 auto;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.bar h1{font-size:1.05rem;margin:0;flex:1 1 260px;font-weight:600}
+input[type=search]{flex:1 1 220px;padding:9px 12px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit}
+input[type=search]:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main{max-width:880px;margin:0 auto;padding:20px 16px 60px}
+.lead{color:var(--mute);margin:0 0 18px;max-width:68ch}
+nav{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 0 26px;padding:0;list-style:none;font-size:.9rem}
+nav a{color:var(--accent);text-decoration:none}nav a:hover{text-decoration:underline}
+section{margin:0 0 34px}
+h2{font-size:1.25rem;margin:0 0 4px;font-weight:600}
+.intro{margin:0 0 10px;color:var(--mute);max-width:68ch}
+.note{margin:10px 0 0;padding:10px 12px;border-radius:6px;background:var(--warn-bg);color:var(--warn);font-size:.92rem;max-width:68ch}
+.rows{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.row{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:6px 18px;padding:10px 14px;border-top:1px solid var(--line);align-items:start}
+.row:first-child{border-top:0}
+.cmd{background:var(--code-bg);border-radius:5px;padding:6px 8px;font-size:.84rem;white-space:pre-wrap;word-break:break-word;position:relative;margin:0}
+.row.copy .cmd{cursor:pointer}
+.row.copy .cmd::after{content:"Copia";position:absolute;right:6px;top:5px;font:600 .68rem/1 "IBM Plex Sans",system-ui,sans-serif;color:var(--accent);opacity:0}
+.row.copy .cmd:hover::after,.row.copy .cmd:focus-visible::after{opacity:1}
+.row.copy .cmd.done::after{content:"Copiato";opacity:1}
+.desc{font-size:.93rem}
+.hide{display:none}
+.empty{color:var(--mute);padding:20px 0}
+footer{color:var(--mute);font-size:.85rem;margin-top:10px}
+@media (max-width:640px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="bar"><h1>Permessi di cartelle e file da Prompt dei comandi</h1><input type="search" id="q" placeholder="Cerca un comando o un’opzione…" aria-label="Cerca"></div></header>
+<main>
+<p class="lead">Riferimento per Windows: <b>icacls</b>, <b>takeown</b>, <b>attrib</b> e gli equivalenti PowerShell. Apri il Prompt dei comandi come amministratore. Tocca un comando per copiarlo.</p>
+<ul id="toc" class="" style="padding:0"></ul>
+<div id="out"></div>
+<p class="empty hide" id="none">Nessun risultato.</p>
+<footer>Sostituisci i percorsi e i nomi utente con i tuoi. Racchiudi tra virgolette i percorsi con spazi.</footer>
+</main>
+<script>
+var S=[
+{id:"vedi",t:"Visualizzare i permessi",i:"Elenco delle ACL di una cartella o di un file.",copy:1,r:[
+["icacls \"C:\\Dati\"","Mostra la ACL della cartella."],
+["icacls \"C:\\Dati\\*\"","Mostra la ACL di ogni elemento contenuto."],
+["icacls \"C:\\Dati\" /T","Mostra le ACL anche di sottocartelle e file."],
+["icacls \"C:\\Dati\" /findsid Utente","Trova i file della cartella che hanno una voce per quell’utente o SID."],
+["icacls \"C:\\Dati\" /verify","Cerca ACL non in ordine canonico o incoerenti."],
+["dir /Q \"C:\\Dati\"","Mostra il proprietario di ogni elemento."],
+["whoami /groups","Elenca i gruppi dell’utente corrente."]]},
+{id:"liv",t:"Livelli di accesso semplici",i:"Si usano dentro le parentesi dopo i due punti, ad esempio Utente:(OI)(CI)M.",r:[
+["F","Controllo completo."],["M","Modifica (lettura, scrittura, esecuzione, eliminazione)."],["RX","Lettura ed esecuzione."],["R","Sola lettura."],["W","Sola scrittura."],["D","Eliminazione."]]},
+{id:"dir",t:"Diritti specifici",i:"Si combinano separandoli con virgola, ad esempio Utente:(R,WD).",r:[
+["DE","Elimina."],["RC","Legge il controllo (legge la ACL)."],["WDAC","Scrive la ACL (modifica i permessi)."],["WO","Scrive il proprietario (cambia il proprietario)."],["S","Sincronizza."],["AS","Accesso alla ACL di sistema (audit)."],["MA","Massimo consentito."],["GR","Lettura generica."],["GW","Scrittura generica."],["GE","Esecuzione generica."],["GA","Tutto generico."],["RD","Legge dati / elenca la cartella."],["WD","Scrive dati / crea file."],["AD","Aggiunge dati / crea sottocartelle."],["REA","Legge attributi estesi."],["WEA","Scrive attributi estesi."],["X","Esegue / attraversa la cartella."],["DC","Elimina elementi figli."],["RA","Legge attributi."],["WA","Scrive attributi."]]},
+{id:"ered",t:"Flag di ereditarietà",i:"Si scrivono prima del livello di accesso, ad esempio (OI)(CI)M.",r:[
+["(OI)","Object Inherit: la voce si propaga ai file."],["(CI)","Container Inherit: la voce si propaga alle sottocartelle."],["(IO)","Inherit Only: vale solo per gli elementi figli, non per la cartella stessa."],["(NP)","No Propagate: si propaga solo di un livello."],["(I)","Voce ereditata dal padre (compare nell’output, non si imposta)."]],
+n:"Per una cartella, la combinazione tipica è (OI)(CI): senza flag il permesso vale solo per la cartella."},
+{id:"cmd",t:"Comandi di icacls",i:"Sintassi: icacls nome [/comando ...].",copy:1,r:[
+["icacls \"C:\\Dati\" /grant Utente:(OI)(CI)M","Aggiunge il permesso, mantenendo quelli già presenti."],
+["icacls \"C:\\Dati\" /grant:r Utente:(OI)(CI)RX","Sostituisce i permessi esistenti dell’utente con quelli indicati."],
+["icacls \"C:\\Dati\" /grant Utente:(OI)(CI)M Gruppo:(OI)(CI)R","Concede più permessi con un solo comando."],
+["icacls \"C:\\Dati\" /deny Utente:(OI)(CI)W","Nega esplicitamente: ha la precedenza sui permessi concessi."],
+["icacls \"C:\\Dati\" /remove Utente","Rimuove tutte le voci (concessioni e negazioni) dell’utente."],
+["icacls \"C:\\Dati\" /remove:g Utente","Rimuove solo le concessioni."],
+["icacls \"C:\\Dati\" /remove:d Utente","Rimuove solo le negazioni."],
+["icacls \"C:\\Dati\" /setowner Utente","Imposta il proprietario."],
+["icacls \"C:\\Dati\" /reset","Ripristina la ACL predefinita ereditata dal padre."],
+["icacls \"C:\\Dati\" /inheritance:e","Abilita l’ereditarietà."],
+["icacls \"C:\\Dati\" /inheritance:d","Disabilita l’ereditarietà, copiando le voci ereditate."],
+["icacls \"C:\\Dati\" /inheritance:r","Disabilita l’ereditarietà e rimuove le voci ereditate."],
+["icacls \"C:\\Dati\" /setintegritylevel (OI)(CI)M","Imposta il livello di integrità (L, M, H)."],
+["icacls \"C:\\Dati\" /substitute Vecchio Nuovo","Sostituisce un SID con un altro nelle ACL (opzione /substitute SidVecchio Sid)."],
+["icacls \"C:\\Dati\\*\" /save acl.txt /T","Salva le ACL in un file."],
+["icacls \"C:\\\" /restore acl.txt","Ripristina le ACL da un file salvato (indica la cartella padre)."]],
+n:"Con /deny e /grant il nome può essere un utente, un gruppo, DOMINIO\\Utente, o un SID preceduto da asterisco (*S-1-5-32-545)."},
+{id:"opz",t:"Opzioni generali di icacls",i:"Si aggiungono in fondo al comando.",copy:1,r:[
+["/T","Applica l’operazione a tutte le sottocartelle e ai file."],["/C","Continua anche in caso di errori (visualizza comunque i messaggi)."],["/L","Agisce sul collegamento simbolico, non sulla destinazione."],["/Q","Modalità silenziosa: non mostra i messaggi di riuscita."],["/Q /C /T","Combinazione frequente per operazioni ricorsive massive."]]},
+{id:"tk",t:"takeown: prendere possesso",i:"Serve quando icacls risponde “Accesso negato”. Il possesso va preso prima, poi si assegnano i permessi.",copy:1,r:[
+["takeown /F \"C:\\Dati\"","Rende proprietario l’utente corrente."],
+["takeown /F \"C:\\Dati\" /A","Assegna il possesso al gruppo Administrators."],
+["takeown /F \"C:\\Dati\" /R","Ricorsivo: include sottocartelle e file."],
+["takeown /F \"C:\\Dati\" /R /D S","Ricorsivo, risponde Sì alla richiesta sulle cartelle senza permesso (Windows in italiano)."],
+["takeown /F \"C:\\Dati\" /R /D Y","Come sopra su Windows in inglese."],
+["takeown /F \"C:\\Dati\" /SKIPSL","Non segue i collegamenti simbolici."],
+["takeown /S Server /U Dominio\\Utente /F \\\\Server\\Cond","Esegue su un computer remoto con altre credenziali (/S, /U, /P)."]]},
+{id:"att",t:"attrib: attributi",i:"Non sono permessi veri e propri.",copy:1,r:[
+["attrib +r \"C:\\Dati\\file.txt\"","Imposta sola lettura."],["attrib -r \"C:\\Dati\\*\" /S /D","Toglie la sola lettura a file e cartelle, ricorsivamente."],["attrib +h +s \"C:\\Dati\\cartella\"","Nasconde la cartella come elemento di sistema."],["attrib -h -s \"C:\\Dati\\cartella\"","Rende di nuovo visibile."],["attrib +a file","Imposta l’attributo archivio."]]},
+{id:"ric",t:"Ricette frequenti",i:"Sequenze pronte da adattare.",copy:1,r:[
+["takeown /F \"D:\\Disco\" /R /D S && icacls \"D:\\Disco\" /grant Administrators:(OI)(CI)F /T /C","Recuperare l’accesso a un disco o a una cartella di un altro utente."],
+["icacls \"C:\\Dati\" /inheritance:r /grant:r Administrators:(OI)(CI)F SYSTEM:(OI)(CI)F Utente:(OI)(CI)M","Cartella privata: solo amministratori, sistema e un utente."],
+["icacls \"C:\\Dati\" /grant *S-1-1-0:(OI)(CI)R","Lettura per Everyone."],
+["icacls \"C:\\Dati\" /grant *S-1-5-32-545:(OI)(CI)M","Modifica per il gruppo Users."],
+["icacls \"C:\\Dati\" /reset /T /C /Q","Reimposta l’intera struttura ai permessi ereditati."],
+["icacls \"C:\\Dati\" /deny Utente:(OI)(CI)(DE,DC)","Impedisce a un utente di eliminare."],
+["icacls \"C:\\Dati\\file.exe\" /deny Utente:(X)","Impedisce l’esecuzione di un file."],
+["icacls \"C:\\Dati\" /remove \"Everyone\" /T","Toglie Everyone da tutta la struttura."]]},
+{id:"sid",t:"SID e nomi utili",i:"I SID funzionano su qualsiasi lingua di Windows.",copy:1,r:[
+["*S-1-1-0","Everyone (Tutti)."],["*S-1-5-18","SYSTEM."],["*S-1-5-32-544","Administrators."],["*S-1-5-32-545","Users (Utenti)."],["*S-1-5-11","Authenticated Users (Utenti autenticati)."],["*S-1-5-19 / *S-1-5-20","Local Service / Network Service."],["wmic useraccount get name,sid","Elenca nomi e SID degli account locali."],["whoami /user","Mostra il SID dell’utente corrente."]]},
+{id:"ps",t:"Equivalenti PowerShell",i:"Per script più complessi, in PowerShell.",copy:1,r:[
+["Get-Acl \"C:\\Dati\" | Format-List","Mostra la ACL."],
+["$a = Get-Acl \"C:\\Dati\"; $r = New-Object System.Security.AccessControl.FileSystemAccessRule(\"Utente\",\"Modify\",\"ContainerInherit,ObjectInherit\",\"None\",\"Allow\"); $a.AddAccessRule($r); Set-Acl \"C:\\Dati\" $a","Aggiunge una regola di modifica."],
+["$a.SetAccessRuleProtection($true,$false)","Disabilita l’ereditarietà e rimuove le voci ereditate (poi Set-Acl)."],
+["$a.SetOwner([System.Security.Principal.NTAccount]\"Utente\"); Set-Acl \"C:\\Dati\" $a","Cambia il proprietario."],
+["Get-ChildItem \"C:\\Dati\" -Recurse | Get-Acl","Legge le ACL ricorsivamente."]]},
+{id:"vec",t:"Comandi obsoleti",i:"Funzionano ancora in parte, ma icacls li sostituisce.",copy:1,r:[
+["cacls \"C:\\Dati\" /E /G Utente:F","Vecchio comando: /E modifica, /G concede, /R revoca, /P sostituisce, /T ricorsivo."],
+["xcacls","Strumento dei resource kit, sostituito da icacls."]],
+n:"Attenzione: /reset, /inheritance:r e /deny con /T possono bloccare l’accesso, anche al tuo account. Salva prima la ACL con /save."},
+{id:"err",t:"Errori comuni",i:"",r:[
+["Accesso negato","Apri il Prompt come amministratore e usa prima takeown."],
+["Nessun mapping tra nomi account e SID","Il nome utente è errato o l’account non esiste: controlla l’ortografia o usa il SID."],
+["Il comando elabora 0 file","Percorso sbagliato o virgolette mancanti."],
+["Il permesso non si propaga","Mancano (OI)(CI), oppure l’ereditarietà è disabilitata nella sottocartella."],
+["Il /deny non viene superato","La negazione prevale sempre: rimuovila con /remove:d."]]}
+];
+var out=document.getElementById('out'),toc=document.getElementById('toc');
+toc.className='';toc.style.cssText='display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 0 26px;padding:0;list-style:none;font-size:.9rem';
+S.forEach(function(s){
+ var li=document.createElement('li'),a=document.createElement('a');a.href='#'+s.id;a.textContent=s.t;li.appendChild(a);toc.appendChild(li);
+ var sec=document.createElement('section');sec.id=s.id;
+ var h=document.createElement('h2');h.textContent=s.t;sec.appendChild(h);
+ if(s.i){var p=document.createElement('p');p.className='intro';p.textContent=s.i;sec.appendChild(p);}
+ var box=document.createElement('div');box.className='rows';
+ s.r.forEach(function(r){
+  var row=document.createElement('div');row.className='row'+(s.copy?' copy':'');
+  var c=document.createElement('pre');c.className='cmd';c.textContent=r[0];
+  if(s.copy){c.tabIndex=0;c.setAttribute('role','button');
+   var go=function(){try{navigator.clipboard.writeText(r[0]).then(function(){c.classList.add('done');setTimeout(function(){c.classList.remove('done')},1200)},function(){})}catch(e){}};
+   c.addEventListener('click',go);c.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}});}
+  var d=document.createElement('div');d.className='desc';d.textContent=r[1];
+  row.appendChild(c);row.appendChild(d);box.appendChild(row);
+ });
+ sec.appendChild(box);
+ if(s.n){var n=document.createElement('p');n.className='note';n.textContent=s.n;sec.appendChild(n);}
+ out.appendChild(sec);
+});
+document.getElementById('q').addEventListener('input',function(e){
+ var v=e.target.value.trim().toLowerCase(),any=false;
+ out.querySelectorAll('section').forEach(function(sec){
+  var shown=0;
+  sec.querySelectorAll('.row').forEach(function(r){var m=!v||r.textContent.toLowerCase().indexOf(v)>-1;r.classList.toggle('hide',!m);if(m)shown++;});
+  sec.classList.toggle('hide',!shown);if(shown)any=true;
+ });
+ document.getElementById('none').classList.toggle('hide',any);
+});
+</script>
+<script src="../assets/barra.js"></script>
+</body>
+</html>

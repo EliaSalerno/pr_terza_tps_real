@@ -25,6 +25,10 @@ scorciatoia comoda ma pericolosa.
 │   ├── guest_additions_virtualbox.html    ← approfondimento sulle Guest Additions
 │   ├── guest_additions_virtualbox.md      ← bozza sorgente dell'approfondimento
 │   ├── Privilegi_windows_assegnabili.html ← privilegi Windows e diritti utente
+│   ├── Permessi dei file da Prompt dei comandi.html
+│   │                                       ← permessi dei file da CMD (icacls, takeown, attrib)
+│   ├── Permessi di cartelle da Prompt dei comandi.html
+│   │                                       ← permessi di cartelle e file da CMD
 │   └── installazione/                     ← guide di preparazione dell'ambiente
 │       ├── creazione_macchina.html        ← creare e installare la macchina Windows 11
 │       ├── intro_alpine.html              ← guida introduttiva ad Alpine Linux in VM
@@ -55,7 +59,8 @@ scorciatoia comoda ma pericolosa.
 Il repository è suddiviso in due cartelle principali:
 
 - **`teoria/`** — tutta la **teoria**: la lezione sulle macchine virtuali, gli
-  approfondimenti su Guest Additions e privilegi Windows, più le guide di
+  approfondimenti su Guest Additions, privilegi Windows e permessi di file e cartelle
+  da Prompt dei comandi, più le guide di
   **preparazione dell'ambiente** in `teoria/installazione/`. Queste guide vanno lette
   una volta sola, prima delle attività, perché tutte le esercitazioni partono da una
   macchina già pronta e clonabile.
@@ -504,6 +509,47 @@ Non sono alternative equivalenti: rispondono a esigenze diverse.
 In questo progetto si usano macchine virtuali perché l'obiettivo è amministrare il
 sistema operativo, non eseguire un singolo processo: servono utenti, permessi, gruppi,
 servizi e configurazione di rete.
+
+## Riferimenti rapidi: permessi da Prompt dei comandi
+
+📄 [`teoria/Permessi dei file da Prompt dei comandi.html`](<teoria/Permessi dei file da Prompt dei comandi.html>)
+— *Permessi dei file da Prompt dei comandi*: riferimento per i singoli file con
+`icacls`, `takeown` e `attrib`.
+
+📄 [`teoria/Permessi di cartelle da Prompt dei comandi.html`](<teoria/Permessi di cartelle da Prompt dei comandi.html>)
+— *Permessi di cartelle e file da Prompt dei comandi*: riferimento per cartelle e file,
+con i flag di ereditarietà `(OI)`/`(CI)`.
+
+**Obiettivo.** Affiancare le attività e la [guida ai comandi
+CMD](#guida-ai-comandi-cmd-utenti-gruppi-e-permessi) con due schede sempre a portata di
+mano per leggere e modificare i permessi NTFS da riga di comando, senza dover
+ricordare a memoria la sintassi di `icacls`.
+
+**In sintesi.** Le due pagine raccolgono i comandi per visualizzare le ACL, i livelli
+di accesso semplici (`F`, `M`, `RX`, `R`, `W`, `D`), i diritti specifici, i flag di
+ereditarietà, `takeown` per prendere possesso quando `icacls` risponde «Accesso
+negato», `attrib` per gli attributi, le ricette più frequenti, i SID utili, gli
+equivalenti PowerShell e i problemi tipici. La prima è pensata per i file, la seconda
+per le cartelle e i file che contengono. Ogni comando si può cercare e copiare con un
+clic.
+
+**Argomenti toccati.** ACL e ACE, ereditarietà e sua interruzione, diritti specifici e
+livelli di accesso, flag `(OI)`, `(CI)`, `(IO)`, `(NP)`, precedenza del «Nega»,
+principio del privilegio minimo, differenza fra permessi NTFS e attributi, SID al
+posto dei nomi utente, `icacls`/`takeown`/`attrib` e i rispettivi equivalenti
+PowerShell.
+
+**Argomenti teorici da conoscere.** Concetti Windows da padroneggiare: la struttura di
+una **ACL** e delle sue **ACE**, il significato dell'**ereditarietà** e della sua
+conversione in autorizzazioni esplicite, la somma dei permessi di utente e gruppi con
+la precedenza del «Nega» e la distinzione fra permessi, proprietario e attributi.
+Utile anche la differenza fra la shell `cmd.exe` e **PowerShell**, perché alcuni
+comandi cambiano sintassi.
+
+**Nota operativa.** Aprire il Prompt dei comandi **come amministratore** e racchiudere
+tra virgolette i percorsi con spazi. Sui file non servono i flag `(OI)` e `(CI)`; se
+`icacls` risponde «Accesso negato», prendere prima il possesso con `takeown` e poi
+assegnare i permessi.
 
 ---
 

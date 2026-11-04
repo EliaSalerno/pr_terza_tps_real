@@ -111,6 +111,52 @@ window.INDICE = [
     ]
   },
   {
+    id: "teoria-permessi-cmd",
+    gruppo: "teoria",
+    categoria: "Sicurezza di Windows",
+    etichetta: "Riferimento CMD",
+    titolo: "Permessi di file e cartelle da Prompt dei comandi",
+    breve: "icacls, takeown, attrib e PowerShell",
+    approfondimento:
+      "Due riferimenti rapidi per gestire i permessi NTFS da Prompt dei comandi: uno dedicato ai singoli file e uno a cartelle e file. Raccolgono i comandi icacls, takeown e attrib con sintassi, livelli di accesso, diritti specifici, flag di ereditarietà, ricette frequenti, SID, equivalenti PowerShell e problemi tipici, con ricerca e copia immediata dei comandi.",
+    documenti: [
+      {
+        titolo: "Permessi dei file da Prompt dei comandi",
+        descrizione:
+          "Riferimento sui singoli file: icacls, takeown e attrib, livelli di accesso, diritti specifici, ereditarietà, ricette frequenti ed equivalenti PowerShell.",
+        argomenti: [
+          "icacls",
+          "takeown",
+          "attrib",
+          "ACL dei file",
+          "livelli di accesso",
+          "diritti specifici",
+          "ereditarietà",
+          "SID",
+          "PowerShell"
+        ],
+        file: "teoria/Permessi dei file da Prompt dei comandi.html"
+      },
+      {
+        titolo: "Permessi di cartelle e file da Prompt dei comandi",
+        descrizione:
+          "Riferimento su cartelle e file: icacls, takeown e attrib, flag di ereditarietà (OI)/(CI), ricette frequenti, equivalenti PowerShell e comandi obsoleti.",
+        argomenti: [
+          "icacls",
+          "takeown",
+          "attrib",
+          "ACL delle cartelle",
+          "flag di ereditarietà",
+          "(OI) e (CI)",
+          "SID",
+          "PowerShell",
+          "comandi obsoleti"
+        ],
+        file: "teoria/Permessi di cartelle da Prompt dei comandi.html"
+      }
+    ]
+  },
+  {
     id: "teoria-installazione",
     gruppo: "teoria",
     categoria: "Preparazione dell'ambiente",
