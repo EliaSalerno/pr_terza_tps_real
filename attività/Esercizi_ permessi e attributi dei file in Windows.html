@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Esercizi: permessi e attributi dei file in Windows</title>
+<style>
+:root{--bg:#f1f4f6;--surface:#fff;--ink:#15232b;--muted:#53656f;--line:#cbd6dc;--accent:#0f6e8c;--code:#e3ebef;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1a20;--surface:#17262e;--ink:#e6eef2;--muted:#9bb0ba;--line:#2c4049;--accent:#5bc0de;--code:#223640}}
+:root[data-theme="dark"]{--bg:#0f1a20;--surface:#17262e;--ink:#e6eef2;--muted:#9bb0ba;--line:#2c4049;--accent:#5bc0de;--code:#223640}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16.5px/1.6 "Segoe UI",system-ui,sans-serif}
+main{max-width:800px;margin:0 auto;padding:36px 18px 64px}
+h1{font:700 clamp(1.8rem,5vw,2.6rem)/1.15 Georgia,"Times New Roman",serif;margin:0 0 8px}
+h2{font:700 1.4rem/1.25 Georgia,serif;margin:42px 0 6px;padding-top:14px;border-top:2px solid var(--accent)}
+h3{font-size:1.05rem;margin:0 0 6px}
+p{margin:0 0 10px}
+.sub{color:var(--muted)}
+code{font-family:Consolas,"Courier New",monospace;font-size:.9em;background:var(--code);padding:1px 5px;border-radius:4px}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto;font:.88rem/1.5 Consolas,monospace;margin:0 0 12px}
+.ex{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:14px 0}
+.ex ol,.ex ul{margin:0 0 10px;padding-left:1.3em}
+.ex li{margin-bottom:4px}
+.q{color:var(--muted)}
+details{border-top:1px dashed var(--line);margin-top:10px;padding-top:8px}
+summary{cursor:pointer;font-weight:600;color:var(--accent);min-height:32px}
+summary:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:8px 0;margin-bottom:6px}
+button{font:600 .9rem "Segoe UI",sans-serif;padding:9px 14px;border-radius:8px;border:1.5px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;min-height:44px}
+button:hover{background:var(--accent);color:var(--bg)}
+.wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.92rem;margin-bottom:10px}
+th,td{text-align:left;padding:6px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+@media print{.bar{display:none}.ex{break-inside:avoid}}
+</style>
+</head>
+<body>
+<main>
+<h1>Permessi e attributi dei file in Windows</h1>
+<p class="sub">Esercizi con <code>icacls</code>, <code>takeown</code>, <code>attrib</code> e PowerShell. Ogni esercizio ha la soluzione richiudibile.</p>
+<div class="bar"><button id="tg" type="button">Mostra tutte le soluzioni</button></div>
+
+<h2>Preparazione (docente)</h2>
+<p>Prompt dei comandi <b>come amministratore</b>, su una macchina di laboratorio o virtuale. Per provare come un altro utente: <code>runas /user:studente1 cmd</code>.</p>
+<pre>mkdir C:\Lab
+mkdir C:\Lab\Archivio
+for %f in (rapporto1.docx rapporto2.docx rapporto3.docx note.txt dati.pdf manuale.pdf log1.log) do echo test &gt; "C:\Lab\%f"
+echo test &gt; C:\Lab\Archivio\log2.log
+net user studente1 Lab#2026pw /add
+net user studente2 Lab#2026pw /add
+net localgroup Classe /add
+net localgroup Classe studente1 /add</pre>
+<p class="sub">Nei file <code>.bat</code> usa <code>%%f</code>. Virgolette sui percorsi con spazi; verifica ogni modifica con <code>icacls</code>; salva la ACL con <code>/save</code> prima di <code>/reset</code> o <code>/inheritance:r</code>.</p>
+
+<h2>Parte 1 · Osservare</h2>
+<section class="ex"><h3>1. Leggere la ACL</h3>
+<ol><li>Mostra la ACL di <code>C:\Lab\note.txt</code> e di tutti i PDF di <code>C:\Lab</code>.</li><li>Mostra proprietario (<code>dir /Q</code>) e attributi (<code>attrib</code>).</li><li>Individua le voci con <code>(I)</code>.</li></ol>
+<p class="q">Che cosa significa <code>(I)</code>? Da dove arrivano quei permessi?</p>
+<details><summary>Soluzione</summary><p><code>icacls "C:\Lab\note.txt"</code>, <code>icacls "C:\Lab\*.pdf"</code>, <code>dir /Q</code>, <code>attrib</code>. <code>(I)</code> = voce ereditata dalla cartella che contiene il file.</p></details></section>
+
+<section class="ex"><h3>2. Leggere i codici</h3>
+<p>Spiega: <code>F M RX R W D RD WD AD DE WDAC WO</code>. Differenza tra <code>WD</code> e <code>AD</code>? Quale diritto cambia i permessi? E il proprietario? Perché <code>(OI)(CI)</code> non servono su un file?</p>
+<details><summary>Soluzione</summary><p>F completo; M modifica; RX lettura+esecuzione; R lettura; W scrittura; D eliminazione; RD legge; WD sovrascrive; AD aggiunge in coda; DE elimina il file; WDAC modifica la ACL; WO cambia il proprietario. <code>(OI)(CI)</code> riguardano la propagazione nelle cartelle.</p></details></section>
+
+<section class="ex"><h3>3. SID e nomi</h3>
+<p>Esegui <code>whoami /user</code> e <code>whoami /groups</code>. Associa: <code>*S-1-1-0</code>, <code>*S-1-5-18</code>, <code>*S-1-5-32-544</code>, <code>*S-1-5-32-545</code>, <code>*S-1-5-11</code>. Perché usare i SID negli script?</p>
+<details><summary>Soluzione</summary><p>Everyone, SYSTEM, Administrators, Users, Authenticated Users. I SID funzionano in qualsiasi lingua di Windows; i nomi sono localizzati.</p></details></section>
+
+<h2>Parte 2 · Concedere e togliere</h2>
+<section class="ex"><h3>4. Concedere e verificare</h3>
+<ol><li>Dai a <code>studente1</code> la lettura su <code>note.txt</code>; poi a <code>Classe</code> la modifica.</li><li>In un solo comando: lettura a <code>studente2</code> e modifica a <code>Classe</code> su <code>dati.pdf</code>.</li><li>Come <code>studente1</code> prova <code>type</code> sul file.</li></ol>
+<p class="q">Che permesso effettivo ha <code>studente1</code>?</p>
+<details><summary>Soluzione</summary><pre>icacls "C:\Lab\note.txt" /grant studente1:R
+icacls "C:\Lab\note.txt" /grant Classe:M
+icacls "C:\Lab\dati.pdf" /grant studente2:R Classe:M</pre><p>I permessi si sommano: <code>studente1</code> ha di fatto la modifica tramite il gruppo.</p></details></section>
+
+<section class="ex"><h3>5. <code>/grant</code> contro <code>/grant:r</code></h3>
+<p>Su <code>rapporto1.docx</code> concedi <code>studente1:M</code>, poi <code>/grant studente1:R</code>. Ripristina e ripeti con <code>/grant:r</code>. Confronta le ACL.</p>
+<details><summary>Soluzione</summary><p>Con <code>/grant</code> la voce si aggiunge e resta M; con <code>/grant:r</code> viene sostituita e resta solo R.</p></details></section>
+
+<section class="ex"><h3>6. Rimuovere voci</h3>
+<p>Su <code>rapporto2.docx</code> concedi <code>studente1:M</code> e nega <code>studente1:W</code>. Prova <code>/remove:d</code>, <code>/remove:g</code>, <code>/remove</code> (ripristinando ogni volta). Che cosa può fare l’utente dopo ciascuna?</p>
+<details><summary>Soluzione</summary><p><code>:d</code> toglie la negazione (resta M); <code>:g</code> toglie la concessione (resta solo la negazione); <code>/remove</code> toglie tutto: valgono solo permessi ereditati o di gruppo.</p></details></section>
+
+<section class="ex"><h3>7. La negazione prevale</h3>
+<p>Su <code>rapporto3.docx</code> dai la modifica a <code>Classe</code>, poi <code>/deny studente1:W</code>. Come <code>studente1</code> leggi e scrivi (<code>echo x &gt;&gt; file</code>). Perché non riesce a scrivere?</p>
+<details><summary>Soluzione</summary><p><code>/deny</code> prevale sulle concessioni, anche di gruppo: legge ma non scrive.</p></details></section>
+
+<section class="ex"><h3>8. Permessi su misura</h3>
+<p>Su <code>registro.txt</code>: <code>studente1</code> legge e aggiunge righe ma non sovrascrive; <code>studente2</code> solo legge; nessuno tranne gli amministratori elimina il file.</p>
+<details><summary>Soluzione</summary><pre>icacls registro.txt /grant:r studente1:(RD,AD)
+icacls registro.txt /grant:r studente2:R
+icacls registro.txt /deny Classe:(DE)</pre><p>Il deny su <code>Classe</code> colpisce anche <code>studente1</code>; gli amministratori non ne fanno parte.</p></details></section>
+
+<h2>Parte 3 · Ereditarietà</h2>
+<section class="ex"><h3>9. Seguire l’ereditarietà</h3>
+<p>Confronta la ACL di <code>C:\Lab</code> e di <code>Archivio\log2.log</code>. Poi <code>icacls "C:\Lab" /grant studente2:(OI)(CI)R</code> e riguarda <code>log2.log</code>.</p>
+<details><summary>Soluzione</summary><p>La nuova voce compare su <code>log2.log</code> con <code>(I)</code>: arriva dalla cartella.</p></details></section>
+
+<section class="ex"><h3>10. Le tre modalità</h3>
+<p>Con tre copie di un file prova <code>/inheritance:d</code>, <code>:r</code> e <code>:d</code> seguito da <code>:e</code>. Dopo <code>:r</code> chi può accedere? Come si torna ai permessi ereditati?</p>
+<div class="wrap"><table><tr><th>Comando</th><th>Voci ereditate</th></tr><tr><td><code>:d</code></td><td>copiate come esplicite, niente più <code>(I)</code></td></tr><tr><td><code>:r</code></td><td>rimosse</td></tr><tr><td><code>:e</code></td><td>tornano dalla cartella padre</td></tr></table></div>
+<details><summary>Soluzione</summary><p>Dopo <code>:r</code> senza <code>/grant</code> nessuno ha accesso: serve <code>takeown</code>. Per tornare: <code>/reset</code>.</p></details></section>
+
+<section class="ex"><h3>11. File riservato</h3>
+<p>Solo Administrators e SYSTEM (completo) e <code>studente1</code> (modifica), con SID e un solo comando.</p>
+<details><summary>Soluzione</summary><pre>icacls "C:\Lab\riservato.txt" /inheritance:r /grant:r *S-1-5-32-544:F *S-1-5-18:F studente1:M</pre></details></section>
+
+<h2>Parte 4 · Più file</h2>
+<section class="ex"><h3>12. Caratteri jolly</h3>
+<ol><li>Mostra la ACL di tutti i <code>.docx</code>.</li><li>Lettura a <code>studente2</code> su tutti i PDF.</li><li><code>/deny studente2:W</code> su <code>rapporto?.docx</code>: colpisce anche <code>rapporto3.docx</code>? Perché?</li><li>Lettura su tutti i <code>.log</code> anche nelle sottocartelle, ignorando gli errori.</li></ol>
+<details><summary>Soluzione</summary><pre>icacls "C:\Lab\*.pdf" /grant studente2:R
+icacls "C:\Lab\rapporto?.docx" /deny studente2:W
+icacls "C:\Lab\*.log" /grant studente2:R /T /C</pre><p><code>?</code> sostituisce un carattere, quindi sì, colpisce anche il 3. <code>/T</code> sottocartelle, <code>/C</code> continua in caso di errori.</p></details></section>
+
+<section class="ex"><h3>13. <code>/reset</code> in sicurezza</h3>
+<p>Salva la ACL di <code>rapporto1.docx</code>, esegui <code>/reset</code> su tutti i <code>.docx</code> (silenzioso, senza fermarti agli errori), verifica, poi ripristina.</p>
+<details><summary>Soluzione</summary><pre>icacls "C:\Lab\rapporto1.docx" /save acl.txt
+icacls "C:\Lab\*.docx" /reset /C /Q
+icacls "C:\Lab" /restore acl.txt</pre></details></section>
+
+<h2>Parte 5 · Proprietà e recupero</h2>
+<section class="ex"><h3>14. File bloccato</h3>
+<p>Il docente crea <code>bloccato.txt</code> con <code>/inheritance:r</code> e nessuna concessione. Leggilo, prova <code>icacls</code>, poi riprendi l’accesso: prima in due passi, poi con <code>&amp;&amp;</code> e <code>%username%</code>, infine assegnando il possesso ad Administrators.</p>
+<details><summary>Soluzione</summary><pre>takeown /F "C:\Lab\bloccato.txt" &amp;&amp; icacls "C:\Lab\bloccato.txt" /grant %username%:F
+takeown /F "C:\Lab\bloccato.txt" /A</pre><p>Si parte da <code>takeown</code> perché <code>icacls</code> può dare “Accesso negato”. Con <code>/A</code> il possesso va al gruppo Administrators.</p></details></section>
+
+<section class="ex"><h3>15. Cambiare il proprietario</h3>
+<p>Mostra il proprietario di <code>note.txt</code>, impostalo a <code>studente1</code> con <code>icacls</code>, verifica. Cosa può fare un proprietario senza altri permessi?</p>
+<details><summary>Soluzione</summary><p><code>icacls "C:\Lab\note.txt" /setowner studente1</code>. Può leggere e modificare la ACL (<code>RC</code>, <code>WDAC</code>) e quindi concedersi altri permessi.</p></details></section>
+
+<h2>Parte 6 · Attributi</h2>
+<section class="ex"><h3>16. Gli attributi non sono permessi</h3>
+<ol><li><code>attrib +r</code> su <code>note.txt</code> e prova a scrivere.</li><li>Dai a te stesso il controllo completo: scrivi comunque?</li><li>Togli la sola lettura. Nascondi il file: <code>dir</code> lo mostra? <code>type</code> funziona?</li><li>Applica <code>-r</code> a tutti i <code>.txt</code> anche nelle sottocartelle.</li></ol>
+<details><summary>Soluzione</summary><p>La sola lettura blocca la scrittura anche a chi ha il permesso, finché non si fa <code>attrib -r</code>. Un file nascosto non è protetto: <code>type</code> funziona. Gli attributi valgono per tutti; <code>attrib -r "C:\Lab\*.txt" /S</code>.</p></details></section>
+
+<h2>Parte 7 · PowerShell</h2>
+<section class="ex"><h3>17. Gli stessi compiti</h3>
+<p>Con <code>Get-Acl</code>/<code>Set-Acl</code>: mostra la ACL; aggiungi una regola di modifica per <code>studente1</code>; disabilita l’ereditarietà togliendo le voci ereditate; cambia il proprietario; leggi le ACL dei PDF in pipe; imposta la sola lettura.</p>
+<details><summary>Soluzione</summary><pre>Get-Acl "C:\Lab\note.txt" | Format-List
+$r = New-Object System.Security.AccessControl.FileSystemAccessRule("studente1","Modify","Allow")
+$a.AddAccessRule($r); Set-Acl "C:\Lab\note.txt" $a
+$a.SetAccessRuleProtection($true,$false)
+$a.SetOwner([System.Security.Principal.NTAccount]"studente1")
+Get-ChildItem "C:\Lab" -Filter *.pdf -Recurse | Get-Acl
+(Get-Item "C:\Lab\note.txt").IsReadOnly = $true</pre><p>($a = <code>Get-Acl</code> del file.) PowerShell è utile negli script articolati.</p></details></section>
+
+<h2>Parte 8 · Diagnosi</h2>
+<section class="ex"><h3>18. Trova l’errore</h3>
+<p>Per ogni sintomo indica causa e soluzione: “Accesso negato” anche da amministratore · file in uso · non riesco a modificare ma ho il permesso · “Nessun mapping tra nomi account e SID” · 0 file elaborati · concesso <code>M</code> ma negato.</p>
+<details><summary>Soluzione</summary><ul><li>Prompt non amministratore o possesso mancante → <code>takeown</code>.</li><li>Programma che lo usa → chiuderlo (i permessi si cambiano, ma non si elimina né rinomina).</li><li>Sola lettura o <code>/deny W</code> → <code>attrib -r</code> o <code>/remove:d</code>.</li><li>Nome errato → controllare o usare il SID.</li><li>Percorso, virgolette o pattern errati.</li><li>Un <code>/deny</code> prevale → <code>/remove:d</code>.</li></ul></details></section>
+
+<section class="ex"><h3>19. Correggi i comandi</h3>
+<ol><li><code>icacls C:\Lab\Documenti Importanti\file.txt /grant studente1:M</code></li><li><code>icacls "C:\Lab\file.txt" /grant studente1:Modifica</code></li><li><code>icacls "C:\Lab\file.txt" /inheritance:r</code></li><li><code>icacls "C:\Lab\*.pdf" /reset /T</code></li><li><code>takeown /F "C:\Lab\file.txt" icacls "C:\Lab\file.txt" /grant Administrators:F</code></li></ol>
+<details><summary>Soluzione</summary><ol><li>Mancano le virgolette.</li><li>Il livello è <code>M</code>.</li><li>Senza <code>/grant:r</code> il file resta senza accesso; salvare prima la ACL.</li><li>Cancella le personalizzazioni su molti file: <code>/save</code> prima.</li><li>Manca <code>&amp;&amp;</code>.</li></ol></details></section>
+
+<h2>Parte 9 · Sfida finale</h2>
+<section class="ex"><h3>20. Cartella di consegna</h3>
+<p>In <code>C:\Lab\Consegne</code>: <code>Classe</code> legge le relazioni ma non le modifica · <code>studente1</code> modifica solo <code>relazione1.docx</code>, <code>studente2</code> solo <code>relazione2.docx</code> · nessuno studente elimina i file · <code>voti.txt</code> solo per Administrators, SYSTEM e docente · <code>.log</code> in sola lettura ma non nascosti · <code>relazione1.docx</code> nascosto · ACL salvate in <code>acl_consegne.txt</code>.</p>
+<p class="q">Consegna: comandi in ordine, output di <code>icacls</code> per ogni file, e perché hai scelto <code>/grant</code>, <code>/grant:r</code> o <code>/deny</code>.</p>
+<details><summary>Traccia di soluzione</summary><pre>icacls "C:\Lab\Consegne" /inheritance:d
+icacls "C:\Lab\Consegne\*.docx" /grant:r Classe:R
+icacls "C:\Lab\Consegne\relazione1.docx" /grant studente1:M
+icacls "C:\Lab\Consegne\relazione2.docx" /grant studente2:M
+icacls "C:\Lab\Consegne\*.docx" /deny Classe:(DE)
+icacls "C:\Lab\Consegne\voti.txt" /inheritance:r /grant:r *S-1-5-32-544:F *S-1-5-18:F docente:R
+attrib +r "C:\Lab\Consegne\*.log"
+attrib +h "C:\Lab\Consegne\relazione1.docx"</pre><p>Attenzione: un <code>/deny</code> su <code>Classe</code> colpisce anche gli studenti e prevale sulla loro modifica; va limitato a <code>DE</code> e verificato con <code>runas</code>.</p></details></section>
+</main>
+<script>
+(function(){
+var b=document.getElementById('tg'),open=false;
+b.addEventListener('click',function(){
+open=!open;
+document.querySelectorAll('details').forEach(function(d){d.open=open});
+b.textContent=open?'Nascondi tutte le soluzioni':'Mostra tutte le soluzioni';
+});
+})();
+</script>
+</body>
+</html>
