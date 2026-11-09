@@ -284,6 +284,36 @@ window.INDICE = [
     ]
   },
   {
+    id: "attivita-esercitazione-permessi-cmd",
+    gruppo: "attivita",
+    categoria: "Utenti, gruppi e permessi",
+    etichetta: "Esercitazione CMD",
+    titolo: "Permessi di file e cartelle da CMD",
+    breve: "Esercizi con soluzioni su icacls, takeown e attrib",
+    approfondimento:
+      "Dodici esercizi guidati sui permessi NTFS da Prompt dei comandi: visualizzare le ACL, concedere e negare lettura e scrittura, rimuovere permessi, gestire l'ereditarietà, salvare e ripristinare le ACL, prendere possesso con takeown, usare gli attributi, i SID e i comandi PowerShell. Ogni esercizio ha la soluzione e la verifica del risultato.",
+    documenti: [
+      {
+        titolo: "Esercitazione: permessi di file e cartelle da Prompt dei comandi",
+        descrizione:
+          "Dodici esercizi con soluzioni su icacls, takeown e attrib: ACL, ereditarietà, Nega e Consenti, backup delle ACL, possesso, attributi e SID.",
+        argomenti: [
+          "icacls",
+          "takeown",
+          "attrib",
+          "ACL e ACE",
+          "ereditarietà",
+          "Nega e Consenti",
+          "salvare e ripristinare le ACL",
+          "attributi",
+          "SID",
+          "PowerShell"
+        ],
+        file: "attività/Esercitazione_permessi_file_cartelle_CMD.html"
+      }
+    ]
+  },
+  {
     id: "attivita-condivisione",
     gruppo: "attivita",
     categoria: "Reti e condivisioni",

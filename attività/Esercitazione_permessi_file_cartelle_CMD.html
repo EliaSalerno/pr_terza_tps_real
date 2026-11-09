@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Esercitazione – Permessi di file e cartelle da Prompt dei comandi</title>
+<link rel="stylesheet" href="../assets/documento.css">
+</head>
+<body>
+
+<header class="doc-intestazione">
+  <p class="occhiello">Attività · Permessi NTFS</p>
+  <h1>Permessi di file e cartelle da Prompt dei comandi</h1>
+  <p class="sottotitolo">Esercitazione con soluzioni su <code>icacls</code>, <code>takeown</code> e <code>attrib</code>, con esempi semplici e diretti da eseguire su Windows 11.</p>
+</header>
+
+<main>
+
+<p class="lead">L'esercitazione usa una cartella di laboratorio, due utenti di prova e pochi comandi. Ogni esercizio ha subito sotto la soluzione: prova prima a eseguirlo da solo, poi confronta il risultato.</p>
+
+<div class="avviso">
+  <p><strong>Prima di iniziare.</strong> Apri il <strong>Prompt dei comandi come amministratore</strong>, meglio in una macchina virtuale Windows 11. I comandi modificano permessi e account: non usarli su un PC di produzione senza sapere cosa stai facendo.</p>
+</div>
+
+<h2>Preparazione dell'ambiente</h2>
+
+<p>Crea una cartella con una sottocartella e due file, poi crea due utenti standard di prova. Tutti questi comandi vanno eseguiti nello stesso prompt amministratore.</p>
+
+<pre><code>mkdir "C:\LabPermessi"
+mkdir "C:\LabPermessi\Documenti"
+mkdir "C:\LabPermessi\Documenti\Archivio"
+echo appunti di prova&gt;"C:\LabPermessi\Documenti\appunti.txt"
+echo report di prova&gt;"C:\LabPermessi\Documenti\report.txt"
+echo documento vecchio&gt;"C:\LabPermessi\Documenti\Archivio\vecchio.txt"
+net user prova1 prova1 /add
+net user prova2 prova2 /add</code></pre>
+
+<div class="note">
+  <p><strong>Nota.</strong> Se gli utenti esistono già, <code>net user ... /add</code> restituisce un errore: puoi ignorarlo oppure usare altri nomi. Le password sono uguali ai nomi utente solo perché si tratta di un laboratorio; in un sistema reale non si fa.</p>
+</div>
+
+<p>Per verificare i permessi come <code>prova1</code> o <code>prova2</code>, apri una seconda finestra con:</p>
+
+<pre><code>runas /user:prova1 cmd</code></pre>
+
+<p>In alternativa cambia utente dalla macchina virtuale. La finestra aperta con <code>runas</code> serve solo per le prove di lettura e scrittura; i comandi <code>icacls</code> vanno invece eseguiti dal prompt amministratore.</p>
+
+<h2>Esercizio 1 — Visualizzare i permessi di una cartella</h2>
+
+<p><strong>Richiesta.</strong> Mostra la ACL della cartella <code>C:\LabPermessi\Documenti</code>.</p>
+
+<div class="info">
+  <p><strong>Soluzione.</strong></p>
+  <pre><code>icacls "C:\LabPermessi\Documenti"</code></pre>
+  <p>Vedrai una riga per ogni voce della ACL: il nome dell'utente o del gruppo, i permessi tra parentesi e, se presenti, i flag di ereditarietà. I gruppi <code>SYSTEM</code>, <code>Administrators</code> e <code>Users</code> hanno in genere il controllo completo o la lettura/esecuzione.</p>
+</div>
+
+<h2>Esercizio 2 — Vedere anche sottocartelle e file</h2>
+
+<p><strong>Richiesta.</strong> Visualizza i permessi di <code>Documenti</code>, di <code>Archivio</code> e dei file contenuti con un solo comando.</p>
+
+<div class="info">
+  <p><strong>Soluzione.</strong></p>
+  <pre><code>icacls "C:\LabPermessi\Documenti" /T</code></pre>
+  <p>Il parametro <code>/T</code> applica il comando a tutta la struttura. Nell'output compaiono <code>Archivio</code>, <code>appunti.txt</code>, <code>report.txt</code> e <code>Archivio\vecchio.txt</code>.</p>
+</div>
+
+<h2>Esercizio 3 — Concedere la sola lettura su una cartella</h2>
+
+<p><strong>Richiesta.</strong> Concedi a <code>prova1</code> la lettura su <code>Documenti</code> e su tutto ciò che contiene, inclusi i file e le sottocartelle che verranno creati in futuro.</p>
+
+<div class="info">
+  <p><strong>Soluzione.</strong></p>
+  <pre><code>icacls "C:\LabPermessi\Documenti" /grant "prova1:(OI)(CI)(R)"</code></pre>
+  <p><code>(R)</code> è il permesso di lettura. Su una cartella <code>(OI)</code> significa che il permesso si eredita sui file, <code>(CI)</code> che si eredita sulle sottocartelle. Senza questi due flag il permesso varrebbe solo per la cartella.</p>
+</div>
+
+<h2>Esercizio 4 — Concedere la modifica su un solo file</h2>
+
+<p><strong>Richiesta.</strong> Concedi a <code>prova1</code> la modifica del solo file <code>appunti.txt</code>, senza toccare gli altri file.</p>
+
+<div class="info">
+  <p><strong>Soluzione.</strong></p>
+  <pre><code>icacls "C:\LabPermessi\Documenti\appunti.txt" /grant "prova1:(M)"</code></pre>
+  <p><code>(M)</code> significa <em>Modify</em>: lettura, scrittura, modifica ed eliminazione del file. Sui file non si usano <code>(OI)</code> e <code>(CI)</code>, perché non c'è nulla da ereditare.</p>
+</div>
+
+<h2>Esercizio 5 — Negare la scrittura a un utente</h2>
+
+<p><strong>Richiesta.</strong> Impedisci a <code>prova2</code> di scrivere nel file <code>report.txt</code>, poi annulla il divieto.</p>
+
+<div class="info">
+  <p><strong>Soluzione.</strong></p>
+  <pre><code>icacls "C:\LabPermessi\Documenti\report.txt" /deny "prova2:(W)"
+icacls "C:\LabPermessi\Documenti\report.txt" /remove:d "prova2"</code></pre>
+  <p>Il primo comando aggiunge una voce di <strong>Nega</strong> sulla scrittura. Il secondo rimuove solo le voci di tipo Nega per quell'utente. Ricorda che un Nega esplicito prevale su un Consenti, anche se l'utente appartiene a un gruppo che ha accesso in scrittura.</p>
+</div>
+
+<h2>Esercizio 6 — Rimuovere un permesso concesso</h2>
+
+<p><strong>Richiesta.</strong> Togli a <code>prova1</code> il permesso di modifica su <code>appunti.txt</code>.</p>
+
+<div class="info">
+  <p><strong>Soluzione.</strong></p>
+  <pre><code>icacls "C:\LabPermessi\Documenti\appunti.txt" /remove "prova1"</code></pre>
+  <p><code>/remove</code> elimina tutte le voci esplicite di quell'utente sul file. Se vuoi togliere solo un Consenti usa <code>/remove:g</code>, se vuoi togliere solo un Nega usa <code>/remove:d</code>. Le voci ereditate non si rimuovono così: prima va disabilitata l'ereditarietà.</p>
+</div>
+
+<h2>Esercizio 7 — Disabilitare l'ereditarietà conservando i permessi</h2>
+
+<p><strong>Richiesta.</strong> Rendi espliciti i permessi ereditati sulla cartella <code>Archivio</code>, così da poterli modificare singolarmente.</p>
+
+<div class="info">
+  <p><strong>Soluzione.</strong></p>
+  <pre><code>icacls "C:\LabPermessi\Documenti\Archivio" /inheritance:d</code></pre>
+  <p><code>:d</code> disabilita l'ereditarietà e <strong>copia</strong> i permessi ereditati come voci esplicite. Dopo il comando, nell'output non compare più il flag <code>(I)</code> accanto alle voci. Se invece vuoi eliminare del tutto i permessi ereditati usa <code>/inheritance:r</code>.</p>
+</div>
+
+<h2>Esercizio 8 — Ripristinare l'ereditarietà</h2>
+
+<p><strong>Richiesta.</strong> Fai tornare <code>Archivio</code> a ereditare i permessi dalla cartella superiore.</p>
+
+<div class="info">
+  <p><strong>Soluzione.</strong></p>
+  <pre><code>icacls "C:\LabPermessi\Documenti\Archivio" /inheritance:e</code></pre>
+  <p><code>:e</code> riabilita l'ereditarietà. Le voci che arrivano dalla cartella superiore tornano a comparire con il flag <code>(I)</code>.</p>
+</div>
+
+<h2>Esercizio 9 — Salvare e ripristinare le ACL</h2>
+
+<p><strong>Richiesta.</strong> Salva i permessi di <code>Documenti</code> in un file di backup e poi ripristinali.</p>
+
+<div class="info">
+  <p><strong>Soluzione.</strong></p>
+  <pre><code>cd /d C:\
+icacls "LabPermessi\Documenti" /save "LabPermessi\acl_documenti.txt" /T
+icacls "LabPermessi" /restore "LabPermessi\acl_documenti.txt"</code></pre>
+  <p><code>/save</code> scrive le ACL in un file di testo; <code>/restore</code> le riapplica. Esegui i comandi dalla stessa cartella da cui hai salvato, in questo caso <code>C:\</code>. Il ripristino non annulla un Nega esplicito già presente: va rimosso a parte.</p>
+</div>
+
+<h2>Esercizio 10 — Prendere possesso di un file</h2>
+
+<p><strong>Richiesta.</strong> Recupera l'accesso a un file quando <code>icacls</code> risponde «Accesso negato» perché il proprietario è un altro utente.</p>
+
+<div class="info">
+  <p><strong>Soluzione.</strong></p>
+  <pre><code>takeown /F "C:\LabPermessi\Documenti\appunti.txt"
+icacls "C:\LabPermessi\Documenti\appunti.txt" /grant "prova1:(M)"</code></pre>
+  <p><code>takeown</code> assegna il possesso del file all'utente corrente. Prima si prende il possesso, poi si assegnano i permessi: sono due passaggi distinti. Con <code>takeown /A</code> il possesso va al gruppo <code>Administrators</code> invece che al singolo amministratore.</p>
+</div>
+
+<h2>Esercizio 11 — Attributi di un file</h2>
+
+<p><strong>Richiesta.</strong> Rendi <code>appunti.txt</code> in sola lettura e <code>report.txt</code> nascosto, poi ripristina entrambi.</p>
+
+<div class="info">
+  <p><strong>Soluzione.</strong></p>
+  <pre><code>attrib +R "C:\LabPermessi\Documenti\appunti.txt"
+attrib +H "C:\LabPermessi\Documenti\report.txt"
+attrib "C:\LabPermessi\Documenti\appunti.txt"
+attrib "C:\LabPermessi\Documenti\report.txt"
+attrib -R "C:\LabPermessi\Documenti\appunti.txt"
+attrib -H "C:\LabPermessi\Documenti\report.txt"</code></pre>
+  <p><code>+R</code> imposta l'attributo di sola lettura, <code>+H</code> quello di file nascosto; <code>-R</code> e <code>-H</code> li tolgono. Gli attributi <strong>non sono permessi</strong>: <code>attrib</code> non cambia la ACL e non protegge davvero il file da un altro utente.</p>
+</div>
+
+<h2>Esercizio 12 — Usare il SID invece del nome</h2>
+
+<p><strong>Richiesta.</strong> Trova il SID di <code>prova1</code> e usalo per concedere la lettura su <code>Documenti</code>.</p>
+
+<div class="info">
+  <p><strong>Soluzione.</strong></p>
+  <pre><code>powershell -Command "(Get-LocalUser -Name prova1).SID.Value"
+icacls "C:\LabPermessi\Documenti" /grant "*S-1-5-21-0000000000-0000000000-0000000000-1001:(OI)(CI)(R)"</code></pre>
+  <p>Sostituisci il SID dell'esempio con quello stampato dal primo comando. L'asterisco davanti al SID indica a <code>icacls</code> che stai usando un identificativo e non un nome. Il SID funziona anche se l'utente viene rinominato.</p>
+</div>
+
+<h2>Verifica dei risultati</h2>
+
+<p>Con la finestra aperta come <code>prova1</code> o <code>prova2</code>, prova queste operazioni:</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>Dopo l'esercizio</th><th>Prova</th><th>Risultato atteso</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>3</td>
+      <td><code>type "C:\LabPermessi\Documenti\report.txt"</code></td>
+      <td>Il contenuto viene mostrato.</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><code>echo modifica&gt;&gt;"C:\LabPermessi\Documenti\report.txt"</code></td>
+      <td>«Accesso negato» per <code>prova1</code>.</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td><code>echo modifica&gt;&gt;"C:\LabPermessi\Documenti\appunti.txt"</code></td>
+      <td>La scrittura riesce per <code>prova1</code>.</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td><code>echo modifica&gt;&gt;"C:\LabPermessi\Documenti\report.txt"</code></td>
+      <td>«Accesso negato» per <code>prova2</code>.</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td><code>icacls "C:\LabPermessi\Documenti\Archivio"</code></td>
+      <td>Le voci non hanno più il flag <code>(I)</code>.</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td><code>icacls "C:\LabPermessi\Documenti\Archivio"</code></td>
+      <td>Le voci ereditate hanno di nuovo il flag <code>(I)</code>.</td>
+    </tr>
+    <tr>
+      <td>11</td>
+      <td><code>attrib "C:\LabPermessi\Documenti\report.txt"</code></td>
+      <td>Compare la lettera <code>H</code> tra gli attributi.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2>Riepilogo dei comandi</h2>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>Operazione</th><th>Comando</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Vedere le ACL</td><td><code>icacls "C:\Cartella"</code></td></tr>
+    <tr><td>Vedere le ACL in modo ricorsivo</td><td><code>icacls "C:\Cartella" /T</code></td></tr>
+    <tr><td>Concedere un permesso</td><td><code>icacls "C:\Cartella" /grant "utente:(OI)(CI)(R)"</code></td></tr>
+    <tr><td>Negare un permesso</td><td><code>icacls "C:\Cartella" /deny "utente:(W)"</code></td></tr>
+    <tr><td>Rimuovere un permesso</td><td><code>icacls "C:\Cartella" /remove "utente"</code></td></tr>
+    <tr><td>Disabilitare l'ereditarietà</td><td><code>icacls "C:\Cartella" /inheritance:d</code></td></tr>
+    <tr><td>Riabilitare l'ereditarietà</td><td><code>icacls "C:\Cartella" /inheritance:e</code></td></tr>
+    <tr><td>Salvare le ACL</td><td><code>icacls "C:\Cartella" /save "backup.txt" /T</code></td></tr>
+    <tr><td>Ripristinare le ACL</td><td><code>icacls "C:\" /restore "backup.txt"</code></td></tr>
+    <tr><td>Prendere possesso</td><td><code>takeown /F "C:\file.txt"</code></td></tr>
+    <tr><td>Cambiare gli attributi</td><td><code>attrib +R "C:\file.txt"</code></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>Pulizia finale</h2>
+
+<p>Al termine, elimina gli utenti e la cartella di laboratorio:</p>
+
+<pre><code>net user prova1 /delete
+net user prova2 /delete
+attrib -R -H -S "C:\LabPermessi\Documenti\*.*" /S /D
+rmdir /s /q "C:\LabPermessi"</code></pre>
+
+<div class="note">
+  <p><strong>Nota.</strong> Se un file è in uso, chiudi il programma che lo tiene aperto prima di eliminare la cartella. Se il prompt non è più amministratore, riaprilo con <em>Esegui come amministratore</em>.</p>
+</div>
+
+</main>
+
+<script src="../assets/barra.js"></script>
+</body>
+</html>
