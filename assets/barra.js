@@ -19,7 +19,7 @@
     "#barra-sito a,#barra-sito button{font:inherit;color:inherit;background:none;border:0;",
     "cursor:pointer;text-decoration:none}",
     "#barra-sito a{padding:3px 8px;border-radius:6px}",
-    "#barra-sito a:hover{background:rgba(127,127,127,.18)}",
+    "#barra-sito a:hover{background:rgb(127,127,127)}",
     "#barra-sito .barra-titolo{font-weight:500;opacity:.75;overflow:hidden;",
     "text-overflow:ellipsis;white-space:nowrap}",
     "#barra-sito .barra-stampa{padding:3px 10px;border:1px solid rgba(127,127,127,.45);",
@@ -75,10 +75,10 @@
       (0.2126 * sfondo.r + 0.7152 * sfondo.g + 0.0722 * sfondo.b) / 255;
     var scuro = luminanza <= 0.5;
 
-    barra.style.color = stileCorpo.color || (scuro ? "#e6e8eb" : "#1f2328");
-    barra.style.backgroundColor = scuro ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.05)";
+    barra.style.color = stileCorpo.color || (scuro ? "#686868" : "#1f2328");
+    barra.style.backgroundColor = scuro ? "rgb(42, 42, 42)" : "rgb(0,0,0)";
     barra.style.borderBottom =
-      "1px solid " + (scuro ? "rgba(255,255,255,.12)" : "rgba(0,0,0,.10)");
+      "1px solid " + (scuro ? "rgb(51, 51, 51)" : "rgb(0,0,0)");
 
     var accento = getComputedStyle(document.documentElement)
       .getPropertyValue("--accent")
