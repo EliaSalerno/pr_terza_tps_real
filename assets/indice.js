@@ -333,6 +333,37 @@ window.INDICE = [
     ]
   },
   {
+    id:"Esercitazione-permessi-gruppi-utenti",
+    gruppo:"attivita",
+    categoria:"Utenti, gruppi e permessi",
+    etichetta:"Esercitazione CMD",
+    titolo:"Configuriamo passo dopo passo un pc scolastico",
+    breve:"Esercizi guidati su utenti, gruppi e permessi",
+    approfondimento:
+      "Esercitazione guidata passo dopo passo: creazione di utenti e gruppi locali, assegnazione di permessi, gestione dell'ereditarietà.",
+    documenti:[
+      {
+        titolo:"Esercitazione: Configuriamo passo dopo passo un pc scolastico",
+        descrizione:"23 mini esercizi che portano alla configurazione di una macchina scolastica: utenti, gruppi e permessi. Durante queste fasi bisognerà creare una relazione",
+        argomenti:[
+          "icacls",
+          "takeown",
+          "whoami",
+          "net user",
+          "net localgroup",
+          "net accounts",
+          "scadenza password",
+          "blocco account",
+          "ereditarietà",
+          "permessi semplici",
+          "flag di ereditarietà",
+          "Nega e Consenti"
+        ],
+        file:"attività/Esercitazione_utenti_gruppi_permessi.html"
+      }
+    ]
+  },
+  {
     id: "attivita-condivisione",
     gruppo: "attivita",
     categoria: "Reti e condivisioni",
