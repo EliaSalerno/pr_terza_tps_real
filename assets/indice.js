@@ -296,7 +296,7 @@ window.INDICE = [
       {
         titolo: "Esercitazione: permessi di file e cartelle da Prompt dei comandi",
         descrizione:
-          "Dodici esercizi con soluzioni su icacls, takeown e attrib: ACL, ereditarietà, Nega e Consenti, backup delle ACL, possesso, attributi e SID.",
+          "12 esercizi con soluzioni su icacls, takeown e attrib: ACL, ereditarietà, Nega e Consenti, backup delle ACL, possesso, attributi e SID.",
         argomenti: [
           "icacls",
           "takeown",
@@ -310,6 +310,25 @@ window.INDICE = [
           "PowerShell"
         ],
         file: "attività/Esercitazione_permessi_file_cartelle_CMD.html"
+      },
+      {
+        titolo: "Esercitazione: permessi di file e cartelle da Prompt dei comandi",
+        descrizione:
+          "20 esercizi con soluzioni su icacls, takeown e attrib: ACL, ereditarietà, Nega e Consenti, backup delle ACL, possesso, attributi e SID.",
+        argomenti: [
+          "icacls",
+          "takeown",
+          "attrib",
+          "SID",
+          "ACL e ACE",
+          "ereditarietà",
+          "Nega e Consenti",
+          "salvare e ripristinare le ACL",
+          "attributi",
+          "SID",
+          "PowerShell"
+        ],
+        file: "attività/Esercizi_ permessi e attributi dei file in Windows.html"
       }
     ]
   },
