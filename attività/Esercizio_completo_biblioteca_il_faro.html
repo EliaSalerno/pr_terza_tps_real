@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Esercitazione: gestione utenti, gruppi, password, permessi</title>
+  <link rel="stylesheet" href="../assets/documento.css">
+	<meta name="description" content="descrizione">
+</head>
+<body>
+  <header class="doc-intestazione">
+    <p class="occhiello">Attività · Permessi su file e cartelle</p>
+    <h1>Esercizio completo <i>Biblioteca Il Faro</i>: utenti, password, gruppi e permessi</h1>
+    <p class="sottotitolo">Esercitazione su <code>icacls</code>, <code>net user</code>, <code>net localgroup</code>,<code>net account</code> e <code>whoami</code> con esempi semplici e diretti da eseguire su Windows 11.</p>
+  </header>
+  <main>
+<h2>Come usare questo esercizio</h2>
+<ul>
+<li>Apri il <strong>Prompt dei comandi come amministratore</strong> su una macchina di laboratorio o virtuale.</li>
+<li>Per i permessi usa solo i <strong>permessi semplici</strong> di <code>icacls</code>: <code>F</code>, <code>M</code>, <code>RX</code>, <code>R</code>, <code>W</code>. Sulle cartelle aggiungi <code>(OI)(CI)</code> prima della lettera; per eliminare i permessi ereditati usa <code>/inheritance:r</code>.</li>
+<li>Svolgi le fasi <strong>in ordine</strong>: ognuna usa quanto fatto nelle precedenti.</li>
+<li>La Parte 1 è la traccia da consegnare agli studenti; la Parte 2 contiene la soluzione commentata.</li>
+<li>Rispetto alla prima variante qui compaiono anche la <strong>sostituzione</strong> di un permesso (<code>/grant:r</code>), la <strong>rimozione di un divieto</strong> (<code>/remove:d</code>) e un file con regole diverse da quelle della sua cartella.</li>
+</ul>
+<h2>Parte 1 — Traccia</h2>
+<h3>Scenario</h3>
+<p>La biblioteca comunale «Il Faro» ha un computer condiviso dal personale. Come amministratore di sistema devi creare gli account, impostare le regole sulle password, organizzare le persone in gruppi e proteggere le cartelle dei vari servizi, rispettando il principio del <strong>minimo privilegio</strong>: ciascuno deve poter fare solo ciò che gli serve per il proprio lavoro.</p>
+<h3>Utenti e gruppi</h3>
+<table>
+<thead>
+<tr>
+<th>Utente</th>
+<th>Nome completo</th>
+<th>Ruolo</th>
+<th>Gruppi</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>marta</td>
+<td>Marta Ferri</td>
+<td>Responsabile della biblioteca</td>
+<td>responsabili, personale</td>
+</tr>
+<tr>
+<td>luigi</td>
+<td>Luigi Sala</td>
+<td>Catalogazione</td>
+<td>catalogo, personale</td>
+</tr>
+<tr>
+<td>sofia</td>
+<td>Sofia Marino</td>
+<td>Catalogazione</td>
+<td>catalogo, personale</td>
+</tr>
+<tr>
+<td>nicola</td>
+<td>Nicola Bassi</td>
+<td>Servizio prestiti</td>
+<td>prestiti, personale</td>
+</tr>
+<tr>
+<td>irene</td>
+<td>Irene Costa</td>
+<td>Servizio prestiti</td>
+<td>prestiti, personale</td>
+</tr>
+<tr>
+<td>tommaso</td>
+<td>Tommaso Riva</td>
+<td>Tirocinante ai prestiti</td>
+<td>prestiti, personale</td>
+</tr>
+<tr>
+<td>bancoprestiti</td>
+<td>Banco Prestiti</td>
+<td>Account condiviso del banco prestiti</td>
+<td>prestiti, personale</td>
+</tr>
+</tbody></table>
+<h3>Cartelle, file e permessi richiesti</h3>
+<p>In <strong>tutte</strong> le cartelle <code>Administrators</code> ha controllo completo (<code>F</code>). Nessun altro gruppo o utente deve avere permessi oltre a quelli indicati.</p>
+<table>
+<thead>
+<tr>
+<th>Cartella</th>
+<th>File contenuti</th>
+<th>Permessi richiesti</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>C:\Biblioteca\Gestione</code></td>
+<td><code>bilancio.txt</code></td>
+<td><code>responsabili</code>: F</td>
+</tr>
+<tr>
+<td><code>C:\Biblioteca\Catalogo</code></td>
+<td><code>schede.txt</code>, <code>riservate.txt</code></td>
+<td><code>catalogo</code>: M; <code>responsabili</code>: RX; <code>prestiti</code>: R</td>
+</tr>
+<tr>
+<td><code>C:\Biblioteca\Prestiti</code></td>
+<td><code>registro.txt</code></td>
+<td><code>prestiti</code>: M; <code>catalogo</code>: R; <code>responsabili</code>: F; il tirocinante <code>tommaso</code> non deve poter scrivere</td>
+</tr>
+<tr>
+<td><code>C:\Biblioteca\Avvisi</code></td>
+<td><code>turni.txt</code></td>
+<td><code>responsabili</code>: M; <code>personale</code>: R</td>
+</tr>
+</tbody></table>
+<p>Il file <code>riservate.txt</code> (in <code>Catalogo</code>) ha regole più strette della cartella: solo <code>catalogo</code> (M) e <code>responsabili</code> (R). Il servizio prestiti non deve poterlo leggere.</p>
+<h3>Fase 1 — Criteri password e struttura delle cartelle</h3>
+<p><strong>F1.1 (Gestione password, criteri)</strong> Visualizza i criteri password del computer. Poi imposta: lunghezza minima 10 caratteri, validità massima 60 giorni, memoria delle ultime 3 password, blocco dell'account dopo 3 tentativi errati.</p>
+<p><strong>F1.2 (Permessi, cartelle e file)</strong> Crea la cartella <code>C:\Biblioteca</code> con le quattro sottocartelle della tabella e, dentro ciascuna, i file indicati, contenenti una riga di testo a piacere.</p>
+<h3>Fase 2 — Utenti</h3>
+<p><strong>F2.1 (Gestione utenti)</strong> Crea gli utenti <code>marta</code>, <code>luigi</code>, <code>sofia</code>, <code>nicola</code>, <code>irene</code> e <code>tommaso</code> con password temporanea <code>Faro#Temp2026</code>, completando per ciascuno nome completo e commento (il ruolo) come da tabella.</p>
+<p><strong>F2.2 (Gestione utenti, gestione password)</strong> Crea l'account condiviso <code>bancoprestiti</code> con password <code>Banco#Prestiti26</code>, nome completo e commento. La sua password non deve poter essere cambiata dall'utente.</p>
+<p><strong>F2.3 (Gestione utenti)</strong> Il tirocinio di <code>tommaso</code> termina il 28/02/2027: l'account deve scadere in quella data.</p>
+<p><strong>F2.4 (Gestione utenti)</strong> Visualizza l'elenco degli utenti e le informazioni dettagliate di <code>tommaso</code>, individuando la scadenza.</p>
+<h3>Fase 3 — Gruppi</h3>
+<p><strong>F3.1 (Gestione gruppi)</strong> Crea i gruppi locali <code>responsabili</code>, <code>catalogo</code>, <code>prestiti</code> e <code>personale</code>, ciascuno con un commento.</p>
+<p><strong>F3.2 (Gestione gruppi)</strong> Inserisci gli utenti nei gruppi come da tabella, usando il minor numero di comandi possibile.</p>
+<p><strong>F3.3 (Gestione gruppi)</strong> Verifica i membri del gruppo <code>prestiti</code> e i gruppi a cui appartiene <code>tommaso</code>.</p>
+<h3>Fase 4 — Permessi su cartelle e file</h3>
+<p><strong>F4.1 (Permessi su cartelle)</strong> Imposta i permessi di <code>Gestione</code>, eliminando quelli ereditati.</p>
+<p><strong>F4.2 (Permessi su cartelle)</strong> Imposta i permessi di <code>Catalogo</code>.</p>
+<p><strong>F4.3 (Permessi su cartelle, negazione)</strong> Imposta i permessi di <code>Prestiti</code> e nega la scrittura a <code>tommaso</code>.</p>
+<p><strong>F4.4 (Permessi su cartelle)</strong> Imposta i permessi di <code>Avvisi</code>.</p>
+<p><strong>F4.5 (Permessi su file)</strong> Imposta i permessi del solo file <code>riservate.txt</code>, più restrittivi di quelli della cartella.</p>
+<p><strong>F4.6 (Permessi, verifica)</strong> Visualizza i permessi di tutte le cartelle e del file e controllali con la tabella.</p>
+<h3>Fase 5 — Verifica con prove pratiche</h3>
+<p><strong>F5.1 (Permessi, gruppi, utenti)</strong> Apri un prompt dei comandi come <code>marta</code>, poi come <code>luigi</code>, poi come <code>tommaso</code> e, in ciascuno, esegui le azioni della tabella. Compila le celle con <em>Sì</em> o <em>No</em>.</p>
+<table>
+<thead>
+<tr>
+<th>Azione</th>
+<th>marta</th>
+<th>luigi</th>
+<th>tommaso</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1. Leggere <code>Gestione\bilancio.txt</code></td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>2. Creare un file in <code>Catalogo</code></td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>3. Leggere <code>Catalogo\schede.txt</code></td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>4. Leggere <code>Catalogo\riservate.txt</code></td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>5. Creare un file in <code>Prestiti</code></td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>6. Leggere <code>Prestiti\registro.txt</code></td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>7. Creare un file in <code>Avvisi</code></td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+</tbody></table>
+<h3>Fase 6 — Variazioni nel servizio</h3>
+<p><strong>F6.1 (Gestione utenti, permessi)</strong> <code>tommaso</code> viene assunto: l'account non deve più scadere e il divieto di scrittura su <code>Prestiti</code> va tolto, senza modificare gli altri permessi. Verifica il risultato.</p>
+<p><strong>F6.2 (Gestione utenti)</strong> <code>sofia</code> va in congedo: disattiva il suo account e verificalo. Al rientro, riattivalo e verifica di nuovo.</p>
+<p><strong>F6.3 (Permessi su cartelle)</strong> Il servizio prestiti inizia a collaborare alla catalogazione: sostituisci il permesso di <code>prestiti</code> su <code>Catalogo</code> con la modifica (M), senza usare <code>/remove</code>. Verifica.</p>
+<p><strong>F6.4 (Permessi su cartelle)</strong> Il gruppo <code>catalogo</code> non deve più avere accesso a <code>Prestiti</code>: togli tutti i suoi permessi da quella cartella e verifica.</p>
+<p><strong>F6.5 (Gestione password)</strong> Si cambia la password dell'account condiviso <code>bancoprestiti</code>: assegnane una nuova senza che sia visibile mentre la digiti.</p>
+<p><strong>F6.6 (Permessi, verifica)</strong> Accedi come <code>nicola</code> (servizio prestiti) e come <code>luigi</code> (catalogazione) e controlla i nuovi permessi: <code>nicola</code> deve poter creare file in <code>Catalogo</code> ma non leggere <code>riservate.txt</code>; <code>luigi</code> non deve più poter leggere <code>Prestiti\registro.txt</code>.</p>
+<h3>Fase 7 — Consegna degli account</h3>
+<p><strong>F7.1 (Gestione password)</strong> Fai in modo che tutti gli utenti, tranne <code>bancoprestiti</code>, debbano cambiare la password al primo accesso. Verifica l'impostazione per <code>marta</code>.</p>
+<h3>Fase 8 — Pulizia</h3>
+<p><strong>F8.1 (Utenti, gruppi, permessi, password)</strong> Elimina gli utenti e i gruppi creati, cancella <code>C:\Biblioteca</code> e ripristina i criteri password ai valori predefiniti (lunghezza minima 0, validità massima 42 giorni, memoria 0, nessun blocco).</p>
+<h3>Domande di riflessione</h3>
+<p><strong>D1</strong> Che differenza c'è tra <code>/grant</code> e <code>/grant:r</code>?</p>
+<p><strong>D2</strong> Dopo il punto F6.3 <code>prestiti</code> ha M su <code>Catalogo</code>. Perché <code>nicola</code> non può comunque leggere <code>riservate.txt</code>?</p>
+<p><strong>D3</strong> Che differenza c'è tra disattivare e eliminare un account? Quando conviene l'una o l'altra?</p>
+<p><strong>D4</strong> Cosa fa <code>/remove:d</code> e in cosa differisce da <code>/remove</code>?</p>
+<p><strong>D5</strong> A cosa serve la scadenza dell'account impostata per <code>tommaso</code>, e cosa cambia con <code>/expires:never</code>?</p>
+<h2>Parte 2 — Soluzione commentata</h2>
+<h3>Fase 1 — Criteri password e struttura delle cartelle</h3>
+<p><strong>Teoria.</strong> I <strong>criteri password</strong> sono regole valide per tutto il computer: lunghezza minima, durata massima, storico (le ultime password non si possono riutilizzare) e soglia di blocco (dopo N tentativi errati l'account si blocca). Servono a rendere le password più difficili da indovinare e a limitare gli attacchi a tentativi. Si gestiscono con <code>net accounts</code>, che <strong>non</strong> modifica le password già esistenti: vale per quelle impostate da ora in poi.</p>
+<p><strong>F1.1 — Pratica</strong></p>
+<pre><code>net accounts
+net accounts /minpwlen:10 /maxpwage:60 /uniquepw:3 /lockoutthreshold:3
+net accounts</code></pre>
+<ul>
+<li><code>/minpwlen:10</code> lunghezza minima in caratteri.</li>
+<li><code>/maxpwage:60</code> dopo 60 giorni la password scade e va cambiata.</li>
+<li><code>/uniquepw:3</code> le ultime 3 password non possono essere riutilizzate.</li>
+<li><code>/lockoutthreshold:3</code> dopo 3 tentativi errati l'account si blocca.</li>
+<li>Il secondo <code>net accounts</code> serve a <strong>verificare</strong> che i valori siano cambiati.</li>
+</ul>
+<p><strong>F1.2 — Pratica</strong></p>
+<pre><code>mkdir C:\Biblioteca\Gestione
+mkdir C:\Biblioteca\Catalogo
+mkdir C:\Biblioteca\Prestiti
+mkdir C:\Biblioteca\Avvisi
+echo Bilancio annuale &gt; C:\Biblioteca\Gestione\bilancio.txt
+echo Schede dei libri &gt; C:\Biblioteca\Catalogo\schede.txt
+echo Schede in lavorazione &gt; C:\Biblioteca\Catalogo\riservate.txt
+echo Registro dei prestiti &gt; C:\Biblioteca\Prestiti\registro.txt
+echo Turni del personale &gt; C:\Biblioteca\Avvisi\turni.txt</code></pre>
+<p><code>mkdir</code> crea anche la cartella <code>C:\Biblioteca</code> se non esiste; <code>echo testo &gt; file</code> crea un file contenente il testo.</p>
+<h3>Fase 2 — Utenti</h3>
+<p><strong>Teoria.</strong> Un <strong>account utente</strong> identifica una persona (o un servizio) sul computer: ha un nome, una password e, internamente, un identificativo univoco (SID) con cui il sistema assegna i permessi. Se si elimina un account e se ne ricrea uno con lo stesso nome, il nuovo è un account <strong>diverso</strong>. Si assegna a ogni persona un account personale, così le azioni sono riconducibili a chi le ha fatte. Un <strong>account condiviso</strong>, come quello del banco prestiti, è sconsigliato perché non permette di sapere chi ha agito: quando serve lo si protegge con una password robusta che gli utenti non possono cambiare, gestita dall'amministratore. La password iniziale impostata dall'amministratore è <strong>temporanea</strong>: l'utente dovrà sostituirla. Gli account di chi ha un incarico a termine (tirocinanti, collaboratori) è buona prassi farli <strong>scadere</strong> automaticamente.</p>
+<p><strong>F2.1 — Pratica</strong></p>
+<pre><code>net user marta Faro#Temp2026 /add /fullname:"Marta Ferri" /comment:"Responsabile della biblioteca"
+net user luigi Faro#Temp2026 /add /fullname:"Luigi Sala" /comment:"Catalogazione"
+net user sofia Faro#Temp2026 /add /fullname:"Sofia Marino" /comment:"Catalogazione"
+net user nicola Faro#Temp2026 /add /fullname:"Nicola Bassi" /comment:"Servizio prestiti"
+net user irene Faro#Temp2026 /add /fullname:"Irene Costa" /comment:"Servizio prestiti"
+net user tommaso Faro#Temp2026 /add /fullname:"Tommaso Riva" /comment:"Tirocinante ai prestiti"</code></pre>
+<p>La sintassi è <code>net user nome password /add</code>; le opzioni <code>/fullname</code> e <code>/comment</code> si possono combinare nello stesso comando. I testi con spazi vanno tra virgolette. La password di 13 caratteri rispetta il minimo di 10 impostato in F1.1.</p>
+<p><strong>F2.2 — Pratica</strong></p>
+<pre><code>net user bancoprestiti Banco#Prestiti26 /add /fullname:"Banco Prestiti" /comment:"Account condiviso del banco prestiti"
+net user bancoprestiti /passwordchg:no</code></pre>
+<p><code>/passwordchg:no</code> impedisce all'utente di cambiare la propria password: solo l'amministratore può farlo.</p>
+<p><strong>F2.3 — Pratica</strong></p>
+<pre><code>net user tommaso /expires:28/02/2027</code></pre>
+<p>Dopo la data indicata l'account non è più utilizzabile, senza bisogno di ricordarsi di disattivarlo. Il formato della data dipende dalle impostazioni regionali (in italiano <code>gg/mm/aaaa</code>). Per togliere la scadenza si usa <code>/expires:never</code>.</p>
+<p><strong>F2.4 — Pratica</strong></p>
+<pre><code>net user
+net user tommaso</code></pre>
+<p><code>net user</code> senza argomenti elenca gli account; con il nome mostra i dettagli, tra cui <em>Nome completo</em>, <em>Commento</em>, <em>L'account scade</em>, <em>L'utente può cambiare la password</em> e <em>Appartenenze al gruppo locale</em>.</p>
+<h3>Fase 3 — Gruppi</h3>
+<p><strong>Teoria.</strong> Un <strong>gruppo</strong> è un insieme di account. Il vantaggio è organizzativo: si assegnano i permessi <strong>al gruppo</strong> una sola volta e poi basta inserire o togliere persone dal gruppo. Un utente può appartenere a più gruppi e i permessi che ottiene dai vari gruppi si <strong>sommano</strong>. Due precisazioni importanti: un gruppo <strong>locale</strong> non può contenere altri gruppi locali (per questo gli utenti vanno inseriti uno a uno anche in <code>personale</code>), e l'appartenenza a un gruppo diventa effettiva al <strong>successivo accesso</strong> dell'utente.</p>
+<p><strong>F3.1 — Pratica</strong></p>
+<pre><code>net localgroup responsabili /add /comment:"Responsabili della biblioteca"
+net localgroup catalogo /add /comment:"Servizio di catalogazione"
+net localgroup prestiti /add /comment:"Servizio prestiti"
+net localgroup personale /add /comment:"Tutto il personale"</code></pre>
+<p><strong>F3.2 — Pratica</strong></p>
+<pre><code>net localgroup responsabili marta /add
+net localgroup catalogo luigi sofia /add
+net localgroup prestiti nicola irene tommaso bancoprestiti /add
+net localgroup personale marta luigi sofia nicola irene tommaso bancoprestiti /add</code></pre>
+<p>Elencando più utenti nello stesso comando si inseriscono in un colpo solo.</p>
+<p><strong>F3.3 — Pratica</strong></p>
+<pre><code>net localgroup prestiti
+net user tommaso</code></pre>
+<p>Il primo comando mostra i membri del gruppo; il secondo, alla voce <em>Appartenenze al gruppo locale</em>, i gruppi di <code>tommaso</code> (<code>prestiti</code> e <code>personale</code>).</p>
+<h3>Fase 4 — Permessi su cartelle e file</h3>
+<p><strong>Teoria.</strong> Ogni cartella e ogni file ha una <strong>lista di controllo degli accessi</strong> (ACL): un elenco di voci, ciascuna delle quali dice <em>a chi</em> (utente o gruppo) si concede o si nega <em>quale</em> permesso. Con <code>icacls</code> si usano questi permessi semplici:</p>
+<table>
+<thead>
+<tr>
+<th>Lettera</th>
+<th>Significato</th>
+<th>In pratica si può...</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>F</code></td>
+<td>Controllo completo</td>
+<td>fare tutto, anche cambiare i permessi</td>
+</tr>
+<tr>
+<td><code>M</code></td>
+<td>Modifica</td>
+<td>leggere, creare, modificare ed eliminare</td>
+</tr>
+<tr>
+<td><code>RX</code></td>
+<td>Lettura ed esecuzione</td>
+<td>aprire cartelle, leggere ed eseguire file</td>
+</tr>
+<tr>
+<td><code>R</code></td>
+<td>Sola lettura</td>
+<td>leggere il contenuto</td>
+</tr>
+<tr>
+<td><code>W</code></td>
+<td>Scrittura</td>
+<td>creare e scrivere file</td>
+</tr>
+</tbody></table>
+<p>Regole da ricordare:</p>
+<ul>
+<li>I permessi ottenuti da gruppi diversi si <strong>sommano</strong>: vale il più ampio.</li>
+<li>Il <strong>divieto</strong> (<code>/deny</code>) prevale sempre sul permesso (<code>/grant</code>).</li>
+<li>Le sottocartelle e i file <strong>ereditano</strong> i permessi dalla cartella che li contiene. <code>(OI)(CI)</code> indica che il permesso passa a file (<em>object inherit</em>) e sottocartelle (<em>container inherit</em>). Con <code>/inheritance:r</code> si eliminano i permessi ereditati, per ripartire da un elenco pulito.</li>
+<li><code>/grant</code> <strong>aggiunge</strong> permessi a quelli esistenti; <code>/grant:r</code> li <strong>sostituisce</strong> (solo per l'utente o il gruppo indicato); <code>/remove</code> toglie tutte le voci di un utente o gruppo; <code>/remove:d</code> toglie solo i divieti.</li>
+<li>Si lascia sempre <code>Administrators</code> con <code>F</code>, per non perdere il controllo della cartella.</li>
+</ul>
+<p><strong>F4.1 — Pratica</strong></p>
+<pre><code>icacls C:\Biblioteca\Gestione /inheritance:r /grant Administrators:(OI)(CI)F /grant responsabili:(OI)(CI)F</code></pre>
+<p>Dopo aver tolto i permessi ereditati, nessuno tranne <code>Administrators</code> e <code>responsabili</code> può accedere a <code>Gestione</code>: gli altri sono esclusi <strong>perché non compaiono</strong> nell'elenco.</p>
+<p><strong>F4.2 — Pratica</strong></p>
+<pre><code>icacls C:\Biblioteca\Catalogo /inheritance:r /grant Administrators:(OI)(CI)F /grant catalogo:(OI)(CI)M /grant responsabili:(OI)(CI)RX /grant prestiti:(OI)(CI)R</code></pre>
+<p><strong>F4.3 — Pratica</strong></p>
+<pre><code>icacls C:\Biblioteca\Prestiti /inheritance:r /grant Administrators:(OI)(CI)F /grant prestiti:(OI)(CI)M /grant catalogo:(OI)(CI)R /grant responsabili:(OI)(CI)F
+icacls C:\Biblioteca\Prestiti /deny tommaso:(OI)(CI)W</code></pre>
+<p><code>tommaso</code> è membro di <code>prestiti</code> (M), ma il divieto di scrittura prevale: potrà leggere, non scrivere.</p>
+<p><strong>F4.4 — Pratica</strong></p>
+<pre><code>icacls C:\Biblioteca\Avvisi /inheritance:r /grant Administrators:(OI)(CI)F /grant responsabili:(OI)(CI)M /grant personale:(OI)(CI)R</code></pre>
+<p>Così solo i responsabili pubblicano gli avvisi, mentre tutto il personale li legge.</p>
+<p><strong>F4.5 — Pratica</strong></p>
+<pre><code>icacls C:\Biblioteca\Catalogo\riservate.txt /inheritance:r /grant Administrators:F /grant catalogo:M /grant responsabili:R</code></pre>
+<p>Su un file non servono <code>(OI)(CI)</code>. Senza <code>/inheritance:r</code> il file avrebbe ereditato da <code>Catalogo</code> il permesso R per <code>prestiti</code>, che quindi avrebbe potuto leggerlo.</p>
+<p><strong>F4.6 — Pratica</strong></p>
+<pre><code>icacls C:\Biblioteca\Gestione
+icacls C:\Biblioteca\Catalogo
+icacls C:\Biblioteca\Prestiti
+icacls C:\Biblioteca\Avvisi
+icacls C:\Biblioteca\Catalogo\riservate.txt</code></pre>
+<p>Nell'output ogni voce mostra l'account, i flag di ereditarietà e la lettera del permesso; i divieti sono indicati da <code>(DENY)</code>. Controlla anche che non compaiano gruppi non previsti, come <code>Users</code> o <code>Authenticated Users</code>.</p>
+<h3>Fase 5 — Verifica con prove pratiche</h3>
+<p><strong>Teoria.</strong> Leggere l'ACL dice cosa è stato impostato, ma solo una <strong>prova reale</strong> mostra i permessi effettivi di un utente, risultato della somma dei suoi gruppi e degli eventuali divieti. Il comando <code>runas</code> apre una nuova sessione con l'identità di un altro utente, con i suoi gruppi.</p>
+<p><strong>F5.1 — Pratica</strong></p>
+<pre><code>runas /user:%COMPUTERNAME%\marta cmd</code></pre>
+<p>Si digita la password <code>Faro#Temp2026</code>. Nella nuova finestra:</p>
+<pre><code>whoami
+whoami /groups
+type C:\Biblioteca\Gestione\bilancio.txt
+echo prova &gt; C:\Biblioteca\Catalogo\%USERNAME%.txt
+type C:\Biblioteca\Catalogo\schede.txt
+type C:\Biblioteca\Catalogo\riservate.txt
+echo prova &gt; C:\Biblioteca\Prestiti\%USERNAME%.txt
+type C:\Biblioteca\Prestiti\registro.txt
+echo prova &gt; C:\Biblioteca\Avvisi\%USERNAME%.txt</code></pre>
+<p>Si ripete lo stesso con <code>luigi</code> e con <code>tommaso</code>. Dove il sistema risponde <em>Accesso negato</em> il risultato è <em>No</em>. Usando <code>%USERNAME%</code> ogni utente crea un file con il proprio nome.</p>
+<table>
+<thead>
+<tr>
+<th>Azione</th>
+<th>marta</th>
+<th>luigi</th>
+<th>tommaso</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1. Leggere <code>Gestione\bilancio.txt</code></td>
+<td>Sì</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>2. Creare un file in <code>Catalogo</code></td>
+<td>No</td>
+<td>Sì</td>
+<td>No</td>
+</tr>
+<tr>
+<td>3. Leggere <code>Catalogo\schede.txt</code></td>
+<td>Sì</td>
+<td>Sì</td>
+<td>Sì</td>
+</tr>
+<tr>
+<td>4. Leggere <code>Catalogo\riservate.txt</code></td>
+<td>Sì</td>
+<td>Sì</td>
+<td>No</td>
+</tr>
+<tr>
+<td>5. Creare un file in <code>Prestiti</code></td>
+<td>Sì</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>6. Leggere <code>Prestiti\registro.txt</code></td>
+<td>Sì</td>
+<td>Sì</td>
+<td>Sì</td>
+</tr>
+<tr>
+<td>7. Creare un file in <code>Avvisi</code></td>
+<td>Sì</td>
+<td>No</td>
+<td>No</td>
+</tr>
+</tbody></table>
+<p><strong>Spiegazione delle risposte</strong></p>
+<ul>
+<li><strong>Riga 1:</strong> solo <code>responsabili</code> e <code>Administrators</code> compaiono nell'ACL di <code>Gestione</code>.</li>
+<li><strong>Riga 2:</strong> <code>marta</code> ha solo RX (<code>responsabili</code>); <code>luigi</code> ha M (<code>catalogo</code>); <code>tommaso</code> ha solo R (<code>prestiti</code>).</li>
+<li><strong>Riga 4:</strong> <code>riservate.txt</code> ha un'ACL propria: <code>marta</code> (R) e <code>luigi</code> (M) possono leggerlo, <code>tommaso</code> no perché <code>prestiti</code> non compare.</li>
+<li><strong>Riga 5:</strong> <code>marta</code> ha F; <code>luigi</code> ha solo R (<code>catalogo</code>); <code>tommaso</code> ha M da <code>prestiti</code>, ma il divieto W prevale.</li>
+<li><strong>Riga 7:</strong> <code>marta</code> ha M su <code>Avvisi</code>; <code>luigi</code> e <code>tommaso</code> hanno solo R (<code>personale</code>).</li>
+</ul>
+<h3>Fase 6 — Variazioni nel servizio</h3>
+<p><strong>Teoria.</strong> Il vantaggio dei gruppi si vede quando le situazioni cambiano: <strong>non si riscrivono</strong> le ACL da zero, si aggiusta solo la voce interessata. Con <code>/grant:r</code> si sostituisce il permesso di un gruppo senza toccare gli altri; con <code>/remove:d</code> si toglie un divieto lasciando intatti i permessi concessi; con <code>/remove</code> si toglie del tutto un gruppo dall'elenco. Chi si assenta per un periodo si <strong>disattiva</strong> (operazione reversibile), non si elimina. Una password condivisa va cambiata dall'amministratore ogni volta che ce n'è bisogno.</p>
+<p><strong>F6.1 — Pratica</strong></p>
+<pre><code>net user tommaso /expires:never
+icacls C:\Biblioteca\Prestiti /remove:d tommaso
+net user tommaso
+icacls C:\Biblioteca\Prestiti</code></pre>
+<p><code>/expires:never</code> annulla la scadenza. <code>/remove:d</code> elimina solo il divieto di <code>tommaso</code>: da ora il permesso M di <code>prestiti</code> torna pienamente efficace anche per lui. Nell'ACL non compare più <code>(DENY)</code>.</p>
+<p><strong>F6.2 — Pratica</strong></p>
+<pre><code>net user sofia /active:no
+net user sofia
+net user sofia /active:yes
+net user sofia</code></pre>
+<p>Con <code>/active:no</code> il campo <em>Account attivo</em> diventa <em>No</em>; con <code>/active:yes</code> torna <em>Sì</em>. Gruppi e permessi di <code>sofia</code> non vengono toccati: il suo account è solo sospeso.</p>
+<p><strong>F6.3 — Pratica</strong></p>
+<pre><code>icacls C:\Biblioteca\Catalogo /grant:r prestiti:(OI)(CI)M
+icacls C:\Biblioteca\Catalogo</code></pre>
+<p>Con <code>/grant:r</code> il permesso R di <code>prestiti</code> viene <strong>sostituito</strong> da M. Con un semplice <code>/grant</code> avremmo ottenuto lo stesso risultato pratico (R e M si sommano), ma l'elenco avrebbe contenuto due voci per lo stesso gruppo: <code>/grant:r</code> lo mantiene ordinato.</p>
+<p><strong>F6.4 — Pratica</strong></p>
+<pre><code>icacls C:\Biblioteca\Prestiti /remove catalogo
+icacls C:\Biblioteca\Prestiti</code></pre>
+<p><code>/remove</code> elimina dall'ACL tutte le voci del gruppo <code>catalogo</code>: da questo momento non può più neppure leggere la cartella <code>Prestiti</code>.</p>
+<p><strong>F6.5 — Pratica</strong></p>
+<pre><code>net user bancoprestiti *</code></pre>
+<p>Il sistema chiede la nuova password due volte, senza mostrarla. Rispetta comunque i criteri impostati in F1.1 (almeno 10 caratteri). Il divieto di cambio da parte dell'utente (<code>/passwordchg:no</code>) non riguarda l'amministratore.</p>
+<p><strong>F6.6 — Pratica</strong></p>
+<pre><code>runas /user:%COMPUTERNAME%\nicola cmd</code></pre>
+<p>Nella nuova finestra:</p>
+<pre><code>echo prova2 &gt; C:\Biblioteca\Catalogo\%USERNAME%.txt
+type C:\Biblioteca\Catalogo\riservate.txt</code></pre>
+<p>Si apre poi un prompt come <code>luigi</code>:</p>
+<pre><code>type C:\Biblioteca\Prestiti\registro.txt</code></pre>
+<p>Risultati: <code>nicola</code> crea il file in <code>Catalogo</code> (<strong>Sì</strong>, ha M) ma non legge <code>riservate.txt</code> (<strong>No</strong>): quel file ha un'ACL propria, senza ereditarietà, e la modifica fatta alla cartella non la raggiunge. <code>luigi</code> non legge <code>registro.txt</code> (<strong>No</strong>), perché <code>catalogo</code> non compare più nell'ACL.</p>
+<h3>Fase 7 — Consegna degli account</h3>
+<p><strong>Teoria.</strong> Una password scelta dall'amministratore la conoscono almeno due persone. Obbligare al cambio al primo accesso fa sì che la password definitiva la conosca solo il proprietario dell'account. Questo non vale per <code>bancoprestiti</code>: la sua password è stata resa <strong>non modificabile dall'utente</strong>, quindi il cambio forzato non è applicabile; la gestisce l'amministratore.</p>
+<p><strong>F7.1 — Pratica</strong></p>
+<pre><code>net user marta /logonpasswordchg:yes
+net user luigi /logonpasswordchg:yes
+net user sofia /logonpasswordchg:yes
+net user nicola /logonpasswordchg:yes
+net user irene /logonpasswordchg:yes
+net user tommaso /logonpasswordchg:yes
+net user marta</code></pre>
+<p>Nell'output di <code>net user marta</code> il campo <em>L'utente deve cambiare la password all'accesso successivo</em> indica <em>Sì</em>. Con un ciclo, al prompt dei comandi, il lavoro si accorcia: <code>for %u in (marta luigi sofia nicola irene tommaso) do net user %u /logonpasswordchg:yes</code> (in un file batch si scrive <code>%%u</code>).</p>
+<h3>Fase 8 — Pulizia</h3>
+<p><strong>F8.1 — Pratica</strong></p>
+<pre><code>net user marta /delete
+net user luigi /delete
+net user sofia /delete
+net user nicola /delete
+net user irene /delete
+net user tommaso /delete
+net user bancoprestiti /delete
+net localgroup responsabili /delete
+net localgroup catalogo /delete
+net localgroup prestiti /delete
+net localgroup personale /delete
+rmdir /s /q C:\Biblioteca
+net accounts /minpwlen:0 /maxpwage:42 /uniquepw:0 /lockoutthreshold:0</code></pre>
+<p><code>rmdir /s /q</code> cancella la cartella con tutto il contenuto, senza chiedere conferma.</p>
+<h3>Risposte alle domande di riflessione</h3>
+<p><strong>D1</strong> <code>/grant</code> <strong>aggiunge</strong> una voce a quelle esistenti; <code>/grant:r</code> <strong>sostituisce</strong> i permessi già assegnati a quell'utente o gruppo con quello indicato, lasciando intatte le voci degli altri.</p>
+<p><strong>D2</strong> Perché <code>riservate.txt</code> ha un'ACL propria, creata con <code>/inheritance:r</code>: non riceve più le modifiche fatte alla cartella. Un permesso concesso a <code>prestiti</code> su <code>Catalogo</code> non arriva a quel file.</p>
+<p><strong>D3</strong> <strong>Disattivare</strong> blocca l'accesso ma conserva account, gruppi e permessi: è reversibile, adatto a un'assenza temporanea. <strong>Eliminare</strong> cancella l'account; se se ne ricrea uno con lo stesso nome è un account diverso (SID diverso), senza gli antichi permessi. Si elimina quando la persona non servirà più.</p>
+<p><strong>D4</strong> <code>/remove:d</code> toglie dall'ACL solo i <strong>divieti</strong> (voci <em>deny</em>) di quell'utente o gruppo, lasciando i permessi concessi; <code>/remove</code> toglie <strong>tutte</strong> le voci, concesse e negate.</p>
+<p><strong>D5</strong> La scadenza fa chiudere l'account da solo alla fine del tirocinio, senza dipendere dalla memoria dell'amministratore. Con <code>/expires:never</code> l'account resta valido a tempo indeterminato, come per un dipendente.</p>
+  </main>
+  <script src="../assets/barra.js"></script>
+</body>
+</html>

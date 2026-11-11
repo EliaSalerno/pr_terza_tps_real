@@ -15,6 +15,11 @@
 */
 window.GRUPPI = [
   {
+    id:"configurazione",
+    titolo:"Configurazione",
+    breve:"Tutto il materiale utile alla configurazione delle macchine virtuali e dell'ambiente di laboratorio."
+  },
+  {
     id: "teoria",
     titolo: "Teoria",
     breve:
@@ -58,7 +63,7 @@ window.INDICE = [
   },
   {
     id: "teoria-guest-additions",
-    gruppo: "teoria",
+    gruppo: "configurazione",
     categoria: "Integrazione host-guest",
     etichetta: "Approfondimento",
     titolo: "Guest Additions di VirtualBox",
@@ -158,7 +163,7 @@ window.INDICE = [
   },
   {
     id: "teoria-installazione",
-    gruppo: "teoria",
+    gruppo: "configurazione",
     categoria: "Preparazione dell'ambiente",
     etichetta: "Guida",
     titolo: "Installazione delle macchine virtuali",
@@ -255,7 +260,7 @@ window.INDICE = [
   },
   {
     id: "attivita-comandi",
-    gruppo: "attivita",
+    gruppo: "teoria",
     categoria: "Utenti, gruppi e permessi",
     etichetta: "Guida CMD",
     titolo: "Guida ai comandi CMD",
@@ -360,6 +365,37 @@ window.INDICE = [
           "Nega e Consenti"
         ],
         file:"attività/Esercitazione_utenti_gruppi_permessi.html"
+      }
+    ]
+  },
+  {
+    id:"attività-permessi-gruppi-utenti",
+    gruppo:"attivita",
+    categoria:"Utenti, gruppi e permessi",
+    etichetta:"Biblioteca il Faro",
+    titolo:"Esercizio completo - Biblioteca Il Faro",
+    breve:"Gestione utenti, gruppi e permessi in un contesto reale",
+    approfondimento:
+      "Esercizio completo su utenti, gruppi e permessi in un contesto reale: la biblioteca scolastica. Creazione di utenti e gruppi locali, gestione delle password, assegnazione dei permessi NTFS secondo una matrice, verifica dei risultati.",
+    documenti:[
+      {
+        titolo:"",
+        descrizione:"",
+        argomenti:[
+          "icacls",
+          "takeown",
+          "whoami",
+          "net user",
+          "net localgroup",
+          "net accounts",
+          "scadenza password",
+          "blocco account",
+          "ereditarietà",
+          "permessi semplici",
+          "flag di ereditarietà",
+          "Nega e Consenti"
+        ],
+        file:"attività/Esercizio_completo_Biblioteca_Il_Faro.html"
       }
     ]
   },
