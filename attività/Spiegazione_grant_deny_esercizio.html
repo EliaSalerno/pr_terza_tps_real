@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ambiente di test per lavorare sui permessi in Windows</title>
+<style>
+:root {
+  --bg: #f6f8fa; --surface: #ffffff; --text: #1c2530; --muted: #5a6776;
+  --line: #d5dce4; --accent: #0b5cad; --code-bg: #14202e; --code-text: #e6edf5; --note-bg: #e8f1fb;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1620; --surface: #17212d; --text: #e3e9f0; --muted: #9aa8b8;
+    --line: #2b3a4b; --accent: #6cb2f5; --code-bg: #0a1017; --code-text: #e6edf5; --note-bg: #1a2a3d;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1620; --surface: #17212d; --text: #e3e9f0; --muted: #9aa8b8;
+  --line: #2b3a4b; --accent: #6cb2f5; --code-bg: #0a1017; --code-text: #e6edf5; --note-bg: #1a2a3d;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 1rem; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: "Segoe UI", system-ui, -apple-system, sans-serif; line-height: 1.65; }
+main { max-width: 780px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 1rem; }
+h2 { font-size: 1.3rem; margin: 2.4rem 0 0.8rem; padding-bottom: 0.4rem; border-bottom: 2px solid var(--line); }
+p { margin: 0.7rem 0; }
+.lead { background: var(--note-bg); border-left: 4px solid var(--accent); padding: 0.9rem 1.1rem; border-radius: 4px; }
+.table-wrap { overflow-x: auto; margin: 1rem 0; }
+table { border-collapse: collapse; width: 100%; background: var(--surface); }
+th, td { text-align: left; padding: 0.55rem 0.85rem; border: 1px solid var(--line); vertical-align: top; }
+th { background: var(--note-bg); }
+pre { background: var(--code-bg); color: var(--code-text); padding: 1rem 1.1rem; border-radius: 6px; overflow-x: auto; font-family: Consolas, "Cascadia Mono", monospace; font-size: 0.92rem; line-height: 1.5; margin: 0.8rem 0; }
+code { font-family: Consolas, "Cascadia Mono", monospace; font-size: 0.92em; background: var(--note-bg); padding: 0.1em 0.35em; border-radius: 3px; }
+pre code { background: none; padding: 0; font-size: inherit; }
+ul { padding-left: 1.3rem; }
+li { margin: 0.35rem 0; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Ambiente di test per lavorare sui permessi in Windows</h1>
+
+  <p class="lead">L’idea è creare utenti, gruppi e cartelle di prova, così puoi sperimentare con <code>icacls</code> senza toccare dati reali. Apri il Prompt dei comandi <strong>come amministratore</strong>.</p>
+
+  <h2>1. Creare gli utenti di prova</h2>
+<pre><code>net user Mario Password123! /add
+net user Luca Password123! /add
+net user Anna Password123! /add</code></pre>
+  <p>Per verificare:</p>
+<pre><code>net user
+net user Mario</code></pre>
+
+  <h2>2. Creare un gruppo e aggiungere membri</h2>
+<pre><code>net localgroup Progettisti /add
+net localgroup Progettisti Mario /add
+net localgroup Progettisti Anna /add</code></pre>
+  <p>Per vedere i membri:</p>
+<pre><code>net localgroup Progettisti</code></pre>
+  <p>Usare i gruppi è la buona pratica: si assegnano i permessi al <strong>gruppo</strong>, non ai singoli utenti.</p>
+
+  <h2>3. Creare la struttura di cartelle</h2>
+<pre><code>mkdir C:\Test\Progetto\Documenti
+mkdir C:\Test\Progetto\Riservato
+mkdir C:\Test\Pubblica
+
+echo prova &gt; C:\Test\Progetto\Documenti\file1.txt
+echo segreto &gt; C:\Test\Progetto\Riservato\file2.txt</code></pre>
+
+  <h2>4. Impostare i permessi di partenza</h2>
+<pre><code>:: Interrompi l'ereditarietà e togli i gruppi larghi
+icacls C:\Test\Progetto /inheritance:d
+icacls C:\Test\Progetto /remove Everyone
+icacls C:\Test\Progetto /remove Users
+icacls C:\Test\Progetto /remove "Authenticated Users"
+
+:: Il gruppo lavora sulla cartella
+icacls C:\Test\Progetto /grant Progettisti:(OI)(CI)M
+
+:: Luca può solo leggere
+icacls C:\Test\Progetto /grant Luca:(OI)(CI)R
+
+:: Riservato: Anna viene bloccata
+icacls C:\Test\Progetto\Riservato /deny Anna:(OI)(CI)F</code></pre>
+
+  <h2>5. Controllare i permessi</h2>
+<pre><code>:: ACL di una cartella
+icacls C:\Test\Progetto
+
+:: ACL ricorsiva su tutto il contenuto
+icacls C:\Test\Progetto\* /t
+
+:: Verifica la coerenza delle ACL
+icacls C:\Test\Progetto\Riservato /verify</code></pre>
+  <p>Per vedere chi è il proprietario:</p>
+<pre><code>dir /q C:\Test\Progetto</code></pre>
+
+  <h2>6. Testare davvero come un altro utente</h2>
+  <p>Puoi aprire un prompt con le credenziali di un utente di prova:</p>
+<pre><code>runas /user:Mario cmd</code></pre>
+  <p>Nella nuova finestra prova:</p>
+<pre><code>whoami
+type C:\Test\Progetto\Documenti\file1.txt
+echo nuovo &gt;&gt; C:\Test\Progetto\Documenti\file1.txt
+del C:\Test\Progetto\Documenti\file1.txt</code></pre>
+  <p>Così vedi subito se un permesso funziona o se ricevi «Accesso negato». Ripeti con <code>Luca</code> e <code>Anna</code> per confrontare i risultati.</p>
+
+  <h2>7. Backup e ripristino delle ACL</h2>
+  <p>Prima di fare esperimenti rischiosi, salva lo stato:</p>
+<pre><code>:: Salva
+icacls C:\Test\Progetto /save C:\Test\acl_backup.txt /t
+
+:: Ripristina (si indica la cartella PADRE)
+icacls C:\Test /restore C:\Test\acl_backup.txt</code></pre>
+  <p>Per tornare allo stato predefinito ereditato:</p>
+<pre><code>icacls C:\Test\Progetto /reset /t</code></pre>
+
+  <h2>8. Gestire il proprietario</h2>
+<pre><code>:: Prendi possesso
+takeown /f C:\Test\Progetto /r /d s
+
+:: Assegna la proprietà a un utente
+icacls C:\Test\Progetto /setowner Mario /t</code></pre>
+
+  <h2>9. Pulizia finale</h2>
+<pre><code>rmdir /s /q C:\Test
+net localgroup Progettisti /delete
+net user Mario /delete
+net user Luca /delete
+net user Anna /delete</code></pre>
+
+  <h2>Riepilogo comandi per categoria</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Scopo</th><th>Comando</th></tr></thead>
+      <tbody>
+        <tr><td>Creare/eliminare utenti</td><td><code>net user nome pass /add</code> / <code>/delete</code></td></tr>
+        <tr><td>Gestire gruppi</td><td><code>net localgroup gruppo /add</code>, <code>... utente /add</code></td></tr>
+        <tr><td>Vedere permessi</td><td><code>icacls percorso</code></td></tr>
+        <tr><td>Dare permessi</td><td><code>icacls percorso /grant utente:(OI)(CI)M</code></td></tr>
+        <tr><td>Negare permessi</td><td><code>icacls percorso /deny utente:(OI)(CI)D</code></td></tr>
+        <tr><td>Rimuovere voci</td><td><code>icacls percorso /remove utente</code></td></tr>
+        <tr><td>Gestire ereditarietà</td><td><code>/inheritance:e</code> (abilita), <code>:d</code> (copia), <code>:r</code> (rimuovi)</td></tr>
+        <tr><td>Backup/ripristino</td><td><code>/save</code> e <code>/restore</code></td></tr>
+        <tr><td>Reset ai valori predefiniti</td><td><code>icacls percorso /reset /t</code></td></tr>
+        <tr><td>Cambiare proprietario</td><td><code>takeown</code> o <code>icacls /setowner</code></td></tr>
+        <tr><td>Testare come altro utente</td><td><code>runas /user:nome cmd</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Consigli</h2>
+  <ul>
+    <li><strong>Usa una macchina virtuale</strong> (Hyper-V, VirtualBox) se vuoi un ambiente completamente isolato.</li>
+    <li>Su <strong>Windows Home</strong> <code>runas</code> funziona, ma la gestione grafica dei gruppi locali è limitata: i comandi <code>net</code> restano la via più affidabile.</li>
+    <li>Se il PC è in un <strong>dominio</strong>, usa <code>net group /domain</code> o PowerShell (<code>Get-Acl</code>, <code>Set-Acl</code>) per gestire gli utenti di dominio.</li>
+    <li>Per un’analisi più dettagliata, esiste anche l’equivalente PowerShell: <code>Get-Acl C:\Test\Progetto | Format-List</code>.</li>
+  </ul>
+</main>
+</body>
+</html>
