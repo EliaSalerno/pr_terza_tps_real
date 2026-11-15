@@ -35,29 +35,46 @@ window.GRUPPI = [
 
 window.INDICE = [
   {
-    id: "teoria-fondamenti",
-    gruppo: "teoria",
-    categoria: "Fondamenti",
-    etichetta: "Dispensa",
-    titolo: "Le macchine virtuali",
-    breve: "Cos'è una VM e come funziona sotto il cofano",
+    id: "teoria-installazione",
+    gruppo: "configurazione",
+    categoria: "Preparazione dell'ambiente",
+    etichetta: "Guida",
+    titolo: "Installazione delle macchine virtuali",
+    breve: "Windows 11 e Alpine Linux, una volta sola",
     approfondimento:
-      "Il funzionamento tecnico delle macchine virtuali: hypervisor di tipo 1 e 2, CPU e memoria virtuali, dischi, rete, snapshot e cloni, pregi, limiti e ambiti di utilizzo. La dispensa si chiude con la procedura tipica di laboratorio e con le domande di verifica, ed è il presupposto per tutte le attività pratiche.",
+      "Le guide per creare le macchine di partenza: Windows 11 con VirtualBox e Alpine Linux. Si seguono una volta sola, prima delle attività, perché ogni esercizio parte da una macchina già pronta, con snapshot «pulito» e cloni riutilizzabili.",
     documenti: [
       {
-        titolo: "Lezione: le macchine virtuali",
+        titolo: "Creare la macchina virtuale Windows 11",
         descrizione:
-          "Panoramica stampabile: VM, hypervisor, risorse, rete, snapshot, container e domande di verifica.",
+          "Da zero a VM pronta: hardware virtuale, installazione di Windows 11, Guest Additions, snapshot e cloni.",
         argomenti: [
-          "macchina virtuale",
-          "hypervisor",
-          "CPU e memoria",
-          "dischi",
-          "rete",
+          "VirtualBox",
+          "Windows 11",
+          "EFI, TPM 2.0, Secure Boot",
+          "dischi dinamici",
+          "Guest Additions",
           "snapshot e cloni",
-          "container"
+          "esportazione OVA"
         ],
-        file: "teoria/Lezione_ le macchine virtuali.html"
+        file: "teoria/installazione/creazione_macchina.html",
+        pdf: "teoria/installazione/pdf/Guida_ creare la macchina virtuale Windows 11 con VirtualBox.pdf"
+      },
+      {
+        titolo: "Alpine Linux in macchina virtuale",
+        descrizione:
+          "Dal live su disco: rete in NAT, setup-alpine, repository di apk, Bash e sincronizzazione dell'orologio.",
+        argomenti: [
+          "Alpine Linux",
+          "NAT e DHCP",
+          "apk",
+          "Bash",
+          "OpenRC",
+          "NTP e chrony",
+          "console"
+        ],
+        file: "teoria/installazione/intro_alpine.html",
+        pdf: "teoria/installazione/pdf/Guida Completa_ Configurazione Alpine Linux su VM.pdf"
       }
     ]
   },
@@ -85,6 +102,33 @@ window.INDICE = [
           "VBoxWindowsAdditions.exe"
         ],
         file: "teoria/guest_additions_virtualbox.html"
+      }
+    ]
+  },
+  {
+    id: "teoria-fondamenti",
+    gruppo: "teoria",
+    categoria: "Fondamenti",
+    etichetta: "Dispensa",
+    titolo: "Le macchine virtuali",
+    breve: "Cos'è una VM e come funziona sotto il cofano",
+    approfondimento:
+      "Il funzionamento tecnico delle macchine virtuali: hypervisor di tipo 1 e 2, CPU e memoria virtuali, dischi, rete, snapshot e cloni, pregi, limiti e ambiti di utilizzo. La dispensa si chiude con la procedura tipica di laboratorio e con le domande di verifica, ed è il presupposto per tutte le attività pratiche.",
+    documenti: [
+      {
+        titolo: "Lezione: le macchine virtuali",
+        descrizione:
+          "Panoramica stampabile: VM, hypervisor, risorse, rete, snapshot, container e domande di verifica.",
+        argomenti: [
+          "macchina virtuale",
+          "hypervisor",
+          "CPU e memoria",
+          "dischi",
+          "rete",
+          "snapshot e cloni",
+          "container"
+        ],
+        file: "teoria/Lezione_ le macchine virtuali.html"
       }
     ]
   },
@@ -158,50 +202,6 @@ window.INDICE = [
           "comandi obsoleti"
         ],
         file: "teoria/Permessi di cartelle da Prompt dei comandi.html"
-      }
-    ]
-  },
-  {
-    id: "teoria-installazione",
-    gruppo: "configurazione",
-    categoria: "Preparazione dell'ambiente",
-    etichetta: "Guida",
-    titolo: "Installazione delle macchine virtuali",
-    breve: "Windows 11 e Alpine Linux, una volta sola",
-    approfondimento:
-      "Le guide per creare le macchine di partenza: Windows 11 con VirtualBox e Alpine Linux. Si seguono una volta sola, prima delle attività, perché ogni esercizio parte da una macchina già pronta, con snapshot «pulito» e cloni riutilizzabili.",
-    documenti: [
-      {
-        titolo: "Creare la macchina virtuale Windows 11",
-        descrizione:
-          "Da zero a VM pronta: hardware virtuale, installazione di Windows 11, Guest Additions, snapshot e cloni.",
-        argomenti: [
-          "VirtualBox",
-          "Windows 11",
-          "EFI, TPM 2.0, Secure Boot",
-          "dischi dinamici",
-          "Guest Additions",
-          "snapshot e cloni",
-          "esportazione OVA"
-        ],
-        file: "teoria/installazione/creazione_macchina.html",
-        pdf: "teoria/installazione/pdf/Guida_ creare la macchina virtuale Windows 11 con VirtualBox.pdf"
-      },
-      {
-        titolo: "Alpine Linux in macchina virtuale",
-        descrizione:
-          "Dal live su disco: rete in NAT, setup-alpine, repository di apk, Bash e sincronizzazione dell'orologio.",
-        argomenti: [
-          "Alpine Linux",
-          "NAT e DHCP",
-          "apk",
-          "Bash",
-          "OpenRC",
-          "NTP e chrony",
-          "console"
-        ],
-        file: "teoria/installazione/intro_alpine.html",
-        pdf: "teoria/installazione/pdf/Guida Completa_ Configurazione Alpine Linux su VM.pdf"
       }
     ]
   },
