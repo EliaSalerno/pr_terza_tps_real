@@ -19,6 +19,8 @@ scorciatoia comoda ma pericolosa.
 │   ├── sito.css                           ← stile della pagina indice
 │   ├── sito.js                            ← rendering di gruppi, card e schede, tema
 │   ├── indice.js                          ← struttura del sito: qui si aggiungono i nuovi argomenti
+│   ├── documento.css                      ← stile dei documenti (intestazione, tabelle, stampa A4)
+│   ├── te.css                             ← stile di supporto per i documenti
 │   └── barra.js                           ← barra "← Indice" inserita in ogni documento
 ├── teoria/                                ← tutta la teoria
 │   ├── Lezione_ le macchine virtuali.html ← lezione teorica stampabile (panoramica)
@@ -29,36 +31,49 @@ scorciatoia comoda ma pericolosa.
 │   │                                       ← permessi dei file da CMD (icacls, takeown, attrib)
 │   ├── Permessi di cartelle da Prompt dei comandi.html
 │   │                                       ← permessi di cartelle e file da CMD
+│   ├── guida_attributi_e_permessi_windows.html
+│   │                                       ← guida interattiva su attributi e permessi
+│   ├── Guida_permessi_cmd.html            ← guida ai permessi di cartella da CMD
 │   └── installazione/                     ← guide di preparazione dell'ambiente
 │       ├── creazione_macchina.html        ← creare e installare la macchina Windows 11
 │       ├── intro_alpine.html              ← guida introduttiva ad Alpine Linux in VM
 │       └── pdf/                           ← copie stampabili delle guide
-└── attività/                              ← tutte le attività di laboratorio
-    ├── Conf_windows_att1.html             ← Attività 1: utenti e file
-    ├── Conf_windows_att2.html             ← Attività 2: gruppi
-    ├── Conf_windows_att3.html             ← Attività 3: condivisione in rete
-    ├── att_conf_windows_ufficio.html       ← Attività 8: ufficio commerciale (riepilogo)
-    ├── active_directory.html              ← Attività 7: Active Directory
-    ├── Conf_windows_comandi.md            ← bozza sorgente della guida ai comandi da CMD
-    ├── Conf_windows_comandi.html          ← guida a utenti, gruppi, domini e permessi da CMD
-    ├── Esercitazione_permessi_file_cartelle_CMD.html
-    │                                       ← esercizi con soluzioni su icacls, takeown e attrib
-    ├── esercitazioni/
-    │   └── configurazione/
-    │       ├── Condivisioni di rete_ vince il permesso più restrittivo.html
-    │       │                               ← simulatore: condivisione SMB vs NTFS
-    │       ├── Laboratorio_registro_eventi_windows.html
-    │       │                               ← laboratorio sui registri eventi
-    │       ├── Laboratorio_registro_eventi_windows.md
-    │       │                               ← bozza sorgente del laboratorio
-    │       ├── diario_di_bordo_windows.html
-    │       │                               ← versione stampabile del laboratorio
-    │       └── Attività_studioVerdisrl_2vm_*.md
-    │                                       ← esercitazione StudioVerdi (studente/docente)
-    └── pdf/                               ← copie stampabili delle attività
+├── attività/                              ← tutte le attività di laboratorio
+│   ├── Spiegazione_grant_deny_esercizio.html
+│   │                                       ← ambiente di test per Consenti (grant) e Nega (deny)
+│   ├── Conf_windows_att1.html             ← Attività 1: utenti e file
+│   ├── Conf_windows_att2.html             ← Attività 2: gruppi
+│   ├── Conf_windows_att3.html             ← Attività 3: condivisione in rete
+│   ├── active_directory.html              ← Attività 7: Active Directory
+│   ├── att_conf_windows_ufficio.html      ← Attività 8: ufficio commerciale (riepilogo)
+│   ├── Conf_windows_comandi.md            ← bozza sorgente della guida ai comandi da CMD
+│   ├── Conf_windows_comandi.html          ← guida a utenti, gruppi, domini e permessi da CMD
+│   ├── Esercitazione_permessi_file_cartelle_CMD.html
+│   │                                       ← 12 esercizi con soluzioni su icacls, takeown e attrib
+│   ├── Esercizi_ permessi e attributi dei file in Windows.html
+│   │                                       ← 20 esercizi con soluzioni su permessi e attributi
+│   ├── Esercitazione_utenti_gruppi_permessi.html
+│   │                                       ← 23 esercizi guidati: configurare un PC scolastico
+│   ├── Esercizio_completo_biblioteca_il_faro.html
+│   │                                       ← esercizio completo «Biblioteca Il Faro»
+│   ├── esercitazioni/
+│   │   └── configurazione/
+│   │       ├── Condivisioni di rete_ vince il permesso più restrittivo.html
+│   │       │                               ← simulatore: condivisione SMB vs NTFS
+│   │       ├── Laboratorio_registro_eventi_windows.html
+│   │       │                               ← laboratorio sui registri eventi
+│   │       ├── Laboratorio_registro_eventi_windows.md
+│   │       │                               ← bozza sorgente del laboratorio
+│   │       ├── diario_di_bordo_windows.html
+│   │       │                               ← versione stampabile del laboratorio
+│   │       └── Attività_studioVerdisrl_2vm_*.md
+│   │                                       ← esercitazione StudioVerdi (studente/docente)
+│   └── pdf/                               ← copie stampabili delle attività
+└── Verifica/                              ← script di verifica dell'ambiente di laboratorio
+    └── Report-Utenze.ps1                  ← report di utenti, gruppi, password policy e dominio
 ```
 
-Il repository è suddiviso in due cartelle principali:
+Il repository è suddiviso in tre cartelle principali:
 
 - **`teoria/`** — tutta la **teoria**: la lezione sulle macchine virtuali, gli
   approfondimenti su Guest Additions, privilegi Windows e permessi di file e cartelle
@@ -68,6 +83,9 @@ Il repository è suddiviso in due cartelle principali:
   macchina già pronta e clonabile.
 - **`attività/`** — tutte le **esercitazioni** di laboratorio, con le risorse collegate
   (PDF, simulatore, laboratorio sui registri eventi).
+- **`Verifica/`** — materiale di **verifica e collaudo** dell'ambiente: per ora lo
+  script PowerShell `Report-Utenze.ps1`, che produce un report su utenti, gruppi,
+  criteri password e appartenenza al dominio di una macchina Windows.
 
 La pagina **`index.html`** è la versione navigabile di questo indice. È organizzata in
 due gruppi — **Teoria** e **Attività** — e ogni gruppo è diviso in sottocategorie per
@@ -688,6 +706,7 @@ virtualizzazione hardware abilitata nel BIOS/UEFI.
 
 | # | Attività | Sintesi | Argomenti teorici da conoscere |
 |---|---|---|---|
+| **—** | [Ambiente di test per grant e deny](#ambiente-di-test-per-grant-e-deny) | Utenti, gruppi e cartelle di prova per sperimentare `icacls`: concessioni e divieti, ereditarietà, verifica con `runas`, backup e ripristino delle ACL, `takeown`, con pulizia finale | [§5](#5-la-memoria-di-massa); ACL e ACE, ereditarietà, somma dei permessi e precedenza del «Nega», SID, minimo privilegio |
 | **1** | [Utenti e file](#configurazione-windows--attività-1-utenti-e-file) | Clonazione della macchina madre in `Windows 1`/`Windows 2`, rinominamento in `WINDOWS-1`/`WINDOWS-2`, creazione di `utente1` e `utente2`, permessi su `cartella1` (ereditarietà rimossa, diritto *Interactive* eliminato, sola lettura → modifica) | [§2](#2-architettura-lhypervisor), [§5](#5-la-memoria-di-massa) (cloni e MAC); ACL ed ereditarietà, identità speciali, admin vs standard |
 | **2** | [Gruppi](#configurazione-windows--attività-2-gruppi) | Creazione di `gruppo1` con `utente1`/`utente2`, autorizzazioni assegnate al gruppo su `cartella2`, verifica con `utente3` fuori gruppo e poi inserito | [§5](#5-la-memoria-di-massa), [§8](#8-ciclo-di-vita-e-manutenzione) (edizione Pro); gruppi locali e token di accesso, nuova sessione |
 | **3** | [Condivisione in rete](#configurazione-windows--attività-3-condivisione-in-rete) | Rete interna tra `WINDOWS-1` e `WINDOWS-2`, firewall disattivato, IP statici, accesso a `\\WINDOWS-1` con `rete1`, cartella condivisa `Condivisione1` in sola lettura | [§5](#5-la-memoria-di-massa), [§6](#6-la-rete) (modalità di rete, DHCP/APIPA); SMB, autorizzazioni di condivisione vs NTFS, cache credenziali |
@@ -696,7 +715,9 @@ virtualizzazione hardware abilitata nel BIOS/UEFI.
 | **6** | [Registro eventi](#laboratorio-il-registro-eventi-di-windows) | Visualizzatore eventi, lettura e filtro degli eventi, registri Applicazione/Sicurezza/Sistema, interrogazione da PowerShell (`Get-WinEvent`) e prompt (`wevtutil`), creazione di eventi e attività collegate, indagine forense finale | [§3](#3-la-cpu-vista-dallospite) (orologio e ordine temporale dei log); struttura ed elementi di un evento, livelli e ID evento, ACL del registro Sicurezza e privilegi di amministratore |
 | **7** | [Active Directory – Dominio, OU, utenti e workstation](#configurazione-windows--attività-7-active-directory--dominio-ou-utenti-e-workstation) | Creazione del dominio, organizzazione in OU, gestione di utenti e gruppi, aggiunta delle workstation al dominio e verifica delle autenticazioni | [§2](#2-architettura-lhypervisor), [§8](#8-ciclo-di-vita-e-manutenzione); directory services, autenticazione centralizzata, ambiti dominio/OU, join al dominio |
 | **8** | [Ufficio commerciale (riepilogo)](#attività-8-ufficio-commerciale-esercitazione-di-riepilogo) | Esercitazione completa su uno scenario aziendale: gruppi e utenti locali da CMD, criteri password e blocco account, permessi NTFS secondo una matrice, condivisione SMB, script di accesso, collaudo e relazione finale | [§5](#5-la-memoria-di-massa), [§6](#6-la-rete); SID, account e gruppi locali, ACL ed ereditarietà, precedenza del «Nega», minimo privilegio, condivisione vs NTFS |
-| **9** | [Permessi di file e cartelle da CMD](#esercitazione-permessi-di-file-e-cartelle-da-prompt-dei-comandi) | Dodici esercizi con soluzioni: ACL, lettura e scrittura, Nega e Consenti, ereditarietà, salvataggio e ripristino delle ACL, `takeown`, attributi, SID e PowerShell | [§5](#5-la-memoria-di-massa); ACL e ACE, ereditarietà, precedenza del «Nega», permessi cumulativi, differenza fra permessi e attributi, `cmd.exe` e PowerShell |
+| **9** | [Permessi di file e cartelle da CMD](#esercitazione-permessi-di-file-e-cartelle-da-prompt-dei-comandi) | Due raccolte di esercizi con soluzioni (12 e 20): ACL, lettura e scrittura, Nega e Consenti, ereditarietà, salvataggio e ripristino delle ACL, `takeown`, attributi, SID e PowerShell | [§5](#5-la-memoria-di-massa); ACL e ACE, ereditarietà, precedenza del «Nega», permessi cumulativi, differenza fra permessi e attributi, `cmd.exe` e PowerShell |
+| **—** | [Configuriamo passo dopo passo un PC scolastico](#esercitazione-configuriamo-passo-dopo-passo-un-pc-scolastico) | 23 esercizi in sequenza: utenti e password, criteri, gruppi `docenti`/`studenti`/`segreteria`, cartelle `C:\Scuola` e permessi semplici, un divieto mirato, verifica con `runas` e pulizia finale | [§5](#5-la-memoria-di-massa); ACL, ereditarietà, token di accesso, permessi cumulativi e precedenza del «Nega», minimo privilegio |
+| **—** | [Biblioteca Il Faro](#esercizio-completo-biblioteca-il-faro) | Esercizio completo su una biblioteca comunale: utenti, gruppi, password e permessi NTFS secondo una matrice e il minimo privilegio; traccia per gli studenti e soluzione commentata | [§5](#5-la-memoria-di-massa); SID e token di accesso, ACL ed ereditarietà, precedenza del «Nega», minimo privilegio |
 
 ## Attività su Windows
 
@@ -714,8 +735,45 @@ da una VM Windows con uno snapshot "pulito" e da un utente `studente1`. Il
 alcuna macchina virtuale. L'**esercitazione di riepilogo** sull'ufficio commerciale
 richiede una VM Windows pulita e un prompt avviato come amministratore: mette insieme
 in un unico scenario utenti, gruppi, permessi e condivisione. L'**esercitazione sui
-permessi da CMD** raccoglie dodici esercizi brevi con soluzioni, da eseguire su una VM
-Windows pulita con il Prompt dei comandi avviato come amministratore.
+permessi da CMD** raccoglie esercizi brevi con soluzioni, da eseguire su una VM
+Windows pulita con il Prompt dei comandi avviato come amministratore; nella stessa
+linea si collocano l'**ambiente di test per grant e deny**, i **23 esercizi** che
+configurano passo dopo passo un PC scolastico e l'**esercizio completo "Biblioteca Il
+Faro"**, che chiude con una relazione.
+
+### Ambiente di test per grant e deny
+
+📄 [`attività/Spiegazione_grant_deny_esercizio.html`](attività/Spiegazione_grant_deny_esercizio.html)
+
+**Obiettivo.** Costruire un **ambiente di prova** isolato — utenti, gruppi e cartelle
+fittizie — per sperimentare `icacls` senza toccare dati reali e capire come si
+combinano le concessioni (`/grant`) e i divieti (`/deny`), in particolare la
+**precedenza del «Nega»**.
+
+**In sintesi.** Si creano gli utenti `Mario`, `Luca`, `Anna` e il gruppo
+`Progettisti`, poi la struttura `C:\Test` con `Progetto` (`Documenti`, `Riservato`) e
+`Pubblica` e alcuni file di prova. Si interrompe l'ereditarietà e si rimuovono i
+gruppi "larghi" (*Everyone*, *Users*, *Authenticated Users*), si assegna al gruppo la
+modifica, a `Luca` la sola lettura e a `Anna` un divieto esplicito su `Riservato`. Si
+controllano le ACL con `icacls`, `/verify` e `dir /q`, si prova davvero con
+`runas /user:Mario cmd` (confrontando i tre utenti), si salvano e ripristinano le ACL
+(`/save`, `/restore`, `/reset`) e si gestisce il proprietario con `takeown` e
+`/setowner`. Chiude con un riepilogo dei comandi per categoria e la pulizia finale.
+
+**Argomenti toccati.** `net user` e `net localgroup`, `icacls` (`/grant`, `/deny`,
+`/remove`, `/inheritance`, `/save`, `/restore`, `/reset`, `/setowner`), flag
+`(OI)`/`(CI)`, `takeown`, `runas` e `whoami`, `dir /q`, precedenza del «Nega» sul
+«Consenti», ereditarietà e backup delle ACL.
+
+**Argomenti teorici da conoscere.** Dalla [Parte I](#parte-i--teoria): [§5](#5-la-memoria-di-massa)
+snapshot e cloni come base di partenza ripetibile. Concetti Windows da padroneggiare:
+struttura di una **ACL** e delle sue **ACE**, **ereditarietà** e sua interruzione, somma
+dei permessi di utente e gruppi con la precedenza del «Nega», **SID** e token di
+accesso, principio del **minimo privilegio**.
+
+**Nota operativa.** Aprire il Prompt dei comandi **come amministratore** e lavorare su
+una VM: l'esercizio crea utenti e modifica permessi. Usare `runas` per verificare i
+risultati dal punto di vista di ciascun utente di prova.
 
 ### Configurazione Windows – Attività 1: utenti e file
 
@@ -1039,6 +1097,14 @@ lasciarla nella cronologia dei comandi.
 ### Esercitazione: permessi di file e cartelle da Prompt dei comandi
 
 📄 [`attività/Esercitazione_permessi_file_cartelle_CMD.html`](attività/Esercitazione_permessi_file_cartelle_CMD.html)
+— *Esercitazione: permessi di file e cartelle da Prompt dei comandi*: dodici esercizi
+guidati con soluzione e verifica.
+
+📄 [`attività/Esercizi_ permessi e attributi dei file in Windows.html`](<attività/Esercizi_ permessi e attributi dei file in Windows.html>)
+— *Esercizi: permessi e attributi dei file in Windows*: venti esercizi in nove parti
+(osservare, concedere e togliere, ereditarietà, più file, proprietà e recupero,
+attributi, PowerShell, diagnosi, sfida finale), con soluzioni richiudibili e una
+preparazione iniziale della macchina.
 
 **Obiettivo.** Fare pratica in modo diretto sui **permessi NTFS** di file e cartelle
 da `cmd.exe`, con esempi brevi e la soluzione subito sotto ogni esercizio: leggere le
@@ -1073,6 +1139,70 @@ una macchina virtuale Windows 11: l'esercitazione crea utenti e modifica permess
 provare l'accesso come `prova1` o `prova2` usare `runas /user:prova1 cmd` oppure
 cambiare utente nella VM. Le password uguali ai nomi utente servono solo per il
 laboratorio.
+
+### Esercitazione: Configuriamo passo dopo passo un PC scolastico
+
+📄 [`attività/Esercitazione_utenti_gruppi_permessi.html`](attività/Esercitazione_utenti_gruppi_permessi.html)
+
+**Obiettivo.** Percorrere, in **23 esercizi da svolgere in ordine**, l'intera
+configurazione di un PC scolastico da Prompt dei comandi: utenti e password, criteri
+di sicurezza, gruppi locali e permessi su cartelle e file, fino a una **relazione**
+finale.
+
+**In sintesi.** Si creano gli utenti `mario`, `giulia`, `luca`, `anna` (nomi completi,
+disattivazione e scadenza dell'account, cambio password anche nascosto e obbligo di
+cambio al primo accesso), si impostano i criteri password con `net accounts`, si
+creano i gruppi `docenti`, `studenti` e `segreteria` e vi si iscrivono gli utenti. Si
+prepara la struttura `C:\Scuola` (`Registro`, `Compiti`, `Materiali`) e si assegnano i
+**permessi semplici** (`F`, `M`, `RX`, `R`, `W`) con `(OI)(CI)` e `/inheritance:r`,
+incluso un **divieto mirato** su `luca`. Si verifica il tutto da un prompt aperto come
+`giulia` con `runas`, poi si riporta la macchina allo stato iniziale (utenti, gruppi,
+cartella `C:\Scuola` e criteri password).
+
+**Argomenti toccati.** `net user`, `net accounts`, `net localgroup`, `icacls` con
+permessi semplici e flag `(OI)`/`(CI)`, `/inheritance:r`, precedenza del «Nega»,
+verifica come altro utente con `runas`, pulizia e ripristino dei valori predefiniti.
+
+**Argomenti teorici da conoscere.** Dalla [Parte I](#parte-i--teoria): [§5](#5-la-memoria-di-massa)
+snapshot e cloni come base ripetibile. Concetti Windows da padroneggiare: **ACL** ed
+**ereditarietà**, **token di accesso** e gruppi locali, somma dei permessi e precedenza
+del «Nega», principio del **minimo privilegio**.
+
+**Nota operativa.** Aprire il Prompt dei comandi **come amministratore** e lavorare su
+una VM Windows pulita: gli esercizi creano utenti, gruppi e cartelle. Svolgerli in
+ordine, perché ciascuno usa quanto creato nei precedenti.
+
+### Esercizio completo: Biblioteca Il Faro
+
+📄 [`attività/Esercizio_completo_biblioteca_il_faro.html`](attività/Esercizio_completo_biblioteca_il_faro.html)
+
+**Obiettivo.** Affrontare in un unico scenario realistico — il personale di una
+biblioteca comunale — l'intera gestione di **utenti, password, gruppi e permessi**,
+applicando il principio del **minimo privilegio**. Il documento contiene la **traccia**
+per gli studenti e, in una seconda parte, la **soluzione commentata**.
+
+**In sintesi.** Si crea il personale (`marta` responsabile, `luigi` e `sofia` alla
+catalogazione, `nicola`, `irene` e `tommaso` ai prestiti, più l'account condiviso
+`bancoprestiti`), organizzato nei gruppi `responsabili`, `catalogo`, `prestiti` e
+`personale`. Si impostano le regole sulle password, si crea l'albero `C:\Biblioteca`
+con le cartelle dei vari servizi e si assegnano i permessi NTFS secondo una **matrice**,
+usando `icacls` con `/grant:r` (sostituzione), `/remove:d` (rimozione di un divieto) e
+un file con regole diverse da quelle della sua cartella. L'esercizio si chiude con la
+verifica dei risultati e la relazione.
+
+**Argomenti toccati.** `net user`, `net localgroup`, `net accounts`, `icacls` con
+livelli `F`, `M`, `RX`, `R`, `W`, flag `(OI)`/`(CI)`, `/inheritance:r`, `/grant:r` e
+`/remove:d`, matrice dei permessi e criterio del minimo privilegio.
+
+**Argomenti teorici da conoscere.** Dalla [Parte I](#parte-i--teoria): [§5](#5-la-memoria-di-massa)
+snapshot e cloni come base di partenza. Concetti Windows da padroneggiare: **SID** e
+**token di accesso**, gruppi locali, struttura di una **ACL** e delle sue **ACE**,
+**ereditarietà**, somma dei permessi e precedenza del «Nega», differenza fra
+**autorizzazioni di condivisione** e **NTFS** (cfr. attività 1–3 e il simulatore).
+
+**Nota operativa.** Aprire il Prompt dei comandi **come amministratore** e fare uno
+snapshot della VM prima di iniziare: l'esercizio crea molti oggetti e conviene poter
+ripartire da una macchina pulita.
 
 ## Attività su Linux (Alpine Linux e Bash)
 
