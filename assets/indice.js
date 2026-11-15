@@ -206,6 +206,23 @@ window.INDICE = [
     ]
   },
   {
+    id:"Ambiente di test per grant e deny",
+    gruppo: "attivita",
+    categoria: "Utenti, gruppi e permessi",
+    etichetta:"Ambiente di test",
+    titolo: "Ambiente di test per grant e deny",
+    breve: "Configurazione di un ambiente di test per esplorare i comportamenti di grant e deny",
+    approfondimento: "Descrizione dell'ambiente di test utilizzato per analizzare il funzionamento dei permessi di grant e deny in Windows.",
+    documenti: [
+      "net user",
+      "net localgroup",
+      "icacls",
+      "runas",
+      "whoami",
+      "takeown"
+    ]
+  },
+  {
     id: "attivita-utenti-file",
     gruppo: "attivita",
     categoria: "Utenti, gruppi e permessi",

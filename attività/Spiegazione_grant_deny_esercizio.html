@@ -1,50 +1,19 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ambiente di test per lavorare sui permessi in Windows</title>
-<style>
-:root {
-  --bg: #f6f8fa; --surface: #ffffff; --text: #1c2530; --muted: #5a6776;
-  --line: #d5dce4; --accent: #0b5cad; --code-bg: #14202e; --code-text: #e6edf5; --note-bg: #e8f1fb;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0f1620; --surface: #17212d; --text: #e3e9f0; --muted: #9aa8b8;
-    --line: #2b3a4b; --accent: #6cb2f5; --code-bg: #0a1017; --code-text: #e6edf5; --note-bg: #1a2a3d;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0f1620; --surface: #17212d; --text: #e3e9f0; --muted: #9aa8b8;
-  --line: #2b3a4b; --accent: #6cb2f5; --code-bg: #0a1017; --code-text: #e6edf5; --note-bg: #1a2a3d;
-}
-* { box-sizing: border-box; }
-html { scroll-padding-top: 1rem; }
-body { margin: 0; background: var(--bg); color: var(--text); font-family: "Segoe UI", system-ui, -apple-system, sans-serif; line-height: 1.65; }
-main { max-width: 780px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
-h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 1rem; }
-h2 { font-size: 1.3rem; margin: 2.4rem 0 0.8rem; padding-bottom: 0.4rem; border-bottom: 2px solid var(--line); }
-p { margin: 0.7rem 0; }
-.lead { background: var(--note-bg); border-left: 4px solid var(--accent); padding: 0.9rem 1.1rem; border-radius: 4px; }
-.table-wrap { overflow-x: auto; margin: 1rem 0; }
-table { border-collapse: collapse; width: 100%; background: var(--surface); }
-th, td { text-align: left; padding: 0.55rem 0.85rem; border: 1px solid var(--line); vertical-align: top; }
-th { background: var(--note-bg); }
-pre { background: var(--code-bg); color: var(--code-text); padding: 1rem 1.1rem; border-radius: 6px; overflow-x: auto; font-family: Consolas, "Cascadia Mono", monospace; font-size: 0.92rem; line-height: 1.5; margin: 0.8rem 0; }
-code { font-family: Consolas, "Cascadia Mono", monospace; font-size: 0.92em; background: var(--note-bg); padding: 0.1em 0.35em; border-radius: 3px; }
-pre code { background: none; padding: 0; font-size: inherit; }
-ul { padding-left: 1.3rem; }
-li { margin: 0.35rem 0; }
-:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ambiente di test per lavorare sui permessi in Windows</title>
+  <link rel="stylesheet" href="../assets/documento.css">
 </head>
 <body>
+<header class="doc-intestazione">
+    <p class="occhiello">Attività · Permessi su file e cartelle</p>
+    <h1>Ambiente di test per lavorare sui permessi in Windows</h1>
+    <p class="sottotitolo">Esercitazione su <code>icacls</code>, <code>net user</code>, <code>net localgroup</code>,<code>net account</code> e <code>whoami</code> con esempi semplici e diretti da eseguire su Windows 11. </p>
+    <p class="sottotitolo">L’idea è creare utenti, gruppi e cartelle di prova, così puoi sperimentare con <code>icacls</code> senza toccare dati reali. Apri il Prompt dei comandi <strong>come amministratore</strong>.</p>
+  </header>
 <main>
-  <h1>Ambiente di test per lavorare sui permessi in Windows</h1>
-
-  <p class="lead">L’idea è creare utenti, gruppi e cartelle di prova, così puoi sperimentare con <code>icacls</code> senza toccare dati reali. Apri il Prompt dei comandi <strong>come amministratore</strong>.</p>
-
   <h2>1. Creare gli utenti di prova</h2>
 <pre><code>net user Mario Password123! /add
 net user Luca Password123! /add
@@ -159,5 +128,6 @@ net user Anna /delete</code></pre>
     <li>Per un’analisi più dettagliata, esiste anche l’equivalente PowerShell: <code>Get-Acl C:\Test\Progetto | Format-List</code>.</li>
   </ul>
 </main>
+<script src="../assets/barra.js"></script>
 </body>
 </html>
