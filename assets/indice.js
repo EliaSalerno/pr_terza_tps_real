@@ -225,10 +225,9 @@ window.INDICE = [
           "whoami",
           "takeown"
         ],
-        file: "attività/Ambiente_di_test_per_grant_e_deny.html"
+        file: "attività/Spiegazione_grant_deny_esercizio.html"
       }
     ],
-    file: "attività/Ambiente_di_test_per_grant_e_deny.html"
   },
   {
     id: "attivita-utenti-file",
