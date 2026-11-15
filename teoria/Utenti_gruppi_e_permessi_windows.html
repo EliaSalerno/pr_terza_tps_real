@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Utenti, gruppi e permessi in Windows</title>
+<link rel="stylesheet" href="../assets/documento.css">
+<style>
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.9rem;margin:1.2rem 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1rem 1.1rem;box-shadow:var(--shadow)}
+.card h3{margin:.1rem 0 .4rem;font-size:1.02rem}
+.card p{margin:.3rem 0;font-size:.95rem;color:var(--muted)}
+.badge{display:inline-block;font:700 .72rem/1 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.05em;text-transform:uppercase;padding:.3em .6em;border-radius:999px;background:var(--soft);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 25%,transparent)}
+.toc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1rem 1.3rem;box-shadow:var(--shadow);margin:1.4rem 0}
+.toc h2{margin:0 0 .4rem;border:0;padding:0;font-size:1.05rem}
+.toc ol{margin:.3rem 0 .3rem 1.3rem}
+.toc li{margin:.2rem 0}
+.toc a{text-decoration:none}
+.toc a:hover{text-decoration:underline}
+.sid{font-family:Consolas,"Cascadia Mono",monospace;font-size:.86em;color:var(--muted)}
+@media print{.card,.toc{box-shadow:none}}
+</style>
+</head>
+<body>
+
+<header class="doc-intestazione">
+  <p class="occhiello">Dispensa &middot; Sicurezza di Windows</p>
+  <h1>Utenti, gruppi e permessi in Windows</h1>
+  <p class="sottotitolo">Come Windows decide <strong>chi</strong> può fare <strong>cosa</strong>: account, identità, gruppi, token di accesso, permessi NTFS e condivisioni. Una dispensa volutamente <strong>teorica</strong>, senza comandi: qui si capisce il modello, non si scrive al prompt.</p>
+</header>
+
+<main>
+
+<p class="lead">Le attività di laboratorio chiedono di creare utenti, raggrupparli e assegnare permessi. Prima di farlo conviene capire <em>perché</em> Windows funziona così. Questa dispensa descrive il modello di sicurezza e l'elenco completo di utenti e gruppi già presenti su una macchina appena creata.</p>
+
+<div class="note"><strong>Nota.</strong> Questa dispensa non contiene comandi né riferimenti a shell. Gli strumenti citati (console <em>Utenti e gruppi locali</em>, <em>Criteri di sicurezza locali</em>, scheda <em>Sicurezza</em> di Esplora file) sono interfacce grafiche.</div>
+
+<nav class="toc" aria-label="Indice">
+  <h2>Indice</h2>
+  <ol>
+    <li><a href="#1">Il problema: identità e autorizzazioni</a></li>
+    <li><a href="#2">L'utente: nome, password, SID, profilo, token</a></li>
+    <li><a href="#3">I tipi di account</a></li>
+    <li><a href="#4">Gli account già presenti su una macchina appena creata</a></li>
+    <li><a href="#5">I gruppi: a cosa servono</a></li>
+    <li><a href="#6">I gruppi già presenti su una macchina appena creata</a></li>
+    <li><a href="#7">Le identità speciali</a></li>
+    <li><a href="#8">Account di servizio e account virtuali</a></li>
+    <li><a href="#9">I permessi NTFS: ACL, ACE, ereditarietà, proprietario</a></li>
+    <li><a href="#10">Come si combinano i permessi: cumulo e precedenza del Nega</a></li>
+    <li><a href="#11">Permessi di condivisione e permessi NTFS</a></li>
+    <li><a href="#12">Attributi e permessi non sono la stessa cosa</a></li>
+    <li><a href="#13">Il controllo account utente (UAC)</a></li>
+    <li><a href="#14">I criteri di sicurezza locali</a></li>
+    <li><a href="#15">Dove si gestisce tutto questo</a></li>
+    <li><a href="#16">Minimo privilegio e buone pratiche</a></li>
+    <li><a href="#17">Domande di verifica</a></li>
+  </ol>
+</nav>
+
+<h2 id="1">1. Il problema: identità e autorizzazioni</h2>
+<p>Un computer può essere usato da più persone, ed è normale che non tutte debbano poter fare tutto: uno studente non deve poter cancellare i voti, un ospite non deve leggere i documenti riservati, un servizio non deve poter modificare il sistema. Windows risponde a questo problema con tre idee:</p>
+<div class="cards">
+  <div class="card"><h3>Identità</h3><p>Chi sei: l'account con cui hai effettuato l'accesso.</p></div>
+  <div class="card"><h3>Appartenenza</h3><p>A quali gruppi appartieni: i ruoli che ricopri.</p></div>
+  <div class="card"><h3>Permessi</h3><p>Cosa puoi fare su ogni singola risorsa: file, cartelle, stampanti, chiavi del registro.</p></div>
+</div>
+<p>Tutto ruota attorno a una regola semplice: <strong>i permessi si assegnano alle identità e ai gruppi, non alle persone</strong>. Se una persona cambia mansione, non si riscrivono mille autorizzazioni: la si sposta di gruppo.</p>
+
+<h2 id="2">2. L'utente: nome, password, SID, profilo, token</h2>
+<p>Un <strong>account utente</strong> è l'identità con cui una persona (o un servizio) accede al sistema. Ogni account ha:</p>
+<ul>
+  <li>un <strong>nome di accesso</strong> (login) e un <strong>nome visualizzato</strong>;</li>
+  <li>una <strong>password</strong> o un altro metodo di accesso (PIN, impronta, smart card);</li>
+  <li>un <strong>SID</strong> (<em>Security Identifier</em>), cioè un identificativo univoco che Windows usa internamente. I permessi sono legati al SID, non al nome: cancellare un utente e ricrearlo con lo stesso nome <strong>non</strong> gli restituisce i vecchi permessi, perché il SID è diverso;</li>
+  <li>un <strong>profilo</strong>, la cartella personale (in genere <code>C:\Users\nome</code>) con documenti, impostazioni e registro personale;</li>
+  <li>l'appartenenza a uno o più <strong>gruppi</strong>;</li>
+  <li>una serie di <strong>diritti</strong> (fare login, spegnere il sistema, eseguire backup&hellip;) e di <strong>privilegi</strong> (operazioni particolari, come modificare l'ora o caricare driver).</li>
+</ul>
+<h3>Il token di accesso</h3>
+<p>Quando un utente effettua l'accesso, Windows costruisce per lui un <strong>token di accesso</strong>: una specie di "badge" che elenca il SID dell'utente, i SID di tutti i gruppi a cui appartiene e i privilegi concessi. Da quel momento <em>ogni</em> operazione viene confrontata con quel badge.</p>
+<div class="info"><strong>Conseguenza pratica.</strong> Se si aggiunge un utente a un gruppo mentre la sua sessione è già aperta, il token è vecchio e il nuovo gruppo non ha effetto finché l'utente non esegue un nuovo accesso (o, in dominio, non aggiorna il token). È il motivo per cui nelle attività si dice sempre "serve un nuovo login".</div>
+
+<h2 id="3">3. I tipi di account</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Tipo</th><th>Dove "vive"</th><th>Note</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Account locale</strong></td><td>Solo su quel computer</td><td>Valido unicamente sulla macchina su cui è stato creato</td></tr>
+    <tr><td><strong>Account Microsoft</strong></td><td>Online, collegato al PC</td><td>Tipico di Windows 10/11 domestico; le credenziali sono del servizio Microsoft</td></tr>
+    <tr><td><strong>Account di dominio</strong></td><td>Sul controller di dominio (Active Directory)</td><td>Valido su tutte le macchine del dominio; autenticazione centralizzata</td></tr>
+    <tr><td><strong>Account di servizio</strong></td><td>Sul computer o nel dominio</td><td>Usato da servizi e applicazioni, non da persone</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Un secondo modo di classificarli riguarda i <strong>poteri</strong>:</p>
+<ul>
+  <li><strong>Amministratore</strong>: può installare software, gestire utenti e gruppi, modificare impostazioni di sistema. Diventa amministratore chi appartiene al gruppo <em>Administrators</em> (Amministratori).</li>
+  <li><strong>Utente standard</strong>: usa il computer e i programmi, ma non può modificare la configurazione del sistema né le cartelle di altri utenti. Ogni volta che serve un privilegio, compare la richiesta di elevazione (UAC).</li>
+</ul>
+
+<h2 id="4">4. Gli account già presenti su una macchina appena creata</h2>
+<p>Su una installazione appena completata, prima di creare qualsiasi utente, Windows prepara alcuni account "di fabbrica". Non sono utenti reali: servono al sistema. Vederli richiede di elencare anche gli account nascosti e disabilitati.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Account</th><th>Stato tipico</th><th>Ruolo</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Administrator</strong><br><span class="sid">(Amministratore)</span></td>
+      <td>Disabilitato per impostazione predefinita su Windows 10/11 client</td>
+      <td>L'amministratore integrato del computer, con SID che termina in <span class="sid">-500</span>. Esiste dalla prima installazione ed è un potenziale bersaglio: per questo, nelle versioni moderne, è disattivato di default e si usa un normale account amministratore creato dall'utente.</td>
+    </tr>
+    <tr>
+      <td><strong>DefaultAccount</strong></td>
+      <td>Disabilitato</td>
+      <td>Account di sistema usato da Windows per alcune attività interne (per esempio durante l'installazione o per determinati servizi). Non va abilitato né modificato.</td>
+    </tr>
+    <tr>
+      <td><strong>Guest</strong><br><span class="sid">(Ospite)</span></td>
+      <td>Disabilitato</td>
+      <td>Account per l'accesso occasionale senza password, con privilegi minimi (SID <span class="sid">-501</span>). Disabilitato di default perché rappresenta un rischio. Fa parte del gruppo <em>Guests</em>.</td>
+    </tr>
+    <tr>
+      <td><strong>WDAGUtilityAccount</strong></td>
+      <td>Disabilitato finché non serve</td>
+      <td>Account usato da <em>Windows Defender Application Guard</em>, la funzione che apre siti non attendibili in un ambiente isolato (contenitore). Lo gestisce Windows da solo.</td>
+    </tr>
+    <tr>
+      <td><strong>defaultuser0</strong><br><span class="sid">(a volte presente)</span></td>
+      <td>Nascosto, disabilitato o già rimosso</td>
+      <td>Account temporaneo creato durante la configurazione iniziale (OOBE) di Windows 10/11. Su alcune installazioni resta visibile: si può lasciare dov'è.</td>
+    </tr>
+    <tr>
+      <td><strong>Il primo utente creato</strong><br><span class="sid">(es. admin, tuo_nome)</span></td>
+      <td>Attivo</td>
+      <td>L'account scelto durante la configurazione. Su un PC domestico è di norma amministratore; in laboratorio conviene che l'account "di servizio" (per esempio <code>admin</code>) resti amministratore e che gli utenti di prova siano <strong>standard</strong>.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="avviso"><strong>Non toccare gli account di sistema.</strong> <em>DefaultAccount</em>, <em>WDAGUtilityAccount</em> e <em>defaultuser0</em> non sono pensati per le persone: abilitarli o cancellarli può rompere funzioni di Windows. In laboratorio si creano account nuovi, lasciando intatti questi.</div>
+
+<h2 id="5">5. I gruppi: a cosa servono</h2>
+<p>Un <strong>gruppo</strong> è un insieme di account. Invece di assegnare gli stessi permessi a dieci persone, si assegnano al gruppo una volta sola e poi si aggiungono o si tolgono le persone. I vantaggi:</p>
+<ul>
+  <li><strong>Semplicità</strong>: si gestisce un'autorizzazione, non dieci.</li>
+  <li><strong>Coerenza</strong>: tutti i membri hanno esattamente gli stessi diritti.</li>
+  <li><strong>Sicurezza</strong>: quando qualcuno cambia ruolo, basta spostarlo di gruppo.</li>
+  <li><strong>Tracciabilità</strong>: nei log si vede l'attività dei gruppi, non solo dei singoli.</li>
+</ul>
+<p>Un account può appartenere a più gruppi contemporaneamente. Esistono gruppi <strong>locali</strong> (validi su una sola macchina) e gruppi <strong>di dominio</strong> (validi su tutta la rete aziendale, gestiti in Active Directory). In Active Directory i gruppi hanno anche un <strong>ambito</strong> (locale di dominio, globale, universale), ma per il laboratorio bastano i gruppi locali.</p>
+<div class="info"><strong>Regola d'oro dei gruppi.</strong> Ai permessi si assegnano <em>gruppi</em>, non utenti. Un file con dieci autorizzazioni individuali è difficile da capire e da mantenere; lo stesso file con tre gruppi è leggibile a colpo d'occhio.</div>
+
+<h2 id="6">6. I gruppi già presenti su una macchina appena creata</h2>
+<p>Su una macchina Windows appena installata esiste già un insieme di gruppi locali, con compiti precisi. Alcuni sono vuoti e servono solo quando una funzione viene attivata; altri contengono già l'account amministratore o l'account ospite.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Gruppo locale</th><th>Chi può contenerlo</th><th>Ruolo</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Administrators</strong><br><span class="sid">(Amministratori)</span></td><td>Utenti e gruppi</td><td>Controllo completo del computer: installare software, creare utenti, modificare i criteri, prendere possesso dei file. Contiene l'account <em>Administrator</em> e, di norma, il primo utente creato. Il gruppo più potente: va riempito con parsimonia.</td></tr>
+    <tr><td><strong>Users</strong><br><span class="sid">(Utenti)</span></td><td>Utenti e gruppi</td><td>Il gruppo "normale". Consente di usare il computer, eseguire applicazioni, stampare, ma non di modificare configurazioni di sistema. Ogni nuovo utente standard vi entra automaticamente (per esempio tramite <em>Authenticated Users</em>).</td></tr>
+    <tr><td><strong>Guests</strong><br><span class="sid">(Ospiti)</span></td><td>Utenti e gruppi</td><td>Accesso molto limitato, con profilo temporaneo in dominio. Contiene l'account <em>Guest</em>. Disabilitato di default.</td></tr>
+    <tr><td><strong>Backup Operators</strong><br><span class="sid">(Operatori di backup)</span></td><td>Utenti e gruppi</td><td>Può eseguire backup e ripristino <strong>ignorando i permessi</strong> dei file (perché il diritto di backup prevale). Non può però cambiare le impostazioni di sicurezza. Potere notevole: assegnarlo con cautela.</td></tr>
+    <tr><td><strong>Replicator</strong></td><td>Utenti e gruppi</td><td>Supporto alle funzioni di replica di file. Gruppo storico, normalmente vuoto. <strong>Non aggiungere utenti reali.</strong></td></tr>
+    <tr><td><strong>Remote Desktop Users</strong><br><span class="sid">(Utenti desktop remoto)</span></td><td>Utenti e gruppi</td><td>Consente di connettersi al computer tramite Desktop remoto (RDP). Vuoto di default.</td></tr>
+    <tr><td><strong>Network Configuration Operators</strong><br><span class="sid">(Operatori configurazione rete)</span></td><td>Utenti e gruppi</td><td>Può modificare le impostazioni TCP/IP (indirizzi, DNS) senza essere amministratore. Vuoto di default.</td></tr>
+    <tr><td><strong>Performance Log Users</strong><br><span class="sid">(Utenti registro prestazioni)</span></td><td>Utenti e gruppi</td><td>Può gestire contatori, registri e avvisi di prestazioni, anche da remoto, senza essere amministratore.</td></tr>
+    <tr><td><strong>Performance Monitor Users</strong><br><span class="sid">(Utenti monitor prestazioni)</span></td><td>Utenti e gruppi</td><td>Può solo <em>osservare</em> i contatori di prestazioni, in locale e da remoto.</td></tr>
+    <tr><td><strong>Power Users</strong><br><span class="sid">(Utenti avanzati)</span></td><td>Utenti e gruppi</td><td>Eredità delle vecchie versioni di Windows. Nelle versioni moderne i suoi poteri sono stati ridotti quasi a quelli di <em>Users</em>. Presente per compatibilità.</td></tr>
+    <tr><td><strong>Cryptographic Operators</strong><br><span class="sid">(Operatori crittografici)</span></td><td>Utenti e gruppi</td><td>Può gestire operazioni di cifratura, certificati e chiavi. Vuoto di default.</td></tr>
+    <tr><td><strong>Distributed COM Users</strong><br><span class="sid">(Utenti DCOM)</span></td><td>Utenti e gruppi</td><td>Può avviare e usare oggetti COM distribuiti su altri computer. Serve ad alcune applicazioni di rete.</td></tr>
+    <tr><td><strong>Event Log Readers</strong><br><span class="sid">(Lettori registro eventi)</span></td><td>Utenti e gruppi</td><td>Può leggere i registri eventi, compreso il registro <em>Sicurezza</em>, che normalmente richiede privilegi di amministratore. Utile per chi fa monitoraggio. Vuoto di default.</td></tr>
+    <tr><td><strong>Access Control Assistance Operators</strong><br><span class="sid">(Operatori supporto controllo accessi)</span></td><td>Utenti e gruppi</td><td>Può consultare e diagnosticare da remoto i permessi e i criteri di controllo delle risorse. Vuoto di default.</td></tr>
+    <tr><td><strong>Device Owners</strong><br><span class="sid">(Proprietari dispositivi)</span></td><td>Utenti e gruppi</td><td>Può modificare le impostazioni dei dispositivi (per esempio hardware o periferiche). Vuoto di default.</td></tr>
+    <tr><td><strong>Hyper-V Administrators</strong><br><span class="sid">(Amministratori Hyper-V)</span></td><td>Utenti e gruppi</td><td>Accesso completo alla gestione di Hyper-V, la virtualizzazione di Microsoft. Presente solo dove Hyper-V è installato.</td></tr>
+    <tr><td><strong>IIS_IUSRS</strong></td><td>Utenti e gruppi</td><td>Gruppo usato dai processi di lavoro di Internet Information Services (IIS), il web server di Microsoft. Presente solo con IIS.</td></tr>
+    <tr><td><strong>Remote Management Users</strong><br><span class="sid">(Utenti gestione remota)</span></td><td>Utenti e gruppi</td><td>Consente l'accesso tramite WinRM, il meccanismo di gestione remota di Windows (usato anche per la raccolta centralizzata degli eventi). Vuoto di default.</td></tr>
+    <tr><td><strong>System Managed Accounts Group</strong><br><span class="sid">(Gruppo account gestiti dal sistema)</span></td><td>Gestito dal sistema</td><td>Gruppo speciale amministrato da Windows, legato agli account gestiti automaticamente. Non va modificato a mano.</td></tr>
+    <tr><td><strong>Storage Replica Administrators</strong></td><td>Utenti e gruppi</td><td>Amministra la replica di archiviazione. Presente solo nelle edizioni server con quella funzione.</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="info"><strong>Gruppi che compaiono solo se attivi una funzione.</strong> Alcuni gruppi nascono quando si installa un ruolo: <em>OpenSSH Users</em> con il server OpenSSH, <em>TelnetClients</em> con il client Telnet, gruppi di IIS, Hyper-V e così via. Su una macchina appena creata e "nuda" non ci sono.</div>
+
+<h2 id="7">7. Le identità speciali</h2>
+<p>Oltre ai gruppi veri e propri, Windows usa delle <strong>identità speciali</strong> (dette anche <em>identità note</em>, in inglese <em>well-known SIDs</em>). Non hanno membri che si possono modificare: rappresentano <em>chi sta accedendo</em> in un dato momento. Sono la chiave per capire le autorizzazioni "di default".</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Identità</th><th>SID</th><th>Rappresenta</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Everyone</strong> <span class="sid">(Tutti)</span></td><td class="sid">S-1-1-0</td><td>Tutti gli utenti, autenticati e non. Nelle versioni moderne è meno "permissiva" di un tempo, ma resta da trattare con cautela.</td></tr>
+    <tr><td><strong>Authenticated Users</strong> <span class="sid">(Utenti autenticati)</span></td><td class="sid">S-1-5-11</td><td>Chiunque abbia effettuato un accesso con credenziali valide, in locale o in rete. È il motivo per cui ogni utente nuovo "entra" di fatto nel gruppo Users.</td></tr>
+    <tr><td><strong>Interactive</strong></td><td class="sid">S-1-5-4</td><td>Chi è connesso fisicamente a quella macchina, davanti a tastiera e schermo.</td></tr>
+    <tr><td><strong>Network</strong></td><td class="sid">S-1-5-2</td><td>Chi accede a una risorsa <em>attraverso la rete</em>, non in locale.</td></tr>
+    <tr><td><strong>Batch</strong></td><td class="sid">S-1-5-3</td><td>Chi esegue processi non interattivi, avviati da attività pianificate o script.</td></tr>
+    <tr><td><strong>Service</strong></td><td class="sid">S-1-5-6</td><td>Gli account usati dai servizi di Windows.</td></tr>
+    <tr><td><strong>ANONYMOUS LOGON</strong></td><td class="sid">S-1-5-7</td><td>Accessi anonimi, senza credenziali. Da tenere sotto controllo.</td></tr>
+    <tr><td><strong>SYSTEM</strong> <span class="sid">(LocalSystem)</span></td><td class="sid">S-1-5-18</td><td>Il sistema operativo stesso. Ha i massimi privilegi locali; i suoi processi sono protetti e difficilmente terminabili.</td></tr>
+    <tr><td><strong>LOCAL SERVICE</strong></td><td class="sid">S-1-5-19</td><td>Account di servizio con privilegi ridotti sulla macchina locale. Usato da molti servizi.</td></tr>
+    <tr><td><strong>NETWORK SERVICE</strong></td><td class="sid">S-1-5-20</td><td>Account di servizio con privilegi ridotti, con identità di rete. Usato da servizi che comunicano in rete.</td></tr>
+    <tr><td><strong>CREATOR OWNER</strong> <span class="sid">(Creatore proprietario)</span></td><td class="sid">S-1-3-0</td><td>Voce di ereditarietà: chi <em>crea</em> un file o una cartella ne diventa proprietario e riceve i permessi previsti. Non ha senso assegnarla direttamente a una persona.</td></tr>
+    <tr><td><strong>CREATOR GROUP</strong></td><td class="sid">S-1-3-1</td><td>Come sopra, ma riferita al gruppo primario del creatore.</td></tr>
+    <tr><td><strong>OWNER RIGHTS</strong> <span class="sid">(Diritti proprietario)</span></td><td class="sid">S-1-3-4</td><td>Identità del proprietario di una risorsa. Permette di dare al proprietario poteri specifici indipendentemente dagli altri permessi.</td></tr>
+    <tr><td><strong>SELF</strong></td><td class="sid">S-1-5-10</td><td>Il richiedente stesso; usata nelle politiche di sicurezza e nei criteri.</td></tr>
+    <tr><td><strong>CONSOLE LOGON</strong></td><td class="sid">S-1-2-1</td><td>Chi accede dalla console fisica o da una sessione RDP diretta.</td></tr>
+    <tr><td><strong>This Organization</strong></td><td class="sid">S-1-5-15</td><td>Le identità della stessa organizzazione (utile in ambito dominio/cloud).</td></tr>
+    <tr><td><strong>NT AUTHORITY</strong> / <strong>NT SERVICE\&hellip;</strong></td><td class="sid">S-1-5-&hellip;</td><td>Contenitore delle identità di sistema e degli account virtuali dei servizi (per esempio <em>NT SERVICE\TrustedInstaller</em>, che protegge i file di sistema).</td></tr>
+    <tr><td><strong>Livelli di integrità</strong><br><span class="sid">Low / Medium / High / System</span></td><td class="sid">S-1-16-&hellip;</td><td>Etichette usate dal Controllo integrità (MIC) per limitare i processi a bassa integrità (per esempio i browser) e impedire loro di scrivere in aree riservate.</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="avviso"><strong>Perché le identità speciali contano.</strong> Molte cartelle di Windows hanno tra i loro permessi voci come <em>Authenticated Users</em>, <em>Interactive</em> o <em>SYSTEM</em>. Capire queste voci è indispensabile quando si interrompe l'ereditarietà e si "pulisce" una ACL: si rischia di togliere a Windows stesso il diritto di accedere alla risorsa.</div>
+
+<h2 id="8">8. Account di servizio e account virtuali</h2>
+<p>I servizi (rete, stampa, aggiornamenti, database) devono girare sotto un'identità. Windows offre alcune possibilità:</p>
+<ul>
+  <li><strong>LocalSystem (SYSTEM)</strong>: privilegi massimi sulla macchina. Comodo ma pericoloso, perché un servizio compromesso ha già il controllo totale.</li>
+  <li><strong>Local Service</strong> e <strong>Network Service</strong>: privilegi ridotti; il secondo si presenta sulla rete come il computer stesso. Scelta più prudente.</li>
+  <li><strong>Account virtuali</strong> (per esempio <em>NT SERVICE\TrustedInstaller</em>): creati automaticamente, isolati e senza password da gestire. Sono la scelta consigliata per i servizi moderni.</li>
+  <li><strong>Account gestiti dal dominio</strong> (gMSA): in ambiente Active Directory, Windows gestisce da solo la password, che cambia periodicamente.</li>
+</ul>
+<div class="info"><strong>Collegamento al registro eventi.</strong> Molti eventi hanno come "utente" proprio questi account di servizio: leggere <em>SYSTEM</em> o <em>NETWORK SERVICE</em> in un log non è un errore, è normale.</div>
+
+<h2 id="9">9. I permessi NTFS: ACL, ACE, ereditarietà, proprietario</h2>
+<p>Ogni oggetto NTFS (file o cartella) ha una <strong>ACL</strong> (<em>Access Control List</em>), cioè una lista di autorizzazioni. Ogni riga della lista è una <strong>ACE</strong> (<em>Access Control Entry</em>) e dice tre cose:</p>
+<ol>
+  <li><strong>a chi</strong> si riferisce (un utente, un gruppo, un'identità speciale);</li>
+  <li><strong>che tipo</strong> di voce è: <em>Consenti</em> o <em>Nega</em>;</li>
+  <li><strong>quali permessi</strong> concede o nega (lettura, scrittura, esecuzione, controllo completo&hellip;).</li>
+</ol>
+<p>Un oggetto NTFS ha in realtà due liste:</p>
+<ul>
+  <li>la <strong>DACL</strong> (<em>Discretionary ACL</em>): chi può fare cosa. È quella che si modifica dalla scheda <em>Sicurezza</em>;</li>
+  <li>la <strong>SACL</strong> (<em>System ACL</em>): quali accessi vanno <strong>registrati nel log</strong> (controllo/audit). Normalmente è vuota e si configura a parte.</li>
+</ul>
+<h3>I livelli di permesso</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Livello (interfaccia)</th><th>Cosa consente</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Controllo completo</strong></td><td>Tutto: leggere, scrivere, eseguire, eliminare, cambiare i permessi e prendere il possesso.</td></tr>
+    <tr><td><strong>Modifica</strong></td><td>Leggere, scrivere, eseguire ed eliminare. Non cambia i permessi.</td></tr>
+    <tr><td><strong>Lettura ed esecuzione</strong></td><td>Vedere il contenuto ed eseguire i programmi, senza modificare.</td></tr>
+    <tr><td><strong>Lettura</strong></td><td>Solo vedere/leggere.</td></tr>
+    <tr><td><strong>Scrittura</strong></td><td>Solo creare e modificare, senza leggere (raro ma possibile).</td></tr>
+    <tr><td><strong>Permessi speciali</strong></td><td>Combinazioni fini: attraversare una cartella, eliminare sottocartelle, cambiare i permessi, prendere il possesso, leggere/scrivere attributi&hellip;</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>Il proprietario</h3>
+<p>Ogni oggetto ha un <strong>proprietario</strong>: chi lo ha creato o chi ne ha preso possesso. Il proprietario ha sempre la possibilità di cambiare i permessi, anche se non compare nella ACL. Nelle aziende il possesso dei file di sistema appartiene a <em>TrustedInstaller</em> o a <em>SYSTEM</em>, e non agli utenti.</p>
+<h3>L'ereditarietà</h3>
+<p>I permessi di una cartella, per impostazione predefinita, si <strong>ereditano</strong> da padre in figlio: una nuova sottocartella riceve automaticamente le autorizzazioni della cartella che la contiene. Le voci ereditate sono segnate come tali e si aggiornano se il padre cambia.</p>
+<p>Quando serve un comportamento diverso, l'ereditarietà si <strong>interrompe</strong>. A quel punto si sceglie se:</p>
+<ul>
+  <li><strong>copiare</strong> le voci ereditate e poi modificarle (diventano esplicite);</li>
+  <li><strong>rimuoverle</strong> e ripartire da zero.</li>
+</ul>
+<p>Attenzione: rimuovendo tutte le voci si rischia di lasciare fuori anche gli amministratori e il sistema, rendendo la cartella inaccessibile a tutti.</p>
+
+<h2 id="10">10. Come si combinano i permessi: cumulo e precedenza del Nega</h2>
+<p>Un utente appartiene a più gruppi e può avere più ACE sullo stesso oggetto. Windows calcola il permesso effettivo con due regole:</p>
+<ol>
+  <li><strong>Cumulo</strong>: i permessi concessi dai vari gruppi si <em>sommano</em>. Se il gruppo A dà lettura e il gruppo B dà scrittura, l'utente ha lettura <em>e</em> scrittura.</li>
+  <li><strong>Precedenza del Nega</strong>: un <em>Nega</em> esplicito vince su qualsiasi <em>Consenti</em>. Se da una parte c'è "Consenti modifica" e dall'altra "Nega scrittura", prevale il Nega.</li>
+</ol>
+<div class="info"><strong>Accesso effettivo.</strong> Il risultato finale si chiama <em>accesso effettivo</em>: è ciò che l'utente può davvero fare, tenendo conto di tutte le appartenenze ai gruppi. È utile visualizzarlo prima di dichiarare "fatto" un esercizio sui permessi.</div>
+<div class="avviso"><strong>Il Nega è una trappola.</strong> Usare il Nega è comodo per escludere un caso, ma crea configurazioni difficili da capire: la maggior parte delle volte è meglio <em>non concedere</em> invece di <em>negare</em>. Il Nega si riserva a eccezioni precise.</div>
+
+<h2 id="11">11. Permessi di condivisione e permessi NTFS</h2>
+<p>Quando una cartella viene condivisa in rete, entrano in gioco <strong>due</strong> liste di permessi:</p>
+<ul>
+  <li>i <strong>permessi di condivisione</strong> (SMB), che riguardano solo l'accesso <em>via rete</em> e sono più grossolani (lettura, modifica, controllo completo);</li>
+  <li>i <strong>permessi NTFS</strong>, che valgono sempre, in locale e in rete, e sono quelli fini.</li>
+</ul>
+<p>Regola fondamentale:</p>
+<div class="info"><strong>In rete vale il più restrittivo.</strong> Chi accede a una cartella condivisa deve superare <em>entrambi</em> i filtri: se la condivisione dà "Controllo completo" ma l'NTFS dà "Lettura", l'utente leggerà soltanto. In locale, invece, conta solo l'NTFS: i permessi di condivisione non si applicano a chi è seduto davanti al computer.</div>
+<p>Per questo, in laboratorio, si tende a dare alla condivisione un permesso ampio (per esempio "Modifica") e a distinguere i vari ruoli con l'NTFS, che è più preciso.</p>
+
+<h2 id="12">12. Attributi e permessi non sono la stessa cosa</h2>
+<p>Spesso si confondono, ma sono livelli diversi:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th></th><th>Permessi (ACL)</th><th>Attributi</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Riguardano</strong></td><td>Chi può accedere e cosa può fare</td><td>Proprietà del file in sé</td></tr>
+    <tr><td><strong>Esempi</strong></td><td>Lettura, scrittura, modifica, controllo completo</td><td>Sola lettura, nascosto, di sistema, archivio, compresso, cifrato</td></tr>
+    <tr><td><strong>Valgono</strong></td><td>Per utenti e gruppi</td><td>Per tutti, indipendentemente dall'identità</td></tr>
+    <tr><td><strong>Effetto</strong></td><td>Decidono <em>se</em> puoi modificare</td><td>Possono rendere il file "protetto" anche a chi avrebbe il permesso</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Un file con attributo "sola lettura" non si modifica nemmeno se l'utente ha il permesso di scrittura; un file "nascosto" resta invisibile nell'elenco normale pur essendo accessibile se lo si conosce. Permessi e attributi lavorano su piani diversi e si sommano.</p>
+
+<h2 id="13">13. Il controllo account utente (UAC)</h2>
+<p>Anche un amministratore, quando effettua l'accesso, riceve <strong>due</strong> token: uno <em>standard</em>, usato di default, e uno <em>amministrativo</em>, tenuto da parte. I programmi partono con il token standard; quando serve un privilegio, compare la richiesta di elevazione (UAC):</p>
+<ul>
+  <li>se l'utente è amministratore, deve <strong>confermare</strong> (o fornire la password, secondo le impostazioni);</li>
+  <li>se l'utente è standard, deve inserire le credenziali di un amministratore.</li>
+</ul>
+<p>Lo schermo si oscura e compare una finestra di consenso: è una misura di sicurezza, non un fastidio. Il suo scopo è impedire che un programma "silenzioso" (o un malware) modifichi il sistema senza che l'utente se ne accorga.</p>
+<div class="info"><strong>Perché conta per i test.</strong> Un programma avviato "come amministratore" ha un token diverso: se un test sui permessi non funziona come previsto, la prima domanda è se il programma stesse girando con il token elevato o standard.</div>
+
+<h2 id="14">14. I criteri di sicurezza locali</h2>
+<p>Oltre ai permessi sui singoli oggetti, Windows applica <strong>criteri</strong> validi per tutto il computer. I più importanti:</p>
+<h3>Password</h3>
+<ul>
+  <li><strong>Lunghezza minima</strong>: quante lettere/numeri deve avere almeno.</li>
+  <li><strong>Complessità</strong>: obbliga a usare maiuscole, minuscole, cifre e simboli.</li>
+  <li><strong>Durata massima</strong>: dopo quanti giorni la password scade e va cambiata.</li>
+  <li><strong>Durata minima</strong>: per quanto tempo non si può cambiarla di nuovo (evita di "aggirare" la scadenza).</li>
+  <li><strong>Cronologia</strong>: quante password vecchie non si possono riusare.</li>
+</ul>
+<h3>Blocco account</h3>
+<ul>
+  <li><strong>Soglia</strong>: dopo quanti tentativi falliti l'account si blocca.</li>
+  <li><strong>Durata del blocco</strong>: per quanto tempo resta bloccato (o finché un amministratore non lo sblocca).</li>
+  <li><strong>Reimpostazione del contatore</strong>: dopo quanto tempo i tentativi falliti "dimenticati".</li>
+</ul>
+<p>Il blocco account protegge dagli attacchi a forza bruta, ma se la soglia è troppo bassa diventa un modo facile per bloccare gli utenti (attacco di negazione del servizio).</p>
+<h3>Controllo (audit)</h3>
+<p>I criteri di controllo decidono <strong>quali eventi finiscono nel registro Sicurezza</strong>: accessi riusciti e falliti, uso di privilegi, modifiche di account e criteri, accesso agli oggetti. È il ponte tra la sicurezza e il registro eventi: senza audit abilitato, il registro Sicurezza è quasi vuoto.</p>
+
+<h2 id="15">15. Dove si gestisce tutto questo</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Strumento (interfaccia grafica)</th><th>Cosa si gestisce</th><th>Disponibilità</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Impostazioni &rarr; Account</strong></td><td>Utenti della famiglia, tipo di account, accesso con PIN o biometria</td><td>Tutte le edizioni</td></tr>
+    <tr><td><strong>Pannello di controllo &rarr; Account utente</strong></td><td>Modifica account, gestione password</td><td>Tutte le edizioni</td></tr>
+    <tr><td><strong>Utenti e gruppi locali</strong></td><td>Elenco completo di utenti e gruppi locali, appartenenze, proprietà</td><td>Solo Pro / Enterprise / Education</td></tr>
+    <tr><td><strong>Criteri di sicurezza locali</strong></td><td>Password, blocco account, controllo, diritti degli utenti</td><td>Solo Pro / Enterprise / Education</td></tr>
+    <tr><td><strong>Editor criteri di gruppo locale</strong></td><td>Criteri locali, script di accesso, restrizioni</td><td>Solo Pro / Enterprise / Education</td></tr>
+    <tr><td><strong>Esplora file &rarr; Proprietà &rarr; Sicurezza</strong></td><td>Permessi NTFS di file e cartelle, ereditarietà, proprietario, controllo</td><td>Tutte le edizioni (su NTFS)</td></tr>
+    <tr><td><strong>Strumenti di amministrazione &rarr; Active Directory</strong></td><td>Utenti e gruppi di dominio, unità organizzative, criteri di gruppo</td><td>Solo in dominio, su server</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="16">16. Minimo privilegio e buone pratiche</h2>
+<ul>
+  <li><strong>Principio del minimo privilegio</strong>: concedere sempre il permesso <em>più piccolo</em> che basta a fare il lavoro. Meglio "Lettura" che "Modifica", meglio "Modifica" che "Controllo completo".</li>
+  <li><strong>Gruppi, non persone</strong>: assegnare i permessi ai gruppi e mettere le persone nei gruppi.</li>
+  <li><strong>Evitare il Nega</strong> se si può semplicemente non concedere.</li>
+  <li><strong>Poche eccezioni sull'ereditarietà</strong>: interromperla solo dove serve, e mai senza aver controllato chi resta con accesso.</li>
+  <li><strong>Account standard per l'uso quotidiano</strong> e amministratore solo quando serve: riduce la superficie d'attacco.</li>
+  <li><strong>Account di servizio</strong> con privilegi ridotti o account virtuali, non SYSTEM se non indispensabile.</li>
+  <li><strong>Password robuste e blocco account</strong>: criteri ragionevoli, senza esagerare con la scadenza.</li>
+  <li><strong>Audit mirato</strong>: registrare ciò che conta (accessi falliti, modifiche di account) senza riempire inutilmente il log.</li>
+  <li><strong>Documentare</strong> le scelte: una ACL senza una spiegazione è un problema futuro.</li>
+</ul>
+
+<h2 id="17">17. Domande di verifica</h2>
+<ol>
+  <li>Che cos'è un SID e perché ricreare un utente con lo stesso nome non gli restituisce i permessi?</li>
+  <li>Cosa contiene il token di accesso e perché cambia solo al login?</li>
+  <li>Quali account sono già presenti su una macchina appena creata e perché sono disabilitati?</li>
+  <li>Qual è la differenza tra un account locale, uno Microsoft e uno di dominio?</li>
+  <li>Perché i permessi si assegnano ai gruppi e non ai singoli utenti?</li>
+  <li>A cosa servono il gruppo <em>Backup Operators</em> e il gruppo <em>Event Log Readers</em>?</li>
+  <li>Cosa sono le identità speciali? Fai due esempi e spiega perché compaiono nelle ACL.</li>
+  <li>Qual è la differenza tra <em>Everyone</em>, <em>Authenticated Users</em> e <em>Interactive</em>?</li>
+  <li>Spiega la differenza tra DACL e SACL.</li>
+  <li>Cosa succede se un gruppo dà "Modifica" e un altro "Nega scrittura"?</li>
+  <li>Perché in rete vale il permesso più restrittivo tra condivisione e NTFS?</li>
+  <li>Qual è la differenza tra un permesso e un attributo?</li>
+  <li>A cosa serve il controllo account utente e perché anche gli amministratori lo incontrano?</li>
+  <li>Quali criteri di password e di blocco account conosci, e a cosa servono?</li>
+</ol>
+
+</main>
+<script src="../assets/barra.js"></script>
+</body>
+</html>

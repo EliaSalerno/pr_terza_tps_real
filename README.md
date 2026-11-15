@@ -34,6 +34,11 @@ scorciatoia comoda ma pericolosa.
 │   ├── guida_attributi_e_permessi_windows.html
 │   │                                       ← guida interattiva su attributi e permessi
 │   ├── Guida_permessi_cmd.html            ← guida ai permessi di cartella da CMD
+│   ├── Windows_e_il_prompt_dei_comandi.html
+│   │                                       ← dispensa su Windows e Prompt dei comandi
+│   ├── Utenti_gruppi_e_permessi_windows.html
+│   │                                       ← dispensa teorica su utenti, gruppi e permessi (senza comandi)
+│   ├── Gestione_eventi_windows.html       ← dispensa sulla gestione degli eventi
 │   └── installazione/                     ← guide di preparazione dell'ambiente
 │       ├── creazione_macchina.html        ← creare e installare la macchina Windows 11
 │       ├── intro_alpine.html              ← guida introduttiva ad Alpine Linux in VM
@@ -570,6 +575,25 @@ comandi cambiano sintassi.
 tra virgolette i percorsi con spazi. Sui file non servono i flag `(OI)` e `(CI)`; se
 `icacls` risponde «Accesso negato», prendere prima il possesso con `takeown` e poi
 assegnare i permessi.
+
+## Windows: sistema, utenti e registro eventi
+
+📄 [`teoria/Windows_e_il_prompt_dei_comandi.html`](teoria/Windows_e_il_prompt_dei_comandi.html)
+— *Windows e il Prompt dei comandi*: dispensa su Windows, i percorsi e le shell, con i
+comandi per creare, modificare e leggere file e cartelle, `shutdown` e tutte le sue
+opzioni, `whoami` per le proprietà dell'utente connesso, `runas` per aprire un programma
+con un'altra identità, più i comandi "simpatici" e quelli di diagnostica.
+
+📄 [`teoria/Utenti_gruppi_e_permessi_windows.html`](teoria/Utenti_gruppi_e_permessi_windows.html)
+— *Utenti, gruppi e permessi in Windows*: dispensa teorica (senza comandi) sul modello
+di sicurezza: account, SID e token, l'elenco completo di utenti e gruppi già presenti su
+una macchina appena creata con i loro ruoli, le identità speciali, ACL ed ereditarietà,
+condivisione e NTFS, UAC e criteri di sicurezza locali.
+
+📄 [`teoria/Gestione_eventi_windows.html`](teoria/Gestione_eventi_windows.html)
+— *La gestione degli eventi in Windows*: dispensa sul registro eventi: architettura,
+anatomia e livelli degli eventi, Visualizzatore eventi, proprietà dei registri, audit,
+ID principali, interrogazione dei log, inoltro centralizzato e uso nelle indagini.
 
 ---
 

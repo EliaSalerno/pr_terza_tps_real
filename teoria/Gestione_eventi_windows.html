@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La gestione degli eventi in Windows</title>
+<link rel="stylesheet" href="../assets/documento.css">
+<style>
+.term{background:#0b0f16;color:#e6ebf2;border:1px solid var(--line);border-radius:12px;padding:1rem 1.2rem;overflow-x:auto;box-shadow:var(--shadow);margin:1.2rem 0;font-family:Consolas,"Cascadia Mono","JetBrains Mono",monospace;font-size:.9rem;line-height:1.7}
+.term .p{color:#7ee787;font-weight:600}
+.term .o{color:#9aa3ad}
+.term .c{color:#79c0ff}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.9rem;margin:1.2rem 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1rem 1.1rem;box-shadow:var(--shadow)}
+.card h3{margin:.1rem 0 .4rem;font-size:1.02rem}
+.card p{margin:.3rem 0;font-size:.95rem;color:var(--muted)}
+.badge{display:inline-block;font:700 .72rem/1 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.05em;text-transform:uppercase;padding:.3em .6em;border-radius:999px;background:var(--soft);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 25%,transparent)}
+.lv{display:inline-block;font:700 .74rem/1 system-ui;padding:.25em .55em;border-radius:6px;border:1px solid var(--line)}
+.lv-c{color:#b3202f;background:color-mix(in srgb,#b3202f 12%,transparent)}
+.lv-e{color:#c4510c;background:color-mix(in srgb,#c4510c 12%,transparent)}
+.lv-w{color:#b07a00;background:color-mix(in srgb,#b07a00 12%,transparent)}
+.lv-i{color:#2457c5;background:color-mix(in srgb,#2457c5 12%,transparent)}
+.lv-v{color:#5b636b;background:color-mix(in srgb,#5b636b 12%,transparent)}
+.toc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1rem 1.3rem;box-shadow:var(--shadow);margin:1.4rem 0}
+.toc h2{margin:0 0 .4rem;border:0;padding:0;font-size:1.05rem}
+.toc ol{margin:.3rem 0 .3rem 1.3rem}
+.toc li{margin:.2rem 0}
+.toc a{text-decoration:none}
+.toc a:hover{text-decoration:underline}
+@media print{.term{background:#f7f7f7;color:#000;box-shadow:none}.term .p,.term .o,.term .c{color:#000}.card,.toc{box-shadow:none}}
+</style>
+</head>
+<body>
+
+<header class="doc-intestazione">
+  <p class="occhiello">Dispensa &middot; Registro eventi</p>
+  <h1>La gestione degli eventi in Windows</h1>
+  <p class="sottotitolo">Il "diario di bordo" del sistema: che cos'è un evento, come è fatto, dove finisce, come si legge e si filtra, quali ID contano davvero e come si usa il registro per capire <strong>cosa è successo</strong> su un computer.</p>
+</header>
+
+<main>
+
+<p class="lead">Il laboratorio sui registri eventi mette in pratica questi concetti. Qui trovi la teoria: l'architettura, l'anatomia di un evento, i livelli, l'audit, gli ID più importanti, l'inoltro centralizzato e le buone pratiche. Alla fine, come sempre, le domande di verifica.</p>
+
+<nav class="toc" aria-label="Indice">
+  <h2>Indice</h2>
+  <ol>
+    <li><a href="#1">Perché registrare gli eventi</a></li>
+    <li><a href="#2">L'architettura: servizio, provider e canali</a></li>
+    <li><a href="#3">I registri e i canali principali</a></li>
+    <li><a href="#4">L'anatomia di un evento</a></li>
+    <li><a href="#5">I livelli di un evento</a></li>
+    <li><a href="#6">Il Visualizzatore eventi</a></li>
+    <li><a href="#7">Le proprietà di un registro</a></li>
+    <li><a href="#8">Il controllo (audit): come nascono gli eventi di sicurezza</a></li>
+    <li><a href="#9">Gli ID evento da conoscere</a></li>
+    <li><a href="#10">Interrogare e filtrare i registri</a></li>
+    <li><a href="#11">Creare eventi e collegare attività</a></li>
+    <li><a href="#12">Inoltro e raccolta centralizzata degli eventi</a></li>
+    <li><a href="#13">Registro eventi e indagini</a></li>
+    <li><a href="#14">Buone pratiche e problemi comuni</a></li>
+    <li><a href="#15">Domande di verifica</a></li>
+  </ol>
+</nav>
+
+<h2 id="1">1. Perché registrare gli eventi</h2>
+<p>Un sistema operativo compie continuamente azioni: avvia e ferma servizi, accetta o rifiuta accessi, installa aggiornamenti, rileva guasti hardware. Se nulla venisse annotato, capire "cosa è andato storto" sarebbe impossibile. Il <strong>registro eventi</strong> è il diario in cui Windows e i programmi scrivono queste azioni.</p>
+<div class="cards">
+  <div class="card"><h3>Diagnosi</h3><p>Perché il PC si è riavviato da solo? Quale servizio è andato in errore prima del blocco?</p></div>
+  <div class="card"><h3>Sicurezza</h3><p>Chi ha effettuato l'accesso? Quanti tentativi falliti? Qualcuno ha creato un account nuovo?</p></div>
+  <div class="card"><h3>Conformità</h3><p>In molti ambienti la legge o le policy impongono di conservare tracce di chi fa cosa e quando.</p></div>
+  <div class="card"><h3>Prestazioni</h3><p>Quanto è rimasto acceso il sistema? Quando è cambiato lo stato di un servizio?</p></div>
+</div>
+
+<h2 id="2">2. L'architettura: servizio, provider e canali</h2>
+<p>Da Windows Vista in poi l'infrastruttura si chiama <strong>Windows Event Log</strong> e sostituisce il vecchio sistema di logging. I protagonisti sono tre:</p>
+<ul>
+  <li>il <strong>servizio Registro eventi</strong> (<em>Windows Event Log</em>), che gira in background e raccoglie gli eventi;</li>
+  <li>i <strong>provider</strong> (o "origini"): il componente che <em>genera</em> l'evento, per esempio un driver, un servizio o un'applicazione;</li>
+  <li>i <strong>canali</strong> (o registri): dove gli eventi vengono raccolti e ordinati.</li>
+</ul>
+<p>Alla base c'è anche <strong>ETW</strong> (<em>Event Tracing for Windows</em>), il meccanismo ad alte prestazioni usato dal kernel e dai driver; il registro eventi "classico" e ETW condividono parte dell'infrastruttura. Per chi amministra, la distinzione pratica è semplice: <em>provider</em> scrive, <em>canale</em> conserva, <em>Visualizzatore eventi</em> mostra.</p>
+<div class="info"><strong>Su disco.</strong> I registri classici sono file <code>.evtx</code> nella cartella <code>C:\Windows\System32\winevt\Logs</code>. Sapere dove sono è utile per copiarli, esportarli o analizzarli su un'altra macchina.</div>
+
+<h2 id="3">3. I registri e i canali principali</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Registro</th><th>Cosa contiene</th><th>Chi lo legge</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Applicazione</strong></td><td>Eventi scritti dalle applicazioni (errori, arresti anomali, aggiornamenti)</td><td>Tutti</td></tr>
+    <tr><td><strong>Sicurezza</strong></td><td>Accessi, uso di privilegi, modifiche di account e criteri, accesso agli oggetti. Popolato solo se l'<strong>audit</strong> è attivo</td><td>Solo amministratori / gruppo <em>Event Log Readers</em></td></tr>
+    <tr><td><strong>Sistema</strong></td><td>Eventi del sistema operativo e dei driver: avvio, arresto, servizi, hardware</td><td>Tutti</td></tr>
+    <tr><td><strong>Installazione</strong> (Setup)</td><td>Installazione di Windows, aggiornamenti, componenti</td><td>Tutti</td></tr>
+    <tr><td><strong>Eventi inoltrati</strong> (Forwarded Events)</td><td>Eventi ricevuti da altri computer tramite la raccolta centralizzata</td><td>Tutti</td></tr>
+    <tr><td><strong>Registri delle applicazioni</strong></td><td>Canali creati da programmi specifici (per esempio Windows PowerShell, TaskScheduler, Microsoft-Windows-DNS-Client)</td><td>Variabile</td></tr>
+    <tr><td><strong>Canali operativi / analitici / di debug</strong></td><td>Registri più tecnici, di norma disabilitati; servono per diagnosi approfondite</td><td>Amministratori</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="info"><strong>Canali amministrativi vs operativi.</strong> I registri classici (Applicazione, Sicurezza, Sistema) sono <em>amministrativi</em>: sempre attivi, con politica di conservazione. I canali <em>operativi</em>, <em>analitici</em> e <em>di debug</em> sono in genere spenti e si abilitano solo quando servono, perché possono generare moltissimi eventi.</div>
+
+<h2 id="4">4. L'anatomia di un evento</h2>
+<p>Ogni evento è una scheda con campi fissi. Impararli significa saper leggere qualsiasi registro:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Campo</th><th>Cosa dice</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Data e ora</strong> (<em>TimeCreated</em>)</td><td>L'istante esatto in cui l'evento è stato registrato (con fuso orario)</td></tr>
+    <tr><td><strong>Origine</strong> (<em>Provider</em>)</td><td>Chi ha scritto l'evento: un servizio, un driver, un'applicazione</td></tr>
+    <tr><td><strong>ID evento</strong> (<em>Event ID</em>)</td><td>Un numero che identifica il <em>tipo</em> di evento per quel provider</td></tr>
+    <tr><td><strong>Livello</strong> (<em>Level</em>)</td><td>Quanto è grave: critico, errore, avviso, informazioni, dettagliato</td></tr>
+    <tr><td><strong>Attività / categoria</strong> (<em>Task</em>)</td><td>Il tipo di operazione (spesso usata come filtro nell'interfaccia)</td></tr>
+    <tr><td><strong>Parole chiave</strong> (<em>Keywords</em>)</td><td>Etichette che classificano l'evento (per esempio "Controllo riuscito")</td></tr>
+    <tr><td><strong>Utente</strong> (<em>User</em>)</td><td>Con quale account è stato generato l'evento (può essere SYSTEM o un servizio)</td></tr>
+    <tr><td><strong>Computer</strong></td><td>Su quale macchina è stato registrato (fondamentale negli eventi inoltrati)</td></tr>
+    <tr><td><strong>Processo e thread</strong></td><td>Quale programma e quale thread hanno generato l'evento (spesso un ID, non un nome)</td></tr>
+    <tr><td><strong>Dati</strong> (<em>EventData</em> / <em>UserData</em>)</td><td>I dettagli specifici: nome utente, percorso, codice di errore&hellip; Cambiano da evento a evento</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Nella scheda <em>Dettagli</em> ogni evento si può vedere in due modi: la vista <strong>descrittiva</strong> (frasi in italiano, comoda da leggere) e la vista <strong>XML</strong> (struttura completa, indispensabile per filtrare o automatizzare).</p>
+<pre class="term"><span class="o">&lt;Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event"&gt;</span>
+  <span class="c">&lt;System&gt;</span>
+    &lt;Provider Name="Microsoft-Windows-Security-Auditing" /&gt;
+    &lt;EventID&gt;4624&lt;/EventID&gt;
+    &lt;Level&gt;0&lt;/Level&gt;
+    &lt;TimeCreated SystemTime="2026-03-12T09:14:22.510Z" /&gt;
+    &lt;Computer&gt;WINDOWS-1&lt;/Computer&gt;
+  <span class="c">&lt;/System&gt;</span>
+  <span class="c">&lt;EventData&gt;</span>
+    &lt;Data Name="TargetUserName"&gt;utente1&lt;/Data&gt;
+    &lt;Data Name="LogonType"&gt;2&lt;/Data&gt;
+  <span class="c">&lt;/EventData&gt;</span>
+<span class="o">&lt;/Event&gt;</span></pre>
+<div class="info"><strong>L'ID non basta da solo.</strong> Un ID evento ha senso solo insieme alla sua <em>origine</em>: il 100 di un provider è un evento diverso dal 100 di un altro. Nelle ricerche si indica sempre la coppia "provider + ID".</div>
+
+<h2 id="5">5. I livelli di un evento</h2>
+<p>Il livello indica la gravità. Nel Visualizzatore eventi compare con un nome e un'icona; nell'XML è un numero. Nei filtri si usa il numero.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Numero</th><th>Livello</th><th>Significato</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td><span class="lv lv-c">Critico</span></td><td>Guasto grave: il componente o l'applicazione non può funzionare.</td></tr>
+    <tr><td>2</td><td><span class="lv lv-e">Errore</span></td><td>Problema che impedisce un'operazione, ma il sistema continua.</td></tr>
+    <tr><td>3</td><td><span class="lv lv-w">Avviso</span></td><td>Situazione anomala ma non ancora un errore: possibile problema futuro.</td></tr>
+    <tr><td>4</td><td><span class="lv lv-i">Informazioni</span></td><td>Evento normale: qualcosa è cambiato, un servizio è partito, un accesso è riuscito.</td></tr>
+    <tr><td>5</td><td><span class="lv lv-v">Dettagliato</span></td><td>Informazione molto fine (in inglese <em>Verbose</em>), di solito nei canali analitici.</td></tr>
+    <tr><td>0</td><td><em>LogAlways</em></td><td>Registrato sempre, a prescindere dal livello (usato da alcuni provider).</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="avviso"><strong>Un errore non è sempre un problema.</strong> Nei log convivono eventi "sporchi" normali (un servizio che parte in ritardo, un'applicazione che si chiude da sola). L'analisi seria guarda <em>sequenze</em> e <em>frequenze</em>, non un singolo evento isolato.</div>
+
+<h2 id="6">6. Il Visualizzatore eventi</h2>
+<p>Lo strumento grafico è il <strong>Visualizzatore eventi</strong> (<em>Event Viewer</em>). Si apre dal menu Start o digitando <code>eventvwr.msc</code> nella finestra <kbd>Win</kbd>+<kbd>R</kbd>.</p>
+<p>L'interfaccia ha tre parti:</p>
+<ul>
+  <li>a sinistra l'<strong>albero</strong> dei registri e delle visualizzazioni;</li>
+  <li>al centro l'<strong>elenco</strong> degli eventi del registro scelto;</li>
+  <li>a destra le <strong>azioni</strong> e, sotto, l'anteprima dell'evento selezionato.</li>
+</ul>
+<h3>Le operazioni più importanti</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Azione</th><th>A cosa serve</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Filtra registro corrente</strong></td><td>Mostra solo gli eventi che rispettano criteri (livello, ID, origine, intervallo di tempo, utente&hellip;)</td></tr>
+    <tr><td><strong>Visualizzazione personalizzata</strong></td><td>Salva un filtro con un nome, così si ritrova con un clic (per esempio "Errori ultime 24 ore")</td></tr>
+    <tr><td><strong>Collega attività a questo evento</strong></td><td>Fa partire automaticamente un'azione (programma, email, script) quando compare un certo evento</td></tr>
+    <tr><td><strong>Salva tutti gli eventi con nome</strong></td><td>Esporta in <code>.evtx</code> (formato nativo), <code>.xml</code>, <code>.csv</code> o <code>.txt</code></td></tr>
+    <tr><td><strong>Apri registro salvato</strong></td><td>Carica un <code>.evtx</code> esportato da un'altra macchina, per analizzarlo offline</td></tr>
+    <tr><td><strong>Cancella registro</strong></td><td>Svuota un registro: <strong>lascia una traccia</strong> (vedi ID 1102) e va evitata in ambito forense</td></tr>
+    <tr><td><strong>Proprietà</strong></td><td>Configura dimensione, conservazione e attivazione del registro</td></tr>
+    <tr><td><strong>Sottoscrizioni</strong></td><td>Raccoglie eventi da altri computer (raccolta centralizzata)</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="info"><strong>Ordinamento.</strong> Di default gli eventi sono mostrati dal più recente al più vecchio. In un'indagine spesso conviene riordinare dal più vecchio al più nuovo, per ricostruire la sequenza.</div>
+
+<h2 id="7">7. Le proprietà di un registro</h2>
+<p>Con il tasto destro su un registro &rarr; <em>Proprietà</em> si configurano tre cose:</p>
+<ul>
+  <li><strong>Dimensione massima</strong> del file di log (per esempio 20 MB di default per Sistema e Applicazione, più grande per Sicurezza).</li>
+  <li><strong>Comportamento alla saturazione</strong>:
+    <ul>
+      <li><em>Sovrascrivi eventi se necessario</em> (predefinito): i più vecchi vengono eliminati quando serve spazio;</li>
+      <li><em>Archivia registro quando è pieno</em>: il registro viene salvato e riparte;</li>
+      <li><em>Non sovrascrivere eventi</em>: il registro si ferma finché non viene svuotato manualmente. Attenzione: gli eventi nuovi <strong>non vengono più registrati</strong>.</li>
+    </ul>
+  </li>
+  <li><strong>Abilitazione</strong> dei canali operativi, analitici e di debug, normalmente spenti.</li>
+</ul>
+<div class="avviso"><strong>Log troppo piccolo, indagine impossibile.</strong> Un registro Sicurezza che copre poche ore è inutile per ricostruire un accesso di giorni prima. Il dimensionamento del log è una scelta di sicurezza, non un dettaglio tecnico.</div>
+
+<h2 id="8">8. Il controllo (audit): come nascono gli eventi di sicurezza</h2>
+<p>Il registro <strong>Sicurezza</strong> non registra tutto automaticamente: occorre abilitare l'<strong>audit</strong> (controllo), cioè dire a Windows <em>quali</em> categorie di eventi annotare e se annotare i successi, i fallimenti o entrambi. Si configura nei <em>Criteri di sicurezza locali</em> (edizioni Pro) oppure con i criteri di gruppo, in dominio.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Categoria di controllo</th><th>Cosa registra</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Accesso account</strong> (Account Logon)</td><td>Validazione delle credenziali (autenticazione): accessi riusciti e falliti</td></tr>
+    <tr><td><strong>Gestione account</strong> (Account Management)</td><td>Creazione, modifica, eliminazione, blocco di utenti e gruppi</td></tr>
+    <tr><td><strong>Accesso/Disconnessione</strong> (Logon/Logoff)</td><td>Login, logoff, blocco schermo, accesso di rete</td></tr>
+    <tr><td><strong>Accesso agli oggetti</strong> (Object Access)</td><td>Lettura, scrittura, eliminazione di file, cartelle, chiavi del registro: va abilitato anche sulla singola risorsa (SACL)</td></tr>
+    <tr><td><strong>Modifica criteri</strong> (Policy Change)</td><td>Modifiche ai criteri di sicurezza, installazione di servizi, uso di privilegi</td></tr>
+    <tr><td><strong>Uso di privilegi</strong> (Privilege Use)</td><td>Quando un processo usa un privilegio sensibile</td></tr>
+    <tr><td><strong>Traccia processi</strong> (Detailed Tracking)</td><td>Creazione di processi e altri eventi di dettaglio</td></tr>
+    <tr><td><strong>Sistema</strong> (System)</td><td>Avvio/arresto del servizio registro eventi, modifiche allo stato di sicurezza</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Ogni categoria ha <strong>sottocategorie</strong> più fini (per esempio "Accesso agli oggetti &rarr; File system"). Abilitare tutto produce enormi quantità di eventi e rallenta il sistema: si sceglie con criterio.</p>
+<div class="info"><strong>Due filtri in serie, anche qui.</strong> Per registrare l'accesso a un file servono <em>sia</em> il criterio di controllo attivo sulla categoria, <em>sia</em> una voce di controllo (SACL) impostata sul file. Attivare solo il criterio non basta.</div>
+
+<h2 id="9">9. Gli ID evento da conoscere</h2>
+<p>Questi ID tornano spessissimo. Ricorda che valgono insieme all'origine indicata.</p>
+<h3>Registro Sistema</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ID</th><th>Origine</th><th>Significato</th></tr></thead>
+  <tbody>
+    <tr><td><strong>6005</strong></td><td>EventLog</td><td>Il servizio registro eventi è stato avviato &rarr; il PC si è acceso</td></tr>
+    <tr><td><strong>6006</strong></td><td>EventLog</td><td>Il servizio registro eventi è stato fermato &rarr; il PC si è spento</td></tr>
+    <tr><td><strong>6013</strong></td><td>EventLog</td><td>Tempo di attività del sistema (uptime)</td></tr>
+    <tr><td><strong>6008</strong></td><td>EventLog</td><td>Arresto precedente imprevisto</td></tr>
+    <tr><td><strong>41</strong></td><td>Kernel-Power</td><td>Riavvio senza spegnimento pulito (crash, perdita di corrente)</td></tr>
+    <tr><td><strong>1074</strong></td><td>User32 / Kernel</td><td>Arresto o riavvio avviato da un utente o da un processo, con il motivo</td></tr>
+    <tr><td><strong>7036</strong></td><td>Service Control Manager</td><td>Un servizio è passato a "in esecuzione" o "arrestato"</td></tr>
+    <tr><td><strong>7040</strong></td><td>Service Control Manager</td><td>È cambiato il tipo di avvio di un servizio (automatico, manuale, disabilitato)</td></tr>
+    <tr><td><strong>7045</strong></td><td>Service Control Manager</td><td>È stato installato un nuovo servizio (spesso da tenere d'occhio)</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>Registro Sicurezza</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ID</th><th>Significato</th></tr></thead>
+  <tbody>
+    <tr><td><strong>1102</strong></td><td>Il registro di controllo di sicurezza è stato <strong>cancellato</strong>: evento importantissimo in un'indagine</td></tr>
+    <tr><td><strong>4624</strong></td><td>Accesso riuscito (contiene il <em>tipo di accesso</em>)</td></tr>
+    <tr><td><strong>4625</strong></td><td>Accesso <strong>non</strong> riuscito: base per scoprire tentativi di forza bruta</td></tr>
+    <tr><td><strong>4634</strong> / <strong>4647</strong></td><td>Disconnessione / disconnessione avviata dall'utente</td></tr>
+    <tr><td><strong>4648</strong></td><td>Accesso con credenziali esplicite (tipico di "esegui come utente diverso")</td></tr>
+    <tr><td><strong>4672</strong></td><td>Accesso con privilegi speciali (di norma un amministratore)</td></tr>
+    <tr><td><strong>4688</strong></td><td>Creazione di un processo (utile per sapere quali programmi sono stati avviati)</td></tr>
+    <tr><td><strong>4719</strong></td><td>Modifica dei criteri di controllo (audit) del sistema</td></tr>
+    <tr><td><strong>4720</strong> / <strong>4726</strong></td><td>Account utente creato / eliminato</td></tr>
+    <tr><td><strong>4722</strong> / <strong>4725</strong></td><td>Account utente abilitato / disabilitato</td></tr>
+    <tr><td><strong>4723</strong> / <strong>4724</strong></td><td>Tentativo di cambio password / reimpostazione della password</td></tr>
+    <tr><td><strong>4732</strong> / <strong>4733</strong></td><td>Membro aggiunto / rimosso da un gruppo di sicurezza locale</td></tr>
+    <tr><td><strong>4740</strong> / <strong>4767</strong></td><td>Account bloccato / account sbloccato</td></tr>
+    <tr><td><strong>4776</strong></td><td>Autenticazione tramite NTLM (riuscita o fallita)</td></tr>
+    <tr><td><strong>4771</strong></td><td>Pre-autenticazione Kerberos non riuscita (tipico in dominio)</td></tr>
+    <tr><td><strong>5156</strong></td><td>Connessione di rete consentita dal filtro di Windows (molto verboso)</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>Il tipo di accesso (Logon Type)</h3>
+<p>Negli eventi 4624/4625 il campo <em>LogonType</em> dice <em>come</em> è avvenuto l'accesso:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Valore</th><th>Tipo</th></tr></thead>
+  <tbody>
+    <tr><td>2</td><td>Interattivo (davanti a tastiera e schermo)</td></tr>
+    <tr><td>3</td><td>Di rete (accesso a una risorsa condivisa)</td></tr>
+    <tr><td>4</td><td>Batch (attività pianificata)</td></tr>
+    <tr><td>5</td><td>Servizio</td></tr>
+    <tr><td>7</td><td>Sblocco dello schermo</td></tr>
+    <tr><td>8</td><td>Rete con credenziali in chiaro</td></tr>
+    <tr><td>9</td><td>Nuove credenziali (usato da "esegui come utente diverso")</td></tr>
+    <tr><td>10</td><td>Desktop remoto (RDP)</td></tr>
+    <tr><td>11</td><td>Interattivo con credenziali memorizzate (accesso offline)</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="10">10. Interrogare e filtrare i registri</h2>
+<p>Per pochi eventi basta il Visualizzatore; per migliaia serve la riga di comando. Da <strong>PowerShell</strong> il comando principale è <code>Get-WinEvent</code>, il più moderno e potente; da <strong>Prompt dei comandi</strong> si usa <code>wevtutil</code>.</p>
+<pre><code># --- PowerShell ---
+
+# Ultimi 10 eventi del registro Sistema
+Get-WinEvent -LogName System -MaxEvents 10
+
+# Solo gli errori (livello 2) delle ultime 24 ore
+Get-WinEvent -FilterHashtable @{LogName='System'; Level=2; StartTime=(Get-Date).AddDays(-1)}
+
+# Tentativi di accesso falliti
+Get-WinEvent -FilterHashtable @{LogName='Security'; Id=4625}
+
+# Cerca per provider e intervallo di tempo, ordinando dal più vecchio
+Get-WinEvent -FilterHashtable @{LogName='System'; ProviderName='Service Control Manager'; StartTime=(Get-Date).AddDays(-7)} |
+  Sort-Object TimeCreated
+
+# Conta gli eventi raggruppandoli per origine ed esporta in CSV
+Get-WinEvent -LogName System -MaxEvents 2000 |
+  Group-Object ProviderName | Sort-Object Count -Descending |
+  Select-Object Count, Name | Export-Csv -NoTypeInformation -Path .\conteggio.csv
+
+# --- Prompt dei comandi ---
+
+REM Elenca i registri disponibili
+wevtutil el
+
+REM Ultimi 5 eventi del registro Sistema, dal più recente, in testo
+wevtutil qe System /c:5 /rd:true /f:text
+
+REM Esporta il registro Sicurezza in un file .evtx
+wevtutil epl Security C:\Backup\Security.evtx</code></pre>
+<p>Per filtri complessi si usa la sintassi <strong>XPath</strong>, la stessa che il Visualizzatore genera quando si salva una visualizzazione personalizzata: si può riutilizzare tale filtro in uno script. I filtri basati su <em>FilterHashtable</em> sono però più leggibili per i casi comuni.</p>
+<div class="info"><strong>Get-EventLog è il passato.</strong> Il vecchio <code>Get-EventLog</code> funziona solo sui registri classici e non vede i canali moderni. Per lavorare sul registro eventi di oggi si usa <code>Get-WinEvent</code>.</div>
+<div class="avviso"><strong>Privilegi.</strong> Il registro Sicurezza si legge solo come amministratore (o come membro del gruppo <em>Event Log Readers</em>). Da PowerShell bisogna aprire la console <em>come amministratore</em>, altrimenti molti eventi restano invisibili.</div>
+
+<h2 id="11">11. Creare eventi e collegare attività</h2>
+<p>A volte serve scrivere eventi propri, per esempio per marcare l'avvio di uno script o per collaudare una procedura di monitoraggio.</p>
+<pre><code>REM Crea un evento informativo nel registro Applicazione
+eventcreate /T INFORMATION /ID 100 /L APPLICATION /SO LabInformatica /D "Avvio esercitazione"
+
+REM Livelli disponibili: INFORMATION, WARNING, ERROR
+
+# Da PowerShell, registrare un'origine personalizzata e scrivere un evento
+New-EventLog -LogName Application -Source "LabInformatica"
+Write-EventLog -LogName Application -Source "LabInformatica" -EventId 101 -EntryType Information -Message "Test"</code></pre>
+<p>Il meccanismo più interessante è il <strong>collegamento di un'attività a un evento</strong>: nel Visualizzatore, con il tasto destro su un evento, si sceglie <em>Collega attività a questo evento</em> e si indica l'azione da eseguire (avviare un programma, uno script, inviare un'email) quando quell'evento si ripresenta. È il fondamento dei sistemi di allerta automatici.</p>
+<div class="avviso"><strong>Attenzione ai trigger.</strong> Un'attività collegata a un evento troppo frequente può avviare lo stesso programma migliaia di volte. Va sempre verificata in un ambiente di prova.</div>
+
+<h2 id="12">12. Inoltro e raccolta centralizzata degli eventi</h2>
+<p>Su una sola macchina i log durano poco e si perdono se il disco si guasta. In ambito professionale si raccolgono gli eventi di molti computer in un unico punto:</p>
+<ul>
+  <li><strong>WEF</strong> (<em>Windows Event Forwarding</em>): i computer inviano gli eventi a un <em>Windows Event Collector</em> tramite <strong>WinRM</strong> e le <em>sottoscrizioni</em>. Gli eventi raccolti finiscono nel registro <strong>Eventi inoltrati</strong>.</li>
+  <li><strong>SIEM</strong> (<em>Security Information and Event Management</em>): piattaforme che aggregano log di Windows, Linux, firewall e applicazioni, correlano gli eventi e generano allerte. Esempi noti: Splunk, Microsoft Sentinel, Elastic Stack, Graylog.</li>
+  <li><strong>Sottoscrizioni</strong>: definiscono <em>quali</em> eventi raccogliere e <em>da quali</em> macchine, per non trasferire dati inutili.</li>
+</ul>
+<p>La raccolta centralizzata risponde a due esigenze: <strong>conservazione</strong> (i log sopravvivono anche se la macchina viene cancellata) e <strong>correlazione</strong> (un attacco distribuito su più computer si vede solo mettendo insieme i pezzi).</p>
+
+<h2 id="13">13. Registro eventi e indagini</h2>
+<p>Il registro eventi è lo strumento principale dell'analisi <em>post-incidente</em>: ricostruire cosa è successo dopo che è successo. Alcuni concetti chiave:</p>
+<ul>
+  <li><strong>Cronologia</strong>: mettere in fila gli eventi per data e ora. Un evento da solo dice poco; la sequenza racconta la storia.</li>
+  <li><strong>Correlazione</strong>: collegare eventi di registri diversi (per esempio un 4625 nel Sicurezza e un 4624 subito dopo).</li>
+  <li><strong>Integrità</strong>: i log sono attendibili solo se non sono stati alterati. La cancellazione del registro Sicurezza produce l'evento <strong>1102</strong>: è un segnale d'allarme, non una prova che "non è successo nulla".</li>
+  <li><strong>Anti-forensics</strong>: chi vuole nascondere le tracce cancella i log, modifica l'ora del sistema o disabilita l'audit. Tutte queste azioni <em>generano a loro volta eventi</em>: l'assenza di tracce è spesso una traccia.</li>
+  <li><strong>Il tempo è tutto</strong>: se l'orologio è sbagliato, la cronologia non torna. Nelle macchine virtuali l'orologio deriva dopo sospensioni e snapshot: va sincronizzato (per esempio via NTP) prima di fare analisi serie.</li>
+  <li><strong>Volatilità</strong>: i log su disco sono più duraturi della memoria RAM, ma un log piccolo e a sovrascrittura automatica "dimentica" in fretta. Per le indagini serve un log dimensionato bene e, meglio ancora, inoltrato altrove.</li>
+</ul>
+<div class="info"><strong>La sequenza tipo.</strong> Accessi falliti ripetuti (4625) &rarr; accesso riuscito (4624) &rarr; creazione di un account (4720) o aggiunta a un gruppo (4732) &rarr; a volte cancellazione dei log (1102). È lo schema classico di un'intrusione, e si vede solo leggendo più eventi in ordine.</div>
+
+<h2 id="14">14. Buone pratiche e problemi comuni</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Buona pratica</th><th>Perché</th></tr></thead>
+  <tbody>
+    <tr><td>Dimensionare bene i registri (Sicurezza più grande)</td><td>Un log che copre poche ore non serve a un'indagine</td></tr>
+    <tr><td>Abilitare l'audit con criterio</td><td>Senza audit il registro Sicurezza è quasi vuoto; con audit eccessivo diventa illeggibile</td></tr>
+    <tr><td>Sincronizzare l'ora (NTP)</td><td>Senza un orologio corretto la cronologia non è affidabile</td></tr>
+    <tr><td>Inoltrare gli eventi critici</td><td>I log sopravvivono alla macchina e si correlano fra più sistemi</td></tr>
+    <tr><td>Esportare e archiviare i log importanti</td><td>Un <code>.evtx</code> salvato è una prova che non si perde</td></tr>
+    <tr><td>Proteggere il registro Sicurezza</td><td>Chi può cancellarlo può nascondere le proprie tracce</td></tr>
+    <tr><td>Monitorare gli ID critici</td><td>1102, 4625 ripetuti, 4720, 4732, 7045 sono campanelli d'allarme</td></tr>
+    <tr><td>Fare uno snapshot prima degli esperimenti</td><td>In laboratorio si può sbagliare e tornare indietro</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Problema</th><th>Cosa fare</th></tr></thead>
+  <tbody>
+    <tr><td>Il registro Sicurezza è vuoto o non si apre</td><td>Aprire lo strumento <strong>come amministratore</strong> e verificare che l'audit sia abilitato</td></tr>
+    <tr><td>Ci sono pochissimi eventi</td><td>La macchina è nuova: generare eventi (riavvii, servizi, accessi)</td></tr>
+    <tr><td>Non trovo un evento</td><td>Controllare il registro giusto, l'intervallo di tempo del filtro e la coppia origine + ID</td></tr>
+    <tr><td>Il registro si è fermato</td><td>La politica è "non sovrascrivere": il log è pieno, va archiviato o ingrandito</td></tr>
+    <tr><td>L'ora degli eventi non torna</td><td>Sincronizzare l'orologio del sistema (soprattutto nelle VM)</td></tr>
+    <tr><td>Troppi eventi</td><td>Filtrare per livello, ID e origine, oppure usare una visualizzazione personalizzata</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="15">15. Domande di verifica</h2>
+<ol>
+  <li>Che cos'è un registro eventi e a cosa serve?</li>
+  <li>Qual è la differenza tra provider e canale?</li>
+  <li>Elenca i registri principali e di' che cosa contiene ciascuno.</li>
+  <li>Quali campi compongono un evento? Indicane almeno cinque.</li>
+  <li>Perché un ID evento ha senso solo insieme alla sua origine?</li>
+  <li>A cosa corrispondono i livelli 2 e 4? E il livello "Dettagliato"?</li>
+  <li>Che cosa succede se la politica di un registro è "non sovrascrivere" e il registro si riempie?</li>
+  <li>Che cos'è l'audit e perché senza di esso il registro Sicurezza è quasi vuoto?</li>
+  <li>Cosa significano gli ID 4624, 4625 e 1102?</li>
+  <li>Cosa indica il "tipo di accesso" 3 e in che evento lo si trova?</li>
+  <li>Perché in un'indagine l'orologio del sistema è importante?</li>
+  <li>Che cos'è l'inoltro degli eventi e quali vantaggi offre?</li>
+  <li>Come si fa partire automaticamente un'azione quando compare un certo evento?</li>
+  <li>Perché la cancellazione dei log non è un buon modo per nascondere le tracce?</li>
+</ol>
+
+</main>
+<script src="../assets/barra.js"></script>
+</body>
+</html>

@@ -206,6 +206,105 @@ window.INDICE = [
     ]
   },
   {
+    id: "teoria-windows-prompt",
+    gruppo: "teoria",
+    categoria: "Sistema operativo Windows",
+    etichetta: "Dispensa",
+    titolo: "Windows e il Prompt dei comandi",
+    breve: "Il sistema, le shell e i comandi utili",
+    approfondimento:
+      "Dispensa sul sistema operativo Windows e sul Prompt dei comandi: com'è fatto Windows e le sue edizioni, dischi, file system e percorsi, le shell (cmd, PowerShell, Windows Terminal), come si legge il prompt e come si apre come amministratore. Poi i comandi utili divisi per scopo: creare cartelle e file, copiare, spostare, rinominare ed eliminare, visualizzare il contenuto di cartelle e file, spegnere e riavviare con il comando shutdown e tutte le sue opzioni, leggere le proprietà dell'utente connesso con whoami, aprire un programma con un'altra identità con runas. Chiude con i comandi \"simpatici\" da mostrare in classe, i comandi di sistema e diagnostica, le scorciatoie del prompt, le buone pratiche e le domande di verifica.",
+    documenti: [
+      {
+        titolo: "Windows e il Prompt dei comandi",
+        descrizione:
+          "Windows, percorsi e shell; comandi per creare, modificare e visualizzare cartelle e file; shutdown con tutte le opzioni; whoami e le proprietà dell'utente; runas; comandi simpatici e di diagnostica.",
+        argomenti: [
+          "Windows ed edizioni",
+          "NTFS e percorsi",
+          "cmd.exe e PowerShell",
+          "Prompt come amministratore",
+          "variabili d'ambiente",
+          "redirezione e pipe",
+          "mkdir, copy, move, ren, del, rmdir",
+          "dir e tree",
+          "shutdown e opzioni",
+          "whoami",
+          "runas",
+          "comandi simpatici",
+          "tasklist e diagnostica"
+        ],
+        file: "teoria/Windows_e_il_prompt_dei_comandi.html"
+      }
+    ]
+  },
+  {
+    id: "teoria-utenti-gruppi-permessi",
+    gruppo: "teoria",
+    categoria: "Utenti, gruppi e permessi",
+    etichetta: "Dispensa",
+    titolo: "Utenti, gruppi e permessi in Windows",
+    breve: "Il modello di sicurezza, senza comandi",
+    approfondimento:
+      "Dispensa teorica sul modello di sicurezza di Windows, volutamente senza comandi: account, SID, profilo e token di accesso; tipi di account; l'elenco completo degli utenti e dei gruppi già presenti su una macchina appena creata, con il ruolo di ciascuno nel mondo Windows; le identità speciali (Everyone, Authenticated Users, SYSTEM e le altre); gli account di servizio. Poi i permessi NTFS: ACL, ACE, ereditarietà, proprietario, cumulo e precedenza del Nega, differenza tra permessi di condivisione e NTFS, attributi, controllo account utente (UAC) e criteri di sicurezza locali. Si chiude con gli strumenti di gestione grafici, il principio del minimo privilegio e le domande di verifica.",
+    documenti: [
+      {
+        titolo: "Utenti, gruppi e permessi in Windows",
+        descrizione:
+          "Il modello di sicurezza di Windows spiegato senza comandi: utenti e gruppi predefiniti con i loro ruoli, identità speciali, ACL ed ereditarietà, condivisione vs NTFS, UAC e criteri di sicurezza.",
+        argomenti: [
+          "account e SID",
+          "token di accesso",
+          "account predefiniti",
+          "gruppi locali predefiniti",
+          "identità speciali",
+          "account di servizio",
+          "ACL e ACE",
+          "ereditarietà",
+          "precedenza del Nega",
+          "condivisione vs NTFS",
+          "attributi",
+          "UAC",
+          "criteri di sicurezza locali",
+          "minimo privilegio"
+        ],
+        file: "teoria/Utenti_gruppi_e_permessi_windows.html"
+      }
+    ]
+  },
+  {
+    id: "teoria-gestione-eventi",
+    gruppo: "teoria",
+    categoria: "Registro eventi",
+    etichetta: "Dispensa",
+    titolo: "La gestione degli eventi in Windows",
+    breve: "Log, livelli, audit e indagini",
+    approfondimento:
+      "Dispensa sulla gestione degli eventi di Windows: perché si registrano, l'architettura del servizio registro eventi con provider e canali, i registri Applicazione, Sicurezza, Sistema e Installazione, l'anatomia di un evento (provider, ID, livello, dati) e i livelli con i codici numerici. Si passa al Visualizzatore eventi e alle proprietà dei registri (dimensione e sovrascrittura), all'audit e alle sue categorie, agli ID evento più importanti, all'interrogazione dei log con Get-WinEvent e wevtutil, alla creazione di eventi e al collegamento di attività, fino all'inoltro centralizzato (WEF e SIEM) e all'uso dei log nelle indagini, con buone pratiche e domande di verifica.",
+    documenti: [
+      {
+        titolo: "La gestione degli eventi in Windows",
+        descrizione:
+          "Il diario di bordo di Windows: architettura, anatomia e livelli degli eventi, Visualizzatore eventi, audit, ID principali, interrogazione dei log, inoltro centralizzato e indagini.",
+        argomenti: [
+          "registro eventi",
+          "provider e canali",
+          "Applicazione, Sicurezza, Sistema",
+          "anatomia di un evento",
+          "livelli e ID evento",
+          "Visualizzatore eventi",
+          "audit e SACL",
+          "4624, 4625, 1102",
+          "Get-WinEvent e wevtutil",
+          "eventcreate",
+          "inoltro eventi (WEF)",
+          "indagini e forense"
+        ],
+        file: "teoria/Gestione_eventi_windows.html"
+      }
+    ]
+  },
+  {
     id:"Ambiente di test per grant e deny",
     gruppo: "attivita",
     categoria: "Utenti, gruppi e permessi",

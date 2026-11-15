@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Windows e il Prompt dei comandi</title>
+<link rel="stylesheet" href="../assets/documento.css">
+<style>
+.term{background:#0b0f16;color:#e6ebf2;border:1px solid var(--line);border-radius:12px;padding:1rem 1.2rem;overflow-x:auto;box-shadow:var(--shadow);margin:1.2rem 0;font-family:Consolas,"Cascadia Mono","JetBrains Mono",monospace;font-size:.9rem;line-height:1.7}
+.term .p{color:#7ee787;font-weight:600}
+.term .o{color:#9aa3ad}
+.term .k{color:#ffa657}
+.term .r{color:#ff7b72}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.9rem;margin:1.2rem 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1rem 1.1rem;box-shadow:var(--shadow)}
+.card h3{margin:.1rem 0 .4rem;font-size:1.02rem}
+.card p{margin:.3rem 0;font-size:.95rem;color:var(--muted)}
+.badge{display:inline-block;font:700 .72rem/1 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.05em;text-transform:uppercase;padding:.3em .6em;border-radius:999px;background:var(--soft);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 25%,transparent)}
+.toc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1rem 1.3rem;box-shadow:var(--shadow);margin:1.4rem 0}
+.toc h2{margin:0 0 .4rem;border:0;padding:0;font-size:1.05rem}
+.toc ol{margin:.3rem 0 .3rem 1.3rem}
+.toc li{margin:.2rem 0}
+.toc a{text-decoration:none}
+.toc a:hover{text-decoration:underline}
+@media print{.term{background:#f7f7f7;color:#000;box-shadow:none}.term .p,.term .o,.term .k,.term .r{color:#000}.card,.toc{box-shadow:none}}
+</style>
+</head>
+<body>
+
+<header class="doc-intestazione">
+  <p class="occhiello">Dispensa &middot; Sistema operativo Windows</p>
+  <h1>Windows e il Prompt dei comandi</h1>
+  <p class="sottotitolo">Come è fatto Windows, come si legge un percorso, che cos'è una shell e come si lavora da <strong>Prompt dei comandi</strong>: creare, modificare e leggere file e cartelle, spegnere il PC, vedere le proprietà dell'utente connesso, avviare un programma con un'altra identità e &mdash; perché no &mdash; qualche comando simpatico da mostrare in classe.</p>
+</header>
+
+<main>
+
+<p class="lead">Questa dispensa accompagna le attività su utenti, gruppi e permessi. Non serve imparare a memoria tutto: l'obiettivo è capire <em>come</em> funziona il sistema e dove si trovano le informazioni, sapendo poi cercare l'opzione giusta con <code>/?</code>.</p>
+
+<nav class="toc" aria-label="Indice">
+  <h2>Indice</h2>
+  <ol>
+    <li><a href="#1">Che cos'è Windows</a></li>
+    <li><a href="#2">Dischi, file system e percorsi</a></li>
+    <li><a href="#3">Le shell: cmd, PowerShell e Windows Terminal</a></li>
+    <li><a href="#4">Leggere il prompt e le regole di base</a></li>
+    <li><a href="#5">Orientarsi tra cartelle e unità</a></li>
+    <li><a href="#6">Creare cartelle e file</a></li>
+    <li><a href="#7">Copiare, spostare, rinominare, eliminare</a></li>
+    <li><a href="#8">Visualizzare il contenuto di cartelle e file</a></li>
+    <li><a href="#9">Spegnere e riavviare: il comando <code>shutdown</code> e tutte le opzioni</a></li>
+    <li><a href="#10">Le proprietà dell'utente connesso</a></li>
+    <li><a href="#11">Aprire un programma con un altro utente</a></li>
+    <li><a href="#12">Comandi simpatici da mostrare in classe</a></li>
+    <li><a href="#13">Comandi utili di sistema e diagnostica</a></li>
+    <li><a href="#14">Scorciatoie e trucchi del prompt</a></li>
+    <li><a href="#15">Buone pratiche e problemi comuni</a></li>
+    <li><a href="#16">Domande di verifica</a></li>
+  </ol>
+</nav>
+
+<h2 id="1">1. Che cos'è Windows</h2>
+<p><strong>Windows</strong> è un sistema operativo: il software che si mette tra l'hardware del computer e i programmi, gestendo processore, memoria, dischi, rete, utenti e permessi. Le versioni moderne (Windows 10, Windows 11, Windows Server) appartengono alla famiglia <strong>Windows NT</strong>, la stessa architettura pensata fin dall'inizio per la sicurezza, i profili utente e il multitasking.</p>
+<p>Le differenze tra le <strong>edizioni</strong> non sono solo estetiche. Contano per il laboratorio:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Edizione</th><th>A cosa serve</th><th>Cosa manca</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Home</strong></td><td>Uso domestico</td><td>Niente <em>Utenti e gruppi locali</em>, niente <em>Criteri di sicurezza locali</em>, niente ingresso in dominio</td></tr>
+    <tr><td><strong>Pro</strong></td><td>Ufficio, laboratorio, scuole</td><td>&mdash;</td></tr>
+    <tr><td><strong>Enterprise / Education</strong></td><td>Grandi organizzazioni</td><td>&mdash;</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="note"><strong>Perché Windows 11 Pro in laboratorio.</strong> Solo le edizioni Pro, Enterprise ed Education hanno la console <em>Utenti e gruppi locali</em>, i <em>Criteri di sicurezza locali</em> e la possibilità di entrare in un dominio. Con la Home alcune attività non si possono fare.</div>
+<p>Tre parole che tornano sempre:</p>
+<div class="cards">
+  <div class="card"><h3>Kernel</h3><p>Il cuore del sistema: gestisce processi, memoria e accesso all'hardware.</p></div>
+  <div class="card"><h3>Registro di sistema</h3><p>Un grande archivio di configurazione, fatto di chiavi e valori, che Windows e i programmi consultano all'avvio.</p></div>
+  <div class="card"><h3>Servizi</h3><p>Programmi che girano in background senza interfaccia (rete, stampa, aggiornamenti). Si vedono in <em>services</em>.</p></div>
+</div>
+
+<h2 id="2">2. Dischi, file system e percorsi</h2>
+<p>I dati vivono su <strong>unità</strong> indicate da una lettera: <code>C:</code> è in genere il disco di sistema, <code>D:</code> un secondo disco o una partizione, <code>E:</code> una chiavetta o un lettore ottico. Il file system quasi sempre usato da Windows è <strong>NTFS</strong>, che supporta permessi, quote, cifratura e journaling. I supporti rimovibili possono usare FAT32 o exFAT (senza permessi NTFS).</p>
+<p>Un <strong>percorso</strong> indica dove si trova un oggetto. Può essere:</p>
+<ul>
+  <li><strong>assoluto</strong>, cioè completo: <code>C:\Users\admin\Documenti\relazione.txt</code>;</li>
+  <li><strong>relativo</strong>, cioè rispetto alla cartella in cui ci si trova: <code>Documenti\relazione.txt</code> oppure <code>..\altro.txt</code>.</li>
+</ul>
+<p>Simboli utili:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Simbolo</th><th>Significato</th></tr></thead>
+  <tbody>
+    <tr><td><code>\</code></td><td>Separatore di cartelle su Windows (su Linux e macOS è <code>/</code>)</td></tr>
+    <tr><td><code>.</code></td><td>La cartella corrente</td></tr>
+    <tr><td><code>..</code></td><td>La cartella superiore (padre)</td></tr>
+    <tr><td><code>\</code> all'inizio</td><td>Radice dell'unità corrente: <code>\Windows</code> è <code>C:\Windows</code> se sei su <code>C:</code></td></tr>
+    <tr><td><code>%USERPROFILE%</code></td><td>La cartella del profilo dell'utente connesso, es. <code>C:\Users\admin</code></td></tr>
+    <tr><td><code>*</code> e <code>?</code></td><td>Caratteri jolly: <code>*</code> = qualsiasi sequenza, <code>?</code> = un solo carattere</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Ogni file ha un <strong>nome</strong>, un'<strong>estensione</strong> (le lettere dopo il punto, come <code>.txt</code>, <code>.exe</code>, <code>.jpg</code>) e degli <strong>attributi</strong> (sola lettura, nascosto, di sistema, archivio, compresso, cifrato). Nome ed estensione sono solo etichette: il tipo vero lo decide il contenuto, non l'estensione.</p>
+<div class="avviso"><strong>Estensioni nascoste.</strong> Windows, di default, nasconde le estensioni conosciute. Conviene mostrarle (scheda <em>Visualizza</em> di Esplora file): un file che sembra <code>foto.jpg</code> potrebbe essere davvero <code>foto.jpg.exe</code>, cioè un programma.</div>
+
+<h2 id="3">3. Le shell: cmd, PowerShell e Windows Terminal</h2>
+<p>Una <strong>shell</strong> è un programma che legge i comandi scritti dall'utente, li esegue e mostra il risultato. Windows ne ha più di una:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Shell</th><th>Programma</th><th>Quando si usa</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Prompt dei comandi</strong> (CMD)</td><td><code>cmd.exe</code></td><td>Comandi "storici" di Windows: <code>dir</code>, <code>copy</code>, <code>net</code>, <code>icacls</code>, <code>shutdown</code></td></tr>
+    <tr><td><strong>PowerShell</strong></td><td><code>powershell.exe</code></td><td>Automazione moderna: comandi a oggetti (cmdlet) come <code>Get-ChildItem</code>, scripting</td></tr>
+    <tr><td><strong>Windows Terminal</strong></td><td><code>wt.exe</code></td><td>Contenitore moderno che apre più schede: CMD, PowerShell, WSL&hellip;</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Da CMD si può sempre richiamare PowerShell con <code>powershell -Command "..."</code>, e da PowerShell si possono lanciare i comandi classici. In questa dispensa si usa quasi sempre il <strong>Prompt dei comandi</strong>.</p>
+<h3>Come si apre il Prompt dei comandi</h3>
+<ul>
+  <li><kbd>Win</kbd> + <kbd>R</kbd>, scrivere <code>cmd</code>, <kbd>Invio</kbd>.</li>
+  <li>Menu Start &rarr; cercare "Prompt dei comandi".</li>
+  <li>In Esplora file, nella barra degli indirizzi, scrivere <code>cmd</code> e premere <kbd>Invio</kbd>: si apre il prompt <em>già dentro</em> quella cartella.</li>
+  <li><kbd>Maiusc</kbd> + clic destro su una cartella &rarr; <em>Apri in Terminale</em>.</li>
+</ul>
+<div class="avviso"><strong>Prompt come amministratore.</strong> Molte operazioni (utenti, permessi, spegnimento programmato, servizi) richiedono privilegi elevati. Si apre con clic destro sull'icona &rarr; <em>Esegui come amministratore</em>. Il titolo della finestra riporta <em>Amministratore</em>. Senza, il comando risponde "Accesso negato".</div>
+
+<h2 id="4">4. Leggere il prompt e le regole di base</h2>
+<p>Quando si apre il prompt compare una riga come questa: è il <strong>prompt</strong>, cioè l'invito a scrivere. Non è parte del comando.</p>
+<pre class="term">Microsoft Windows [Versione 10.0.22631.3155]
+(c) Microsoft Corporation. Tutti i diritti riservati.
+
+<span class="p">C:\Users\admin&gt;</span> <span class="o">_</span></pre>
+<p>Si legge così: <code>C:\Users\admin</code> è la <strong>cartella corrente</strong>, <code>&gt;</code> indica che il sistema è pronto. Dopo aver premuto <kbd>Invio</kbd>, il comando viene eseguito e il prompt ricompare. In PowerShell la riga comincia con <code>PS</code>: <code>PS C:\Users\admin&gt;</code>.</p>
+<h3>Variabili d'ambiente</h3>
+<p>Windows tiene da parte alcune informazioni riutilizzabili, dette <strong>variabili d'ambiente</strong>. Si scrivono tra segni di percentuale:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Variabile</th><th>Contiene</th></tr></thead>
+  <tbody>
+    <tr><td><code>%USERNAME%</code></td><td>Il nome dell'utente connesso</td></tr>
+    <tr><td><code>%USERPROFILE%</code></td><td>La cartella del profilo, es. <code>C:\Users\admin</code></td></tr>
+    <tr><td><code>%COMPUTERNAME%</code></td><td>Il nome del computer</td></tr>
+    <tr><td><code>%TEMP%</code></td><td>La cartella dei file temporanei</td></tr>
+    <tr><td><code>%PATH%</code></td><td>Gli elenchi di cartelle in cui Windows cerca i programmi</td></tr>
+    <tr><td><code>%CD%</code></td><td>La cartella corrente</td></tr>
+    <tr><td><code>%ERRORLEVEL%</code></td><td>Il codice di uscita dell'ultimo comando (0 = riuscito)</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Il comando <code>set</code>, senza argomenti, elenca tutte le variabili; <code>set NOME=valore</code> ne crea una per la sessione corrente.</p>
+<h3>Redirezione, pipe e concatenazione</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Operatore</th><th>Effetto</th></tr></thead>
+  <tbody>
+    <tr><td><code>&gt;</code></td><td>Scrive l'output in un file, sovrascrivendolo (es. <code>dir &gt; elenco.txt</code>)</td></tr>
+    <tr><td><code>&gt;&gt;</code></td><td>Aggiunge l'output in fondo a un file</td></tr>
+    <tr><td><code>&lt;</code></td><td>Prende l'input da un file</td></tr>
+    <tr><td><code>2&gt;</code></td><td>Redirige gli errori (es. <code>2&gt; errori.txt</code>)</td></tr>
+    <tr><td><code>|</code></td><td>Pipe: l'output di un comando diventa l'input del successivo (es. <code>dir | findstr txt</code>)</td></tr>
+    <tr><td><code>&amp;&amp;</code> / <code>&amp;</code></td><td>Esegue il secondo comando solo se il primo è riuscito / in ogni caso</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>Chiedere aiuto</h3>
+<p>Quasi ogni comando accetta <code>/?</code> per mostrare la sintassi completa: <code>dir /?</code>, <code>shutdown /?</code>, <code>copy /?</code>. È la prima cosa da fare quando un'opzione non si ricorda.</p>
+
+<h2 id="5">5. Orientarsi tra cartelle e unità</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Comando</th><th>Cosa fa</th></tr></thead>
+  <tbody>
+    <tr><td><code>cd</code></td><td>Mostra la cartella corrente</td></tr>
+    <tr><td><code>cd Documenti</code></td><td>Entra nella sottocartella <code>Documenti</code></td></tr>
+    <tr><td><code>cd ..</code></td><td>Sali di un livello</td></tr>
+    <tr><td><code>cd \</code></td><td>Vai alla radice dell'unità corrente</td></tr>
+    <tr><td><code>cd /d D:\Lavoro</code></td><td>Cambia cartella <em>e</em> unità in un solo colpo</td></tr>
+    <tr><td><code>D:</code></td><td>Passa all'unità <code>D:</code> (mantenendo la cartella corrente di quell'unità)</td></tr>
+    <tr><td><code>pushd C:\Lavoro</code> / <code>popd</code></td><td>Ricorda la cartella e ci torna dopo</td></tr>
+    <tr><td><code>cls</code></td><td>Pulisce lo schermo</td></tr>
+    <tr><td><code>exit</code></td><td>Chiude la finestra del prompt</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Con percorsi che contengono spazi usare le <strong>virgolette</strong>: <code>cd "C:\Program Files"</code>.</p>
+
+<h2 id="6">6. Creare cartelle e file</h2>
+<h3>Cartelle</h3>
+<pre><code>mkdir Lavoro
+md Lavoro\Progetto\Documenti</code></pre>
+<p><code>mkdir</code> e <code>md</code> sono lo stesso comando. Con le "estensioni comandi" attive (default), una sola chiamata crea anche le cartelle intermedie, come nel secondo esempio.</p>
+<h3>File</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Comando</th><th>Risultato</th></tr></thead>
+  <tbody>
+    <tr><td><code>echo Ciao &gt; saluto.txt</code></td><td>Crea (o sovrascrive) un file con una riga di testo</td></tr>
+    <tr><td><code>echo Ciao &gt;&gt; saluto.txt</code></td><td>Aggiunge la riga in fondo al file</td></tr>
+    <tr><td><code>type nul &gt; vuoto.txt</code></td><td>Crea un file vuoto</td></tr>
+    <tr><td><code>fsutil file createnew prova.dat 0</code></td><td>Crea un file di dimensione stabilita in byte (qui 0)</td></tr>
+    <tr><td><code>copy con appunti.txt</code></td><td>Metodo storico: scrive da tastiera fino a <kbd>Ctrl</kbd>+<kbd>Z</kbd>. Ancora utile, ma scomodo</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="info"><strong>Il file non si "crea" davvero a vuoto.</strong> In Windows un file nasce quando ci si scrive qualcosa: per questo <code>echo</code> con la redirezione è il modo più semplice. <code>type nul &gt; file</code> sfrutta il fatto che <code>nul</code> è il "dispositivo nullo".</div>
+
+<h2 id="7">7. Copiare, spostare, rinominare, eliminare</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Comando</th><th>Cosa fa</th></tr></thead>
+  <tbody>
+    <tr><td><code>ren vecchio.txt nuovo.txt</code></td><td>Rinomina un file o una cartella (non sposta)</td></tr>
+    <tr><td><code>move file.txt C:\Lavoro</code></td><td>Sposta (o rinomina se il percorso è nello stesso posto)</td></tr>
+    <tr><td><code>copy origine destinazione</code></td><td>Copia file; con più file: <code>copy *.txt C:\Backup</code></td></tr>
+    <tr><td><code>xcopy C:\Dati D:\Backup /E /I /H</code></td><td>Copia anche le sottocartelle (<code>/E</code>), crea la destinazione (<code>/I</code>), include i nascosti (<code>/H</code>)</td></tr>
+    <tr><td><code>robocopy C:\Dati D:\Backup /E /MIR</code></td><td>Copia robusta e riavviabile; <code>/MIR</code> rende la destinazione identica all'origine (attenzione: cancella l'eccedenza)</td></tr>
+    <tr><td><code>del file.txt</code> / <code>erase file.txt</code></td><td>Elimina file (sinonimi). <code>del *.tmp</code> elimina per gruppo</td></tr>
+    <tr><td><code>rmdir Cartella</code> / <code>rd Cartella</code></td><td>Elimina una cartella <strong>vuota</strong></td></tr>
+    <tr><td><code>rmdir /s /q Cartella</code></td><td>Elimina cartella, contenuto e sottocartelle (<code>/s</code>) senza chiedere conferma (<code>/q</code>)</td></tr>
+    <tr><td><code>attrib +r +h file.txt</code></td><td>Imposta attributi: <code>+r</code> sola lettura, <code>+h</code> nascosto, <code>-</code> per toglierli</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="avviso"><strong><code>del</code>, <code>rmdir /s</code>, <code>move</code> e <code>robocopy /MIR</code> non passano dal Cestino</strong> e non chiedono conferma con le opzioni "quiet". Un errore di percorso cancella dati veri: controllare sempre la cartella corrente con <code>cd</code> e, nei test, lavorare su cartelle usa-e-getta.</div>
+
+<h2 id="8">8. Visualizzare il contenuto di cartelle e file</h2>
+<h3>Elencare il contenuto: <code>dir</code></h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Comando</th><th>Cosa mostra</th></tr></thead>
+  <tbody>
+    <tr><td><code>dir</code></td><td>Nome, dimensione, data/ora di file e cartelle della cartella corrente</td></tr>
+    <tr><td><code>dir /a</code></td><td>Anche i file nascosti e di sistema</td></tr>
+    <tr><td><code>dir /s</code></td><td>Ricorsivo: elenca anche tutte le sottocartelle</td></tr>
+    <tr><td><code>dir /b</code></td><td>Solo i nomi, senza intestazioni né riepilogo</td></tr>
+    <tr><td><code>dir /o:n</code> / <code>/o:s</code> / <code>/o:d</code></td><td>Ordina per nome / dimensione / data</td></tr>
+    <tr><td><code>dir /w</code></td><td>Formato largo, su più colonne</td></tr>
+    <tr><td><code>dir /q</code></td><td>Mostra anche il <strong>proprietario</strong> di ogni elemento</td></tr>
+    <tr><td><code>dir *.txt /s</code></td><td>Tutti i file <code>.txt</code> nella cartella e nelle sottocartelle</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>La struttura ad albero: <code>tree</code></h3>
+<pre><code>tree C:\Lavoro
+tree /f C:\Lavoro</code></pre>
+<p><code>tree</code> disegna la gerarchia delle cartelle; <code>/f</code> aggiunge anche i file. È il modo più immediato per "fotografare" l'organizzazione di una cartella.</p>
+<h3>Leggere il contenuto dei file</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Comando</th><th>Cosa fa</th></tr></thead>
+  <tbody>
+    <tr><td><code>type file.txt</code></td><td>Stampa il contenuto di un file di testo</td></tr>
+    <tr><td><code>more file.txt</code></td><td>Come <code>type</code>, ma pagina per pagina</td></tr>
+    <tr><td><code>find "parola" file.txt</code></td><td>Mostra le righe che contengono la parola</td></tr>
+    <tr><td><code>findstr /i /n "errore" *.log</code></td><td>Ricerca testuale avanzata (case-insensitive, con numero di riga) anche in più file</td></tr>
+    <tr><td><code>where comando</code></td><td>Indica dove si trova l'eseguibile di un comando</td></tr>
+    <tr><td><code>comp a.txt b.txt</code> / <code>fc a.txt b.txt</code></td><td>Confronta due file (binario / testuale)</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="9">9. Spegnere e riavviare: il comando <code>shutdown</code> e tutte le opzioni</h2>
+<p>Il comando <code>shutdown</code> spegne o riavvia il computer locale o uno remoto, con un eventuale conto alla rovescia e una motivazione. È utilissimo in laboratorio e in dominio per pianificare gli arresti.</p>
+<p>Sintassi completa:</p>
+<pre><code>shutdown [/i | /l | /s | /sg | /r | /g | /a | /p | /h | /e | /o] [/hybrid] [/fw] [/f] [/m \\computer] [/t xxx] [/d [p|u:]xx:yy [/c "commento"]]</code></pre>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Opzione</th><th>Significato</th></tr></thead>
+  <tbody>
+    <tr><td><code>/i</code></td><td>Mostra la finestra grafica <em>Arresto remoto</em>. Se presente deve essere la <strong>prima</strong> opzione e le altre vengono ignorate</td></tr>
+    <tr><td><code>/l</code></td><td>Disconnette l'utente corrente, senza spegnere il PC. Non combinabile con altre opzioni</td></tr>
+    <tr><td><code>/s</code></td><td>Spegne il computer</td></tr>
+    <tr><td><code>/sg</code></td><td>Spegne il computer; al successivo avvio, se abilitato, esegue l'accesso automatico e blocca la sessione</td></tr>
+    <tr><td><code>/r</code></td><td>Spegne <strong>e riavvia</strong></td></tr>
+    <tr><td><code>/g</code></td><td>Arresto completo e riavvio, con ripristino delle app registrate dopo l'accesso automatico</td></tr>
+    <tr><td><code>/a</code></td><td>Annulla un arresto già pianificato (va eseguito in un'altra finestra durante il conto alla rovescia)</td></tr>
+    <tr><td><code>/p</code></td><td>Spegne subito, senza attesa né avviso; solo per il computer locale, utilizzabile solo con <code>/d</code> o <code>/f</code></td></tr>
+    <tr><td><code>/h</code></td><td>Mette il computer in <strong>ibernazione</strong> (se abilitata)</td></tr>
+    <tr><td><code>/hybrid</code></td><td>Arresto ibrido, cioè prepara l'<em>avvio rapido</em>; si usa con <code>/s</code></td></tr>
+    <tr><td><code>/fw</code></td><td>Al successivo riavvio entra nell'interfaccia del firmware (BIOS/UEFI)</td></tr>
+    <tr><td><code>/e</code></td><td>Documenta la causa di un arresto imprevisto nel <em>Shutdown Event Tracker</em></td></tr>
+    <tr><td><code>/o</code></td><td>Riavvia entrando nel menu delle <strong>opzioni di avvio avanzate</strong>; si usa con <code>/r</code></td></tr>
+    <tr><td><code>/f</code></td><td>Forza la chiusura delle applicazioni senza avvisare. <strong>Si perdono i dati non salvati</strong></td></tr>
+    <tr><td><code>/m \\computer</code></td><td>Indica il computer di destinazione (remoto)</td></tr>
+    <tr><td><code>/t xxx</code></td><td>Attesa in secondi prima dell'arresto (default 30). Se &gt; 0, <code>/f</code> è implicito</td></tr>
+    <tr><td><code>/d [p|u:]xx:yy</code></td><td>Motivo dell'arresto: <code>p</code> pianificato, <code>u</code> definito dall'utente, <code>xx</code> causa maggiore, <code>yy</code> causa minore</td></tr>
+    <tr><td><code>/c "commento"</code></td><td>Commento personalizzato (max 512 caratteri), mostrato nel registro eventi</td></tr>
+    <tr><td><code>/?</code></td><td>Mostra l'aiuto e l'elenco dei codici di motivo disponibili</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>Esempi pronti all'uso</h3>
+<pre><code>REM Spegni tra 60 secondi, avvisando gli utenti
+shutdown /s /t 60 /c "Manutenzione programmata"
+
+REM Annulla lo spegnimento pianificato (in un'altra finestra)
+shutdown /a
+
+REM Riavvia subito forzando la chiusura delle app
+shutdown /r /t 0 /f
+
+REM Spegni e prepara l'avvio rapido
+shutdown /s /hybrid /t 0
+
+REM Riavvia entrando nel menu di avvio avanzato
+shutdown /r /o /t 0
+
+REM Disconnetti l'utente corrente
+shutdown /l
+
+REM Riavvia un altro PC della rete, con motivo pianificato
+shutdown /r /m \\WINDOWS-2 /t 30 /c "Aggiornamento" /d p:4:1</code></pre>
+<div class="avviso"><strong>Attenzione agli scherzi.</strong> <code>shutdown /s /t 0</code> spegne davvero, e <code>/f</code> chiude i programmi senza salvare. Un "semplice" <code>shutdown</code> lanciato su un PC altrui è un attacco, non uno scherzo: in laboratorio si prova solo sulla propria macchina virtuale, e con uno snapshot pronto.</div>
+<p>Per la sola disconnessione, in alternativa c'è <code>logoff</code>.</p>
+
+<h2 id="10">10. Le proprietà dell'utente connesso</h2>
+<p>Il comando principale è <strong><code>whoami</code></strong> ("chi sono io"): mostra utente, gruppi e privilegi dell'account connesso.</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Comando</th><th>Cosa mostra</th></tr></thead>
+  <tbody>
+    <tr><td><code>whoami</code></td><td>Dominio (o computer) e nome utente, es. <code>windows-1\admin</code></td></tr>
+    <tr><td><code>whoami /user</code></td><td>Nome utente e <strong>SID</strong> (l'identificativo interno dell'account)</td></tr>
+    <tr><td><code>whoami /groups</code></td><td>I gruppi a cui appartiene l'utente, con i rispettivi SID</td></tr>
+    <tr><td><code>whoami /priv</code></td><td>I privilegi presenti nel token di accesso (abilitati o disabilitati)</td></tr>
+    <tr><td><code>whoami /claims</code></td><td>Le attestazioni (<em>claims</em>) dell'utente</td></tr>
+    <tr><td><code>whoami /all</code></td><td>Tutto: utente, SID, gruppi, privilegi e attestazioni</td></tr>
+    <tr><td><code>whoami /upn</code> / <code>/fqdn</code> / <code>/logonid</code></td><td>Nome in formato UPN, FQDN, oppure ID di accesso</td></tr>
+    <tr><td><code>whoami /fo list</code> / <code>/fo csv</code> / <code>/nh</code></td><td>Formato di output (tabella, elenco, CSV) e niente intestazioni</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Altre informazioni utili sull'utente e sulla sessione:</p>
+<pre><code>REM Riepilogo dell'account corrente (nome, scadenza password, ultimo accesso...)
+net user %USERNAME%
+
+REM Sessioni aperte sul computer (utente, sessione, stato, ora)
+query user
+query session
+
+REM Riepilogo generale del sistema (edizione, RAM, processore, data di installazione)
+systeminfo
+
+REM Solo alcune righe
+systeminfo | findstr /C:"Nome host" /C:"Versione SO" /C:"Memoria fisica"
+
+REM Variabili d'ambiente dell'utente e del sistema
+set
+
+REM Applicazione dei criteri di gruppo (se in dominio o con criteri locali)
+gpresult /r</code></pre>
+<div class="info"><strong>Collegamento alle attività.</strong> <code>whoami /groups</code> e <code>whoami /priv</code> sono gli stessi strumenti usati nelle attività su utenti, gruppi e permessi: mostrano ciò che Windows mette davvero nel <em>token di accesso</em> al momento del login, non ciò che è scritto sulla carta.</div>
+
+<h2 id="11">11. Aprire un programma con un altro utente</h2>
+<p>Con <strong><code>runas</code></strong> si avvia un programma con le credenziali di un altro account, senza cambiare la sessione: è il modo classico per verificare "cosa vede" un altro utente (utile per i test dei permessi).</p>
+<pre><code>REM Apri il Blocco note come utente1 (verrà chiesta la password)
+runas /user:utente1 notepad
+
+REM Apri un Prompt dei comandi con l'identità di utente1
+runas /user:utente1 cmd
+
+REM Utente di dominio
+runas /user:AZIENDA\mario cmd</code></pre>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Opzione</th><th>Significato</th></tr></thead>
+  <tbody>
+    <tr><td><code>/user:NomeUtente</code></td><td>L'account con cui eseguire il programma (locale o <code>DOMINIO\utente</code>)</td></tr>
+    <tr><td><code>/noprofile</code></td><td>Non carica il profilo dell'utente (avvio più veloce, ambiente essenziale)</td></tr>
+    <tr><td><code>/env</code></td><td>Usa l'ambiente dell'utente corrente invece di quello nuovo</td></tr>
+    <tr><td><code>/savecred</code></td><td>Salva le credenziali (le richiede solo la prima volta) &mdash; comodo ma delicato</td></tr>
+    <tr><td><code>/netonly</code></td><td>Le credenziali valgono solo per l'accesso alle risorse <strong>di rete</strong>, non in locale</td></tr>
+    <tr><td><code>/smartcard</code></td><td>Chiede le credenziali tramite smart card</td></tr>
+    <tr><td><code>/showtrustlevels</code></td><td>Elenca i livelli di attendibilità disponibili</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="avviso"><strong>Cosa <code>runas</code> non fa.</strong> Non "eleva" i privilegi e non aggira il controllo account utente (UAC): anche se l'altro utente è amministratore, il programma parte con il token <em>standard</em>. Serve inoltre che il servizio <strong>Logon secondario</strong> (Secondary Logon) sia attivo; nelle edizioni Home <code>runas</code> esiste ma l'alternativa grafica può mancare.</div>
+<p>L'equivalente grafico, nelle edizioni Pro, è <kbd>Maiusc</kbd> + clic destro sul programma &rarr; <em>Esegui come utente diverso</em>. In ambienti professionali si usano anche strumenti come <code>psexec -u</code> (Sysinternals), che permettono di specificare utente e password in un unico comando.</p>
+
+<h2 id="12">12. Comandi simpatici da mostrare in classe</h2>
+<p>Non tutto deve essere permessi e ACL. Questi comandi fanno capire, divertendosi, che dal prompt si può controllare davvero il computer. Quelli che richiedono Internet usano <code>curl</code>, già incluso in Windows 10 e 11.</p>
+<div class="cards">
+  <div class="card"><h3><code>tree /f</code></h3><p>Disegna l'albero completo di file e cartelle. Perfetto per "vedere" la struttura.</p></div>
+  <div class="card"><h3><code>color 0A</code></h3><p>Colora il prompt: <code>0</code> = sfondo nero, <code>A</code> = testo verde. Prova <code>color /?</code> per la tavolozza.</p></div>
+  <div class="card"><h3><code>title Ciao classe</code></h3><p>Cambia il titolo della finestra del prompt.</p></div>
+  <div class="card"><h3><code>echo</code> e l'arte ASCII</h3><p>Con la redirezione si creano file di testo; incollando arte ASCII si fanno "disegni" da terminale.</p></div>
+</div>
+<pre><code>REM Un albero da mostrare alla LIM
+tree /f C:\Windows\System32\drivers\etc
+
+REM Prompt "hacker" verde su nero
+color 0A
+
+REM Il titolo della finestra
+title Benvenuti in TPS
+
+REM Effetto macchina da scrivere: stampa riga per riga
+echo Ciao classe! & echo Oggi si gioca col prompt. & echo Provate anche voi.
+
+REM Apri le app di Windows dal prompt
+notepad
+calc
+mspaint
+explorer .
+control
+start https://www.microsoft.com
+
+REM Il meteo in ASCII (serve Internet)
+curl wttr.in/Roma
+
+REM Un pappagallo che balla (serve Internet)
+curl parrot.live
+
+REM Animazioni ASCII: ciambella, pappagallo, Nyan Cat (serve Internet)
+curl ascii.live/donut
+curl ascii.live/parrot
+curl ascii.live/nyan
+
+REM Trasforma un testo in un QR code (serve Internet)
+curl qrenco.de/Ciao%20TPS
+
+REM "Star Wars" in ASCII: richiede il client telnet (funzionalità opzionale)
+telnet towel.blinkenlights.nl</code></pre>
+<div class="info"><strong>Se un comando "non esiste".</strong> <code>telnet</code> va prima attivato tra le funzionalità di Windows; <code>curl</code> è già presente da Windows 10 in poi. Senza Internet, i comandi che scaricano contenuti non funzionano: è un'occasione per parlare di rete e di <code>ping</code>.</div>
+<div class="avviso"><strong>Con moderazione.</strong> Un <code>shutdown /s /t 0</code> o un <code>msg *</code> lanciato sul PC del compagno non è uno scherzo. Si sperimenta sempre sulla propria macchina virtuale, con lo snapshot pronto.</div>
+
+<h2 id="13">13. Comandi utili di sistema e diagnostica</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Comando</th><th>Cosa fa</th></tr></thead>
+  <tbody>
+    <tr><td><code>tasklist</code></td><td>Elenca i processi in esecuzione con PID e memoria usata</td></tr>
+    <tr><td><code>taskkill /PID 1234 /F</code></td><td>Termina un processo (per PID o <code>/IM nome.exe</code>)</td></tr>
+    <tr><td><code>ipconfig /all</code></td><td>Configurazione di rete completa: IP, MAC, gateway, DNS</td></tr>
+    <tr><td><code>ping host</code> / <code>tracert host</code></td><td>Verifica la raggiungibilità di un host / traccia il percorso dei pacchetti</td></tr>
+    <tr><td><code>nslookup nome</code></td><td>Interroga il DNS per risolvere un nome</td></tr>
+    <tr><td><code>netstat -ano</code></td><td>Connessioni e porte in ascolto, con PID del processo</td></tr>
+    <tr><td><code>net use</code> / <code>net share</code></td><td>Risorse di rete collegate / condivisioni del computer</td></tr>
+    <tr><td><code>net user</code> / <code>net localgroup</code></td><td>Utenti e gruppi locali (usati nelle attività)</td></tr>
+    <tr><td><code>schtasks /query</code></td><td>Attività pianificate</td></tr>
+    <tr><td><code>sc query</code> / <code>services</code></td><td>Stato dei servizi</td></tr>
+    <tr><td><code>sfc /scannow</code></td><td>Controlla e ripara i file di sistema (richiede privilegi)</td></tr>
+    <tr><td><code>chkdsk</code></td><td>Controlla lo stato del disco</td></tr>
+    <tr><td><code>vol</code> / <code>label</code></td><td>Etichetta del volume / la modifica</td></tr>
+    <tr><td><code>date</code> / <code>time</code></td><td>Mostra (e, da amministratore, imposta) data e ora</td></tr>
+    <tr><td><code>assoc</code> / <code>ftype</code></td><td>Associazioni tra estensioni e tipi di file / comandi associati</td></tr>
+    <tr><td><code>ver</code> / <code>winver</code></td><td>Versione di Windows (da prompt / finestra grafica)</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Per i permessi esistono comandi dedicati (<code>icacls</code>, <code>takeown</code>, <code>attrib</code>): sono raccolti nei riferimenti dedicati della sezione Teoria e usati nelle attività.</p>
+
+<h2 id="14">14. Scorciatoie e trucchi del prompt</h2>
+<ul>
+  <li><kbd>Tab</kbd> completa automaticamente nomi di file e cartelle; premuto più volte li scorre tutti.</li>
+  <li><kbd>Freccia su</kbd> e <kbd>Freccia giù</kbd> richiamano i comandi precedenti; <kbd>F7</kbd> apre l'elenco della cronologia.</li>
+  <li><kbd>Ctrl</kbd>+<kbd>C</kbd> interrompe un comando; <kbd>Esc</kbd> cancella la riga scritta.</li>
+  <li><code>doskey /history</code> stampa la cronologia; <code>doskey /? </code> permette di definire macro e alias.</li>
+  <li><code>cls</code> pulisce lo schermo; <code>color</code> cambia i colori; <code>title</code> il titolo.</li>
+  <li>Trascinare un file nella finestra del prompt ne incolla il percorso completo: comodissimo per non sbagliare.</li>
+  <li>Il tasto <kbd>Maiusc</kbd> + clic destro su una cartella offre "Copia come percorso".</li>
+  <li><code>cmd /k</code> esegue un comando e resta aperto; <code>cmd /c</code> esegue e chiude.</li>
+</ul>
+
+<h2 id="15">15. Buone pratiche e problemi comuni</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Situazione</th><th>Cosa fare</th></tr></thead>
+  <tbody>
+    <tr><td>"Accesso negato"</td><td>Il comando richiede privilegi: aprire il prompt <strong>come amministratore</strong></td></tr>
+    <tr><td>"Il sistema non trova il percorso specificato"</td><td>Controllare la cartella corrente (<code>cd</code>) e racchiudere tra virgolette i percorsi con spazi</td></tr>
+    <tr><td>Il comando non esiste</td><td>Verificare il nome, il <code>%PATH%</code> con <code>where</code>, oppure usare <code>comando /?</code></td></tr>
+    <tr><td>Ho cancellato qualcosa per sbaglio</td><td>Dal prompt non si passa dal Cestino: se è una VM, ripristinare lo <strong>snapshot</strong></td></tr>
+    <tr><td>Output troppo lungo</td><td>Redirigere in un file (<code>&gt; log.txt</code>) o filtrare con <code>| more</code> / <code>| findstr</code></td></tr>
+    <tr><td>Comando lungo e ripetitivo</td><td>Salvarlo in un file <code>.bat</code> e richiamarlo per nome</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="info"><strong>Regola d'oro.</strong> Al prompt non esiste il "Ctrl+Z" universale e non esiste il Cestino: prima di lanciare un comando distruttivo, chiedersi <em>dove</em> si sta lavorando. In laboratorio si usa una macchina virtuale con snapshot: è fatta apposta per poter sbagliare.</div>
+
+<h2 id="16">16. Domande di verifica</h2>
+<ol>
+  <li>Qual è la differenza tra un percorso assoluto e uno relativo? Fai un esempio.</li>
+  <li>A cosa servono i simboli <code>.</code> e <code>..</code>?</li>
+  <li>Qual è la differenza tra il Prompt dei comandi e PowerShell?</li>
+  <li>Che differenza c'è tra <code>&gt;</code> e <code>&gt;&gt;</code>?</li>
+  <li>Quali comandi useresti per creare la cartella <code>C:\Lavoro\Progetto</code> e un file <code>note.txt</code> al suo interno?</li>
+  <li>Quale comando mostra anche i file nascosti? E quale il proprietario degli elementi?</li>
+  <li>Quale opzione di <code>shutdown</code> annulla un arresto già pianificato?</li>
+  <li>Perché <code>/f</code> è pericoloso in <code>shutdown</code>?</li>
+  <li>Con quale comando vedi i gruppi e i privilegi dell'utente connesso?</li>
+  <li>A cosa serve <code>runas</code> e perché non serve a "diventare amministratore"?</li>
+  <li>Perché conviene mostrare le estensioni dei file in Esplora file?</li>
+  <li>Cosa significa <code>%USERPROFILE%</code> e in quale comando lo useresti?</li>
+</ol>
+
+</main>
+<script src="../assets/barra.js"></script>
+</body>
+</html>
