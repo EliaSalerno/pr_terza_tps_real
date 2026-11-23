@@ -518,7 +518,7 @@ window.INDICE = [
           "flag di ereditarietà",
           "Nega e Consenti"
         ],
-        file:"attività/Esercizio_completo_Biblioteca_Il_Faro.html"
+        file:"attività/Esercizio_completo_biblioteca_il_faro.html"
       }
     ]
   },
