@@ -14,24 +14,69 @@
 </header>
 <main>
 <nav aria-label="Indice">
-<a href="#prep">Preparazione</a><a href="#elenco">Elencare i registri</a><a href="#leggere">Leggere eventi</a><a href="#filtrare">Filtrare</a><a href="#esportare">Esportare e importare</a><a href="#config">Configurare</a><a href="#cancellare">Cancellare</a><a href="#creare">Creare eventi</a><a href="#gui">Aprire la GUI</a>
+<ol>
+  <li><a href="#prep">Preparazione</a> </li>
+  <li><a href="#elenco">Elencare i registri</a> </li>
+  <li><a href="#leggere">Leggere eventi</a> </li>
+  <li><a href="#filtrare">Filtrare</a> </li>
+  <li><a href="#esportare">Esportare e importare</a> </li>
+  <li><a href="#config">Configurare</a> </li>
+  <li><a href="#cancellare">Cancellare</a> </li>
+  <li><a href="#creare">Creare eventi</a> </li>
+  <li><a href="#gui">Aprire la GUI</a> </li>
+</ol>
 </nav>
 
 <h2 id="prep">Preparazione</h2>
 <p>Cerca <strong>cmd</strong> nel menu Start, clic destro e scegli <strong>Esegui come amministratore</strong>. Molte operazioni (registro Sicurezza, cancellazione, configurazione) richiedono questi privilegi.</p>
 <div class="note">I comandi che modificano o cancellano i registri sono irreversibili. Prima di usarli, esporta una copia con <code>wevtutil epl</code>.</div>
 <h3>Registri principali</h3>
-<div class="tw"><table>
-<tr><th>Nome</th><th>Contenuto</th></tr>
-<tr><td><code>Application</code></td><td>Eventi di programmi e applicazioni</td></tr>
-<tr><td><code>System</code></td><td>Driver, servizi, avvio e arresto di Windows</td></tr>
-<tr><td><code>Security</code></td><td>Accessi, audit, permessi (solo amministratore)</td></tr>
-<tr><td><code>Setup</code></td><td>Installazione di aggiornamenti e componenti</td></tr>
+<div>
+  <table>
+    <tr>
+      <th>Nome</th>
+      <th>Contenuto</th>
+    </tr>
+    <tr>
+      <td><code>Application</code></td>
+      <td>Eventi di programmi e applicazioni</td>
+    </tr>
+    <tr>
+      <td><code>System</code></td>
+      <td>Driver, servizi, avvio e arresto di Windows</td>
+    </tr>
+    <tr>
+      <td><code>Security</code></td>
+      <td>Accessi, audit, permessi (solo amministratore)</td>
+    </tr>
+    <tr>
+      <td><code>Setup</code></td>
+      <td>Installazione di aggiornamenti e componenti</td>
+    </tr>
 </table></div>
 <h3>Livelli di gravità (<code>Level</code>)</h3>
-<div class="tw"><table>
-<tr><th>Valore</th><th>Significato</th></tr>
-<tr><td>1</td><td>Critico</td></tr><tr><td>2</td><td>Errore</td></tr><tr><td>3</td><td>Avviso</td></tr><tr><td>4</td><td>Informazione</td></tr>
+<div>
+  <table>
+    <tr>
+      <th>Valore</th>
+      <th>Significato</th>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>Critico</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Errore</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Avviso</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Informazione</td>
+    </tr>
 </table></div>
 
 <h2 id="elenco">Elencare i registri</h2>
