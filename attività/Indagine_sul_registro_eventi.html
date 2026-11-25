@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratorio: Indagine sul registro eventi (Prompt dei comandi)</title>
+<style>
+:root{--bg:#f7f8fa;--fg:#1c2330;--mut:#5b6678;--card:#fff;--bd:#d5dae3;--acc:#1f4e8c;--code:#0f1720;--codefg:#d7e3f4;--sol:#eaf4ec;--solbd:#2f7d4a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12161d;--fg:#e4e8ef;--mut:#9aa5b8;--card:#1a2029;--bd:#2c3442;--acc:#7fb0ee;--code:#0a0d12;--codefg:#d7e3f4;--sol:#16281c;--solbd:#4caf78}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 Georgia,"Times New Roman",serif}
+main{max-width:860px;margin:0 auto;padding:24px 18px 60px}
+h1{font:700 1.9rem/1.2 "Segoe UI",Arial,sans-serif;margin:.2em 0}
+h2{font:700 1.3rem/1.3 "Segoe UI",Arial,sans-serif;margin:0 0 .6em;color:var(--acc)}
+h3{font:600 1rem "Segoe UI",Arial,sans-serif;margin:1em 0 .3em}
+.meta{color:var(--mut);font-family:"Segoe UI",Arial,sans-serif;font-size:.95rem}
+section{background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:18px 20px;margin:20px 0}
+pre{background:var(--code);color:var(--codefg);padding:12px 14px;border-radius:4px;overflow-x:auto;font:.88rem/1.5 Consolas,"Courier New",monospace;margin:.6em 0}
+code{font-family:Consolas,"Courier New",monospace;font-size:.9em}
+table{border-collapse:collapse;width:100%;margin:.6em 0;font-size:.93rem;display:block;overflow-x:auto}
+th,td{border:1px solid var(--bd);padding:6px 9px;text-align:left;vertical-align:top}
+th{background:var(--bg);font-family:"Segoe UI",Arial,sans-serif}
+.sol{background:var(--sol);border-left:4px solid var(--solbd);padding:10px 14px;margin:.8em 0;border-radius:0 4px 4px 0}
+.sol strong.t{font-family:"Segoe UI",Arial,sans-serif;display:block;margin-bottom:.3em}
+.sol p,.sol ul{margin:.3em 0}
+.tool{position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5;border-bottom:1px solid var(--bd)}
+button{font:600 .9rem "Segoe UI",Arial,sans-serif;padding:7px 14px;border:1px solid var(--acc);background:var(--acc);color:#fff;border-radius:4px;cursor:pointer;margin-right:6px}
+button:focus-visible{outline:3px solid #f0a020;outline-offset:2px}
+body.hide .sol{display:none}
+.warn{border-left:4px solid #c0801a;padding:6px 12px;background:rgba(192,128,26,.12);margin:.8em 0}
+@media print{.tool{display:none}section{break-inside:avoid-page}body{background:#fff;color:#000}}
+</style>
+</head>
+<body>
+<main>
+<h1>Indagine sul registro eventi di Windows</h1>
+<p class="meta">Laboratorio con Prompt dei comandi &middot; durata 2 ore &middot; VM Windows Pro con diritti di amministratore</p>
+<div class="tool"><button id="b1" type="button">Nascondi soluzioni (versione studente)</button><button id="b2" type="button">Stampa</button></div>
+
+<p><strong>Obiettivo:</strong> generare eventi reali e ritrovarli, filtrarli e leggerli come in un'indagine, usando solo <code>cmd</code>, <code>wevtutil</code>, <code>auditpol</code>, <code>net</code> ed <code>eventcreate</code>. Apri il Prompt dei comandi con <em>Esegui come amministratore</em>: senza privilegi il registro Sicurezza non si legge.</p>
+<div class="warn">Le sottocategorie di <code>auditpol</code> dipendono dalla lingua di Windows. Se un nome dà errore, elencalo con <code>auditpol /list /subcategory:*</code>. Nelle soluzioni i nomi sono quelli inglesi.</div>
+
+<section>
+<h2>Punto 0 &ndash; Preparazione</h2>
+<ol>
+<li>Crea uno <strong>snapshot</strong> della VM.</li>
+<li>Controlla ora e sincronizzazione: <code>time /t</code> e <code>w32tm /query /status</code>. Se serve: <code>w32tm /resync</code>.</li>
+<li>Crea la cartella di lavoro: <code>mkdir C:\Backup</code>.</li>
+<li>Annota versione di Windows (<code>ver</code>), nome computer (<code>hostname</code>) e ora di inizio.</li>
+</ol>
+<div class="sol"><strong class="t">Soluzione</strong>
+<p><code>ver</code> mostra la versione, <code>hostname</code> il nome. Lo snapshot permette di tornare indietro dopo gli esperimenti; l'ora corretta è indispensabile perché la cronologia sia attendibile (nelle VM l'orologio deriva dopo sospensioni e snapshot).</p></div>
+</section>
+
+<section>
+<h2>Punto 1 &ndash; Esplorare i registri</h2>
+<ol>
+<li>Elenca i registri: <code>wevtutil el</code>. Per contarli: <code>wevtutil el | find /c /v ""</code>.</li>
+<li>Guarda i file su disco: <code>dir C:\Windows\System32\winevt\Logs</code>.</li>
+<li>Leggi le informazioni di un registro: <code>wevtutil gli Application</code>.</li>
+<li>(Facoltativo) Apri <code>eventvwr.msc</code> e individua le tre parti dell'interfaccia.</li>
+</ol>
+<p><strong>Domande:</strong> (a) Che estensione hanno i file dei registri? (b) Quanti eventi contiene il registro Application? (c) Differenza tra canale amministrativo e operativo/analitico?</p>
+<div class="sol"><strong class="t">Soluzione</strong>
+<ul>
+<li>(a) <code>.evtx</code>, nella cartella <code>C:\Windows\System32\winevt\Logs</code>.</li>
+<li>(b) Il numero compare nel campo <code>numberOfLogRecords</code> di <code>wevtutil gli Application</code> (varia da macchina a macchina).</li>
+<li>(c) I canali amministrativi (Application, Security, System) sono sempre attivi e hanno una politica di conservazione. Quelli operativi, analitici e di debug sono di norma disabilitati e si attivano per diagnosi approfondite, perché producono molti eventi.</li>
+</ul></div>
+</section>
+
+<section>
+<h2>Punto 2 &ndash; Anatomia di un evento</h2>
+<ol>
+<li>Leggi gli ultimi 3 eventi di Sistema in testo: <code>wevtutil qe System /c:3 /rd:true /f:text</code></li>
+<li>Rileggili in XML: <code>wevtutil qe System /c:3 /rd:true /f:xml</code></li>
+<li>Per un evento di livello Informazioni, uno Avviso (3) e uno Errore (2) compila la scheda. Per trovarli: <code>wevtutil qe System /q:"*[System[(Level=3)]]" /c:1 /rd:true /f:text</code> (cambia il livello).</li>
+</ol>
+<table><tr><th>Campo</th><th>Informazioni</th><th>Avviso</th><th>Errore</th></tr>
+<tr><td>Data e ora</td><td></td><td></td><td></td></tr>
+<tr><td>Origine (Provider)</td><td></td><td></td><td></td></tr>
+<tr><td>ID evento</td><td></td><td></td><td></td></tr>
+<tr><td>Livello</td><td></td><td></td><td></td></tr>
+<tr><td>Utente / Computer</td><td></td><td></td><td></td></tr></table>
+<p><strong>Domande:</strong> (a) Perché l'ID da solo non basta? (b) Quale numero indica "Errore" nell'XML? (c) Quale numero indica "Critico"?</p>
+<div class="sol"><strong class="t">Soluzione</strong>
+<ul>
+<li>(a) Un ID ha significato solo con il suo provider: il 100 di un provider è un evento diverso dal 100 di un altro. Si indica sempre la coppia provider + ID.</li>
+<li>(b) <code>2</code> (nell'XML compare come <code>&lt;Level&gt;2&lt;/Level&gt;</code>). (c) <code>1</code>. Gli altri: 3 Avviso, 4 Informazioni, 5 Dettagliato, 0 LogAlways.</li>
+<li>La scheda è libera: i valori dipendono dalla macchina. Verifica coerenza tra livello e numero, e che l'origine sia indicata.</li>
+</ul></div>
+</section>
+
+<section>
+<h2>Punto 3 &ndash; Proprietà di un registro</h2>
+<pre>wevtutil gl Security
+wevtutil sl Security /ms:104857600
+wevtutil gl Security</pre>
+<ol>
+<li>Con il primo comando annota dimensione massima (<code>maxSize</code>) e <code>retention</code>.</li>
+<li>Il secondo la porta a 100 MB (valore in byte). Il terzo verifica.</li>
+</ol>
+<p><strong>Domande:</strong> (a) Cosa succede con "Non sovrascrivere eventi" a log pieno? (b) Perché la dimensione è una scelta di sicurezza?</p>
+<div class="sol"><strong class="t">Soluzione</strong>
+<ul>
+<li>100 MB = 100 &times; 1024 &times; 1024 = <code>104857600</code> byte; dopo il comando <code>maxSize: 104857600</code>.</li>
+<li>(a) Il registro si ferma e <strong>gli eventi nuovi non vengono più registrati</strong> finché non viene svuotato o archiviato.</li>
+<li>(b) Un log che copre poche ore è inutile per ricostruire un accesso di giorni prima: con la sovrascrittura i vecchi eventi spariscono in fretta.</li>
+</ul></div>
+</section>
+
+<section>
+<h2>Punto 4 &ndash; Attivare l'audit</h2>
+<pre>auditpol /get /category:*
+auditpol /set /subcategory:"Logon" /success:enable /failure:enable
+auditpol /set /subcategory:"User Account Management" /success:enable /failure:enable
+auditpol /set /subcategory:"Security Group Management" /success:enable /failure:enable
+auditpol /get /subcategory:"Logon"</pre>
+<p><strong>Domande:</strong> (a) Perché l'audit non è attivo su tutto? (b) Cosa serve in più per tracciare l'accesso a un singolo file?</p>
+<div class="sol"><strong class="t">Soluzione</strong>
+<ul>
+<li>L'ultimo comando deve mostrare <em>Success and Failure</em> per Logon.</li>
+<li>(a) Registrare tutto produce enormi quantità di eventi, rallenta il sistema e rende il registro illeggibile: si sceglie con criterio.</li>
+<li>(b) Oltre al criterio di controllo su "Accesso agli oggetti" serve una voce di controllo (<strong>SACL</strong>) impostata sul file. Il solo criterio non basta.</li>
+</ul></div>
+</section>
+
+<section>
+<h2>Punto 5 &ndash; Simulare un'intrusione</h2>
+<p>Esegui in quest'ordine e annota l'ora (<code>time /t</code>) di ogni azione. Sostituisci <code>Administrator</code> con un account esistente nella tua VM.</p>
+<table><tr><th>#</th><th>Comando</th><th>Evento atteso</th></tr>
+<tr><td>1</td><td><code>runas /user:Administrator cmd</code> con password <strong>sbagliata</strong>, 3 volte</td><td></td></tr>
+<tr><td>2</td><td><code>runas /user:Administrator cmd</code> con password corretta</td><td></td></tr>
+<tr><td>3</td><td><code>net user ospite_lab P@ssw0rd123 /add</code></td><td></td></tr>
+<tr><td>4</td><td><code>net localgroup Administrators ospite_lab /add</code></td><td></td></tr>
+<tr><td>5</td><td><code>net user ospite_lab /active:no</code> poi <code>net user ospite_lab /delete</code></td><td></td></tr>
+<tr><td>6</td><td><code>shutdown /r /t 0 /c "Test laboratorio"</code></td><td></td></tr></table>
+<div class="sol"><strong class="t">Soluzione</strong>
+<table><tr><th>#</th><th>Evento</th><th>Significato</th></tr>
+<tr><td>1</td><td>4625</td><td>Accesso non riuscito (base per scoprire la forza bruta)</td></tr>
+<tr><td>2</td><td>4624 (+ 4672 se admin; 4648 per credenziali esplicite)</td><td>Accesso riuscito; privilegi speciali</td></tr>
+<tr><td>3</td><td>4720</td><td>Account creato</td></tr>
+<tr><td>4</td><td>4732</td><td>Membro aggiunto a gruppo locale di sicurezza</td></tr>
+<tr><td>5</td><td>4725, poi 4726</td><td>Account disabilitato, poi eliminato</td></tr>
+<tr><td>6</td><td>1074, 6006, 6005, 6013</td><td>Riavvio richiesto (con motivo), servizio fermato, servizio avviato, uptime. Un 6008/41 indicherebbe invece un arresto imprevisto.</td></tr></table></div>
+</section>
+
+<section>
+<h2>Punto 6 &ndash; Trovare le tracce con i filtri XPath</h2>
+<pre>REM Eventi di "controllo account", dal più vecchio al più nuovo
+wevtutil qe Security /q:"*[System[(EventID=4625 or EventID=4624 or EventID=4720 or EventID=4732 or EventID=4725 or EventID=4726)]]" /rd:false /f:text
+
+REM Solo gli ultimi 30 minuti
+wevtutil qe Security /q:"*[System[(EventID=4624) and TimeCreated[timediff(@SystemTime)&lt;=1800000]]]" /rd:true /f:text
+
+REM LogonType degli ultimi accessi riusciti
+wevtutil qe Security /q:"*[System[(EventID=4624)]]" /c:10 /rd:true /f:xml | findstr "LogonType"
+
+REM Quanti accessi falliti?
+wevtutil qe Security /q:"*[System[(EventID=4625)]]" /f:text | find /c "Event ID"</pre>
+<p>Nel Visualizzatore crea anche una <strong>visualizzazione personalizzata</strong> "Controllo account" con gli stessi ID (scheda XML: è lo stesso XPath).</p>
+<p><strong>Domande:</strong> (a) Quale LogonType ha il tuo accesso interattivo? (b) Cosa indica il tipo 10? (c) E il tipo 3?</p>
+<div class="sol"><strong class="t">Soluzione</strong>
+<ul>
+<li>Nota: nel Prompt dei comandi il simbolo <code>&lt;</code> va scritto <code>&lt;</code> (non come entità HTML); nella pagina è mostrato come testo.</li>
+<li>(a) <code>2</code> (interattivo). Un accesso con <code>runas</code> con credenziali diverse genera anche tipo 9 (nuove credenziali).</li>
+<li>(b) <code>10</code> = Desktop remoto (RDP). (c) <code>3</code> = accesso di rete (risorsa condivisa).</li>
+<li>Altri: 4 batch, 5 servizio, 7 sblocco schermo, 8 rete con credenziali in chiaro, 11 credenziali memorizzate.</li>
+</ul></div>
+</section>
+
+<section>
+<h2>Punto 7 &ndash; Analisi con la riga di comando</h2>
+<pre>wevtutil qe System /c:10 /rd:true /f:text
+wevtutil qe System /q:"*[System[(Level=2) and TimeCreated[timediff(@SystemTime)&lt;=86400000]]]" /rd:true /f:text
+wevtutil qe System /q:"*[System[Provider[@Name='Service Control Manager']]]" /c:20 /rd:true /f:text
+wevtutil qe System /c:2000 /rd:true /f:text > C:\Backup\sistema.txt
+wevtutil qe System /c:2000 /rd:true /f:text | find /c "Service Control Manager"
+wevtutil qe System /q:"*[System[(EventID=7045)]]" /f:text</pre>
+<p><strong>Domande:</strong> (a) Quanti eventi dell'origine Service Control Manager nei primi 2000? (b) Cosa segnala il 7045? (c) Cosa succede senza privilegi di amministratore sul registro Sicurezza? (d) Quali limiti ha <code>cmd</code> rispetto a PowerShell su migliaia di eventi?</p>
+<div class="sol"><strong class="t">Soluzione</strong>
+<ul>
+<li>(a) Il numero restituito da <code>find /c</code>. Attenzione: conta le righe che contengono la stringa, quindi è un'approssimazione.</li>
+<li>(b) L'installazione di un nuovo servizio, da tenere d'occhio perché usata spesso per la persistenza.</li>
+<li>(c) Errore di accesso negato: molti eventi restano invisibili.</li>
+<li>(d) Non c'è raggruppamento, ordinamento né esportazione CSV integrati: con <code>find</code> e <code>findstr</code> si contano e si cercano stringhe, ma l'analisi di grandi volumi è più lenta e manuale. <code>Get-WinEvent</code> è preferibile anche a <code>Get-EventLog</code>, che non vede i canali moderni.</li>
+</ul></div>
+</section>
+
+<section>
+<h2>Punto 8 &ndash; Creare eventi e collegare un'attività</h2>
+<pre>eventcreate /T INFORMATION /ID 100 /L APPLICATION /SO LabInformatica /D "Avvio esercitazione"
+wevtutil qe Application /q:"*[System[(EventID=100)]]" /c:3 /rd:true /f:text</pre>
+<p>Nel Visualizzatore: tasto destro sull'evento &rarr; <em>Collega attività a questo evento</em> &rarr; avvia <code>notepad.exe</code>. Rilancia <code>eventcreate</code> e verifica.</p>
+<p>In alternativa da cmd: <code>schtasks /query</code> per vedere l'attività creata.</p>
+<p><strong>Domanda:</strong> quali rischi ha un'attività collegata a un evento molto frequente?</p>
+<div class="sol"><strong class="t">Soluzione</strong>
+<ul>
+<li>Il programma può partire migliaia di volte, saturando il sistema. Va provata in un ambiente di prova (la VM).</li>
+<li>Livelli ammessi da <code>eventcreate</code>: INFORMATION, WARNING, ERROR. L'origine <code>LabInformatica</code> e l'ID 100 permettono di ritrovare l'evento (provider + ID).</li>
+</ul></div>
+</section>
+
+<section>
+<h2>Punto 9 &ndash; Esportare, cancellare e ritrovare la traccia</h2>
+<pre>wevtutil epl Security C:\Backup\Security.evtx
+wevtutil cl Security
+wevtutil qe Security /q:"*[System[(EventID=1102)]]" /f:text
+wevtutil qe C:\Backup\Security.evtx /lf:true /c:10 /rd:true /f:text</pre>
+<p>Esegui la cancellazione <strong>solo in VM e dopo l'esportazione</strong>. In un solo comando: <code>wevtutil cl Security /bu:C:\Backup\Security2.evtx</code>.</p>
+<p><strong>Domande:</strong> (a) Chi ha generato l'1102 e quando? (b) Il file esportato contiene ancora gli eventi precedenti? (c) Perché la cancellazione è già una prova? (d) Che valore ha l'inoltro (WEF/SIEM)?</p>
+<div class="sol"><strong class="t">Soluzione</strong>
+<ul>
+<li>(a) L'evento 1102 riporta l'account che ha cancellato il registro e l'ora; dopo la cancellazione è praticamente l'unico evento presente.</li>
+<li>(b) Sì: il file <code>.evtx</code> mantiene gli eventi precedenti.</li>
+<li>(c) Cancellare il log genera a sua volta un evento: l'assenza di tracce è spesso una traccia. Non prova che "non è successo nulla".</li>
+<li>(d) Con l'inoltro i log sopravvivono alla macchina e a chi li cancella, e si correlano fra più sistemi.</li>
+</ul></div>
+</section>
+
+<section>
+<h2>Punto 10 &ndash; Timeline e conclusioni (consegna)</h2>
+<p>Ordina dal più vecchio al più nuovo gli eventi raccolti (usa il file <code>.evtx</code> esportato).</p>
+<table><tr><th>Ora</th><th>Registro</th><th>ID</th><th>Origine</th><th>Cosa è successo</th></tr>
+<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr><tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr></table>
+<p>Rispondi in 5-8 righe: <em>riconosci lo schema classico di un'intrusione? Quali eventi lo dimostrano e in che ordine?</em></p>
+<div class="sol"><strong class="t">Timeline attesa e risposta modello</strong>
+<table><tr><th>Ordine</th><th>Registro</th><th>ID</th><th>Origine</th><th>Significato</th></tr>
+<tr><td>1</td><td>Sicurezza</td><td>4625 (x3)</td><td>Microsoft-Windows-Security-Auditing</td><td>Tentativi falliti</td></tr>
+<tr><td>2</td><td>Sicurezza</td><td>4624, 4672</td><td>Security-Auditing</td><td>Accesso riuscito con privilegi</td></tr>
+<tr><td>3</td><td>Sicurezza</td><td>4720</td><td>Security-Auditing</td><td>Creato ospite_lab</td></tr>
+<tr><td>4</td><td>Sicurezza</td><td>4732</td><td>Security-Auditing</td><td>Aggiunto ad Administrators</td></tr>
+<tr><td>5</td><td>Sicurezza</td><td>4725, 4726</td><td>Security-Auditing</td><td>Disabilitato ed eliminato</td></tr>
+<tr><td>6</td><td>Sicurezza</td><td>1102</td><td>Eventlog</td><td>Log cancellato</td></tr>
+<tr><td>7</td><td>Sistema</td><td>1074, 6006, 6005, 6013</td><td>User32, EventLog</td><td>Riavvio</td></tr></table>
+<p><strong>Risposta modello:</strong> sì. La sequenza accessi falliti ripetuti (4625), accesso riuscito (4624), creazione di un account (4720), aggiunta a un gruppo privilegiato (4732) e cancellazione dei log (1102) è lo schema classico di un'intrusione: forza bruta, accesso, persistenza, privilegi, occultamento delle tracce. Si vede solo leggendo più eventi in ordine; per questo l'ora deve essere corretta e i log vanno esportati o inoltrati.</p>
+<p><em>Nota:</em> il riavvio del punto 5 precede il 1102 solo se eseguito prima; l'ordine reale dipende da come è stato svolto: valuta la coerenza con le ore annotate. Con la cancellazione eseguita al punto 9, il registro Sicurezza prima di essa si legge solo nel file esportato.</p></div>
+</section>
+
+<section>
+<h2>Consegna e valutazione</h2>
+<ul>
+<li>Tabelle compilate (punti 2 e 10), output salvati dei comandi e file <code>.evtx</code> esportato.</li>
+<li>Risposte alle domande di ogni punto.</li>
+</ul>
+<table><tr><th>Criterio</th><th>Punti</th></tr>
+<tr><td>Correttezza di ID, origini e livelli</td><td>/30</td></tr>
+<tr><td>Uso corretto di <code>wevtutil</code>, XPath e <code>auditpol</code></td><td>/25</td></tr>
+<tr><td>Qualità e ordine della timeline</td><td>/25</td></tr>
+<tr><td>Spiegazione del perché di ogni evento e conclusioni</td><td>/20</td></tr></table>
+</section>
+</main>
+<script>
+var b=document.getElementById("b1");
+b.onclick=function(){var h=document.body.classList.toggle("hide");b.textContent=h?"Mostra soluzioni (versione docente)":"Nascondi soluzioni (versione studente)"};
+document.getElementById("b2").onclick=function(){window.print()};
+</script>
+</body>
+</html>
